@@ -100,7 +100,7 @@ void test_cmd(vector <string> args)
         }
         cout << endl;
     }
-    cout << "acc: " << (count / (double)test_set.size()) << "%" << endl;
+    cout << "acc: " << (1 - count / (double)test_set.size()) << "%" << endl;
     cout << "failed: ";
     for (int i = 0;  i < failed.size(); i++)
     {
@@ -124,14 +124,12 @@ void show_cmd(vector <string> args)
             to_show = &test_set[stoi(args[i + 1])];
         }
         cout << to_show->get_label() << endl;
+        string grayscale = " .:-=+*#%@";
         for (int y = 0; y < 28; y++)
         {
             for (int x = 0; x < 28; x++)
             {
-                if (to_show->get_vtr()[28 * y + x] > 255 / 2)
-                    cout << 0;
-                else
-                    cout << " ";
+                cout << grayscale[to_show->get_vtr()[28 * y + x] * 10 / 255];
             }
             cout << endl;
         }
