@@ -21,8 +21,8 @@ void exit_cmd(vector <string> args);
 
 int main()
 {
-    ifstream train_label_in (TRAIN_LABEL_PATH, ios::in | ios::binary);
-    ifstream train_vtr_in (TRAIN_VTR_PATH, ios::in | ios::binary);
+    ifstream train_label_in (TRAIN_LABEL_PATH, ios::binary);
+    ifstream train_vtr_in (TRAIN_VTR_PATH, ios::binary);
     cout << "Loading Train Set...";
     cout.flush();
     if (load_set(train_set, train_label_in, train_vtr_in))
@@ -31,8 +31,8 @@ int main()
     }
     train_label_in.close();
     train_vtr_in.close();
-    ifstream test_label_in (TEST_LABEL_PATH, ios::in | ios::binary);
-    ifstream test_vtr_in (TEST_VTR_PATH, ios::in | ios::binary);
+    ifstream test_label_in (TEST_LABEL_PATH, ios::binary);
+    ifstream test_vtr_in (TEST_VTR_PATH, ios::binary);
     cout << "Loading Test Set...";
     cout.flush();
     if (load_set(test_set, test_label_in, test_vtr_in))
