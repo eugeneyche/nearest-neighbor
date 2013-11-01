@@ -89,6 +89,7 @@ void test_cmd(vector <string> args)
     for (int i = 0; i < test_set.size(); i++)
     {
         cout << i << " -> ";
+        cout.flush();
         int l_nn = nn(test_set[i], train_set, range(0, train_set.size()));
         cout << l_nn;
         if (test_set[i].get_label() != train_set[l_nn].get_label())
