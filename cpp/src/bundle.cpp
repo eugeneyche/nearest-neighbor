@@ -1,12 +1,12 @@
 #include "bundle.h"
 
-Bundle::Bundle(int label, vector <double> vtr
+Bundle::Bundle(int label, vector <double> vtr)
 {
     this->label = label;
     this->vtr = vtr;
 }
 
-double Bundle::distance_to(const Bundle & other)
+double Bundle::distance_to(const Bundle & other) const
 {
     if (vtr.size() != other.get_vtr().size())
         return -1;
@@ -17,4 +17,14 @@ double Bundle::distance_to(const Bundle & other)
         sum += l_dist * l_dist;
     }
     return sum;
+}
+
+const int & Bundle::get_label() const
+{
+    return label;
+}
+
+const vector <double> & Bundle::get_vtr() const
+{
+    return vtr;
 }
