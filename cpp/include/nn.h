@@ -6,9 +6,9 @@
 #include <vector>
 using namespace std;
 
-int read_bytes(int n_bytes, ifstream & in);
-bool load_set(vector <Bundle> & out_set, ifstream & label_in, ifstream & vtr_in);
+int read_bytes(ifstream & in, int n_bytes);
+bool load_set(vector <Bundle> & out_vtr, ifstream & label_in, ifstream & vtr_in);
 
-int nn1(Bundle test_set, vector <Bundle> train_set, vector <int> domain);
+int nn(const Bundle & test, const vector <Bundle> & train_set, vector <int> domain);
 
 #endif
