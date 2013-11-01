@@ -16,6 +16,7 @@ vector <Bundle> test_set;
 vector <Bundle> train_set;
 
 void nn_cmd(vector <string> args);
+void test_cmd(vector <string> args);
 void show_cmd(vector <string> args);
 void exit_cmd(vector <string> args);
 
@@ -42,6 +43,7 @@ int main()
     test_label_in.close();
     test_vtr_in.close();
     cmds["nn"] = nn_cmd;
+    cmds["test"] = test_cmd;
     cmds["show"] = show_cmd;
     cmds["exit"] = exit_cmd;
     for (string line; is_running && cout << ">>> " &&  getline(cin, line);)
@@ -78,6 +80,33 @@ void nn_cmd(vector <string> args)
         cout.flush();
         cout << nn(test_set[stoi(args[i])], train_set, range(0, train_set.size())) << endl;
     }
+}
+
+void test_cmd(vector <string> args)
+{
+    int count = 0;
+    vector <int> failed;
+    for (int i = 0; i < test_set.size(); i++)
+    {
+        cout << i << " -> ";
+        int l_nn = nn(test_set[i], train_set, range(0, train_set.size()));
+        cout << l_nn;
+        if (test_set[i].get_label() != train_set[l_nn].get_label())
+        {
+            cout << " X";
+            failed.push_back(i);
+            count++;
+        }
+        cout << endl;
+    }
+    cout << "acc: " << (count / (double)test_set.size()) << "%" << endl;
+    cout << "failed: ";
+    for (int i = 0;  i < failed.size(); i++)
+    {
+        if (i > 0) cout << " ";
+        cout << failed[i];
+    }
+    cout << endl;
 }
 
 void show_cmd(vector <string> args)
