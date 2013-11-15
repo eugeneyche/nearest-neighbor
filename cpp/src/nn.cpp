@@ -1,16 +1,19 @@
 #include "nn.h"
+#include <iostream>
+using namespace std;
 
-euclid_vector * nn(euclid_vector * test, data_set & train_set)
+euclid_vector * nn(euclid_vector * test, data_set & train_st)
 {
     euclid_vector * mn = NULL;
     double mn_dist = 0;
-    for (vector_space::iterator itr = train_set.begin(); itr < train_set.end(); itr++)
+    double l_dist = 0;
+    for (int i = 0; i < train_st.size(); i++)
     {
-        double l_dist;
-        if (nn == NULL || (l_dist = distance_to(*test, **itr)) < mn_dist)
+        l_dist = distance_to(*test, *train_st[i]);
+        if (mn == NULL || l_dist < mn_dist)
         {
             mn_dist = l_dist;
-            mn = *itr;
+            mn = train_st[i];
         }
     }
     return mn;
