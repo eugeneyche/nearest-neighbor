@@ -1,4 +1,9 @@
 #include "data_set.h"
 #include "vector_math.h"
+#include <vector>
+
+using namespace std;
 
 euclid_vector * nn(euclid_vector * test, data_set & train_set);
+
+double selector(vector<double> s, double k);
