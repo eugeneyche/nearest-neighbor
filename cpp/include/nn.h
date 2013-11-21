@@ -6,4 +6,4 @@ using namespace std;
 
 euclid_vector * nn(euclid_vector * test, data_set & train_set);
 
-double selector(vector<double> s, double k);
+double selector(euclid_vector s, double k);
