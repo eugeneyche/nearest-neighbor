@@ -134,8 +134,8 @@ data_set domain(vector<double> test, kd_tree_node root)
 
 kd_tree_node::kd_tree_node(vector<int> domain)//leaf node
 {
-    depth = NULL;
-    pivot = NULL;
+    depth = 0;
+    pivot = 0.0;
     *sub = subset(domain);
     left = NULL;
     right = NULL;
