@@ -23,8 +23,8 @@ int read_bytes(FILE * in, int n_bytes)
 int main()
 {
     {
-        FILE * vtr_in = fopen("data/train_vectors", "r");
-        FILE * label_in = fopen("data/train_labels", "r");
+        FILE * vtr_in = fopen("data/train_vectors", "rb");
+        FILE * label_in = fopen("data/train_labels", "rb");
         FILE * vtr_out = fopen("out/train_vectors", "w+");
         FILE * label_out = fopen("out/train_labels", "w+");
         vector <int> labels;

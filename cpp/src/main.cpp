@@ -20,10 +20,10 @@ void printGlyph(euclid_vector * to_print)
 
 int main()
 {
-    FILE * train_vtrs = fopen("data/mnist/train_vectors", "r");
-    FILE * train_labels = fopen("data/mnist/train_labels", "r");
-    FILE * test_vtrs = fopen("data/mnist/test_vectors", "r");
-    FILE * test_labels = fopen("data/mnist/test_labels", "r");
+    FILE * train_vtrs = fopen("data/mnist/train_vectors", "rb");
+    FILE * train_labels = fopen("data/mnist/train_labels", "rb");
+    FILE * test_vtrs = fopen("data/mnist/test_vectors", "rb");
+    FILE * test_labels = fopen("data/mnist/test_labels", "rb");
     load(train, train_vtrs);
     label(train, train_labels);
     printf("Loaded Train Set\n");
@@ -31,7 +31,7 @@ int main()
     label(test, test_labels);
     printf("Loaded Test Set\n");
     int count [100] = {0};
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < test.size(); i++)
     {
         data_set mn_nn = k_nn(test[i], train, 100);
         for (int j = 0; j < mn_nn.size(); j++)
@@ -41,7 +41,6 @@ int main()
                 count[j]++;
             }
         }
-        printGlyph(test[i]);
     }
     for (int i = 0; i < 100; i++)
     {
