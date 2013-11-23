@@ -2,6 +2,7 @@
 #define _DATA_SET_H
 
 #include "vector_math.h"
+#include <iostream>
 #include <fstream>
 #include <map>
 using namespace std;
@@ -14,14 +15,14 @@ class data_set;
 void load(data_set & st, ifstream & vtr_in);
 void label(data_set & st, ifstream & label_in);
 
+
 class data_set
 {
 private:
-    data_set * _parent;
     label_space * _labels;
     vector_space * _vectors;
     vector <int> _domain;
-    data_set(data_set & parent, vector <int> domain);
+    data_set(vector <int> domain);
 public:
     data_set();
     data_set(vector_space vectors);
