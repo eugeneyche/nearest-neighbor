@@ -1,33 +1,31 @@
 #include "data_set.h"
 
 
-void load(data_set & st, ifstream & vtr_in)
+void load(data_set & st, FILE * in)
 {
     int n, m;
-    vtr_in >> n >> m;
+    fscanf(in, "%d %d\n", &n, &m);
     double v;
     for (int i = 0; i < n; i++)
     {
         euclid_vector * vtr = new euclid_vector;
-        for (int j = 0; j < m; j++)
-        {
-            vtr_in >> v;
-            vtr->push_back(v);
-        }
-        st._domain.push_back(int(st._domain.size()));
+        double buffer [m];
+        fread(buffer, sizeof(double), m, in);
+        vtr->assign(buffer, buffer + m);
+        st._domain.push_back(st._domain.size());
         st._vectors->push_back(vtr);
     }
 }
 
-void label(data_set & st, ifstream & label_in)
+void label(data_set & st, FILE * in)
 {
     int n;
-    label_in >> n;
-    int l;
+    fscanf(in, "%d\n", &n);
+    int buffer [n];
+    fread(buffer, sizeof(int), n, in);
     for (int i = 0; i < n; i++)
     {
-        label_in >> l;
-        st.set_label(st[i], l);
+        st.set_label(i, buffer[i]);
     }
     cout<<"labeling"<<endl;
 }
@@ -74,9 +72,19 @@ int data_set::size()
     return int(_domain.size());
 }
 
+void data_set::set_label(int i, int label)
+{
+    set_label((*this)[i], label);
+}
+
 void data_set::set_label(euclid_vector * vtr, int label)
 {
     (*_labels)[vtr] = label;
+}
+
+int data_set::get_label(int i)
+{
+    return get_label((*this)[i]);
 }
 
 int data_set::get_label(euclid_vector * vtr)
