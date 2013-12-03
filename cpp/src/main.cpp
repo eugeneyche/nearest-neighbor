@@ -11,8 +11,7 @@ char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
 
 void printGlyph(euclid_vector * to_print)
 {
-    for (int i = 0; i < 28 * 28; i++)
-    {
+    for (int i = 0; i < 28 * 28; i++) {
         printf("%c", gradient[(int)((*to_print)[i] / 255 * 10)]);
         if (i % 28 == 27) printf("\n");
     }
