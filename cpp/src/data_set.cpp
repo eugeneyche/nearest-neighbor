@@ -1,6 +1,5 @@
 #include "data_set.h"
 
-
 void load(data_set & st, FILE * in)
 {
     int n, m;
@@ -27,19 +26,22 @@ void label(data_set & st, FILE * in)
     {
         st.set_label(i, buffer[i]);
     }
-    cout<<"labeling"<<endl;
 }
 
-data_set::data_set(vector <int> domain)
+data_set::data_set(data_set & parent, vector <int> domain)
 {
+    _parent = &parent;
+    _labels = parent._labels;
+    _vectors = parent._vectors;
     for (vector <int>::iterator itr = domain.begin(); itr != domain.end(); itr++)
     {
-        _domain.push_back(this->_domain[*itr]);
+        _domain.push_back(parent._domain[*itr]);
     }
 }
 
 data_set::data_set()
 {
+    _parent = NULL;
     _labels = new label_space;
     _vectors = new vector_space;
 }
@@ -47,29 +49,33 @@ data_set::data_set()
 
 data_set::data_set(vector_space vectors)
 {
+    _parent = NULL;
     _labels = new label_space;
     _vectors = new vector_space;
     for (vector_space::iterator itr = vectors.begin(); itr != vectors.end(); itr++)
     {
-        _domain.push_back(int(_domain.size()));
+        _domain.push_back(_domain.size());
         _vectors->push_back(*itr);
     }
 }
 
 data_set::~data_set()
 {
-    while (_vectors->size() > 0)
+    if (_parent == NULL)
     {
-        delete _vectors->back();
-        _vectors->pop_back();
+        while (_vectors->size() > 0)
+        {
+            delete _vectors->back();
+            _vectors->pop_back();
+        }
+        delete _labels;
+        delete _vectors;
     }
-    delete _labels;
-    delete _vectors;
 }
 
 int data_set::size()
 {
-    return int(_domain.size());
+    return _domain.size();
 }
 
 void data_set::set_label(int i, int label)
@@ -99,5 +105,5 @@ euclid_vector * data_set::operator[](int i)
 
 data_set data_set::subset(vector <int> domain)
 {
-    return data_set(domain);
+    return data_set(*this, domain);
 }

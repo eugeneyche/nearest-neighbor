@@ -4,7 +4,6 @@
 #include "vector_math.h"
 #include <cstdio>
 #include <map>
-
 using namespace std;
 
 typedef map <euclid_vector *, int> label_space;
@@ -15,14 +14,14 @@ class data_set;
 void load(data_set & st, FILE * in);
 void label(data_set & st, FILE * in);
 
-
 class data_set
 {
 private:
+    data_set * _parent;
     label_space * _labels;
     vector_space * _vectors;
     vector <int> _domain;
-    data_set(vector <int> domain);
+    data_set(data_set & parent, vector <int> domain);
 public:
     data_set();
     data_set(vector_space vectors);

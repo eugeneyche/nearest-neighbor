@@ -52,24 +52,4 @@ int main()
     fclose(train_labels);
     fclose(test_vtrs);
     fclose(test_labels);
-    
-    
-    /* kd_tree nn search //need to add a parameter c
-     for (int i = 0; i < test.size(); i++)
-     {
-     cout << test.get_label(test[i]) << " -> ";
-     cout.flush();
-     euclid_vector * l_mn = kd_tree_nn(c, test[i], train);
-     cout << train.get_label(l_mn);
-     if (test.get_label(test[i]) != train.get_label(l_mn))
-     cout << " X" << endl;
-     else
-     cout << endl;
-     }
-     fclose(train_vtrs);
-     fclose(train_labels);
-     fclose(test_vtrs);
-     fclose(test_labels);
-     */
-
 }
