@@ -4,7 +4,6 @@ void load(data_set & st, FILE * in)
 {
     int n, m;
     fscanf(in, "%d %d\n", &n, &m);
-    double v;
     for (int i = 0; i < n; i++)
     {
         euclid_vector * vtr = new euclid_vector;

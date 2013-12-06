@@ -1,4 +1,5 @@
 #include "kd_tree_node.h"
+#include <random>
 
 
 
@@ -32,15 +33,14 @@ double selector(vector<double> s, int k)
     {// the kth smallest on the left
 		return selector(left, k);
 	}
-	else if(left.size() < k && left.size()+v.size() >= k)
+	else if(left.size()+v.size() >= k)
     { // the kth smallest found
 		return s[randomIndex];
 	}
 	else
     { // the kth smallest on the right
-		return selector(right, int(k-left.size()-v.size()));
+		return selector(right, int (k-left.size()-v.size()));
 	}
-    return 0;
 }
 
 
@@ -50,22 +50,23 @@ double selector(vector<double> s, int k)
  * 'size' is the size of each data
  * 'domain' is the index of the data each leaf will point to
  */
-kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_set data)
+kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_set &data)
 {
-    kd_tree_node internal_node = *new kd_tree_node(0,0);
+    kd_tree_node internal_node = kd_tree_node(0,0);
     vector<int> left_domain;
     vector<int> right_domain;
     
     data_set sub = data.subset(domain);
     int subsize = sub.size();
-    int k = subsize / 2;
+    int k = (int)subsize / 2;
     vector <double> vtr;
     for (int j=0; j<subsize; j++)
     {
-        vector<double> h = *data[j];
+        vector<double> h = *sub[j];
         vtr.push_back(h[i]);
     }
-    double median = selector(vtr,k);
+    double median;
+    median = selector(vtr,k);
 
     for (int j=0; j < subsize; j++)
     {
@@ -84,8 +85,8 @@ kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_se
     }
     if (domain.size() == c)
     {
-        *internal_node.left = *new kd_tree_node(left_domain);
-        *internal_node.right = *new kd_tree_node(right_domain);
+        *internal_node.left = kd_tree_node(left_domain);
+        *internal_node.right = kd_tree_node(right_domain);
     }
     return internal_node;
 }
@@ -94,7 +95,7 @@ kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_se
 /* build kd_tree
  * return the root
  */
-kd_tree_node kd_tree(int c, data_set data)
+kd_tree_node kd_tree(int c, data_set &data)
 {
     int size = data.size();
     vector<int> domain;
@@ -102,13 +103,15 @@ kd_tree_node kd_tree(int c, data_set data)
     {
         domain.push_back(i);
     }
-    kd_tree_node root = build_tree_help(c, 0, size, domain, data);
+    srand(int(time(NULL))); //random seed
+    double randomIndex = rand() % size; //random number between 0 and size-1
+    kd_tree_node root = build_tree_help(c, randomIndex, size, domain, data);
     return root;
 }
 
 
 /* search for the data_set*/
-kd_tree_node search(vector<double> test, kd_tree_node node)
+kd_tree_node search(euclid_vector & test, kd_tree_node node)
 {
     int i = node.get_index();
     if (test[i] > node.get_pivot() && i<test.size())
@@ -119,9 +122,9 @@ kd_tree_node search(vector<double> test, kd_tree_node node)
 
 }
 
-vector<int> sub_domain(vector<double> test, kd_tree_node root)
+vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
 {
-    kd_tree_node leaf = search(test,root);
+    kd_tree_node leaf = search(*test,root);
     return *leaf.sub;
 }
 
