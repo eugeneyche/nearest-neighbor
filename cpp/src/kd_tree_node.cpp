@@ -1,8 +1,6 @@
 #include "kd_tree_node.h"
 #include <random>
 
-
-
 /* select the kth smallest value in the vector */
 double selector(vector<double> s, int k)
 {
@@ -59,7 +57,7 @@ kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_se
     data_set sub = data.subset(domain);
     int subsize = sub.size();
     int k = (int)subsize / 2;
-    vector <double> vtr;
+    euclid_vector vtr;
     for (int j=0; j<subsize; j++)
     {
         vector<double> h = *sub[j];
@@ -70,7 +68,7 @@ kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_se
 
     for (int j=0; j < subsize; j++)
     {
-        vector<double> v = *sub[j];
+        euclid_vector v = *sub[j];
         if(v[i] <= median)
             left_domain.push_back(j);
         else
@@ -99,7 +97,7 @@ kd_tree_node kd_tree(int c, data_set &data)
 {
     int size = data.size();
     vector<int> domain;
-    for (int i=0; i<size; i++)
+    for (int i = 0; i < size; i++)
     {
         domain.push_back(i);
     }
