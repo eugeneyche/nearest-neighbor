@@ -1,5 +1,6 @@
 #include "kd_tree_node.h"
 #include <random>
+#include <iostream>
 
 /* select the kth smallest value in the vector */
 double selector(vector<double> s, int k)
@@ -42,29 +43,59 @@ double selector(vector<double> s, int k)
 }
 
 
+/* variance function
+ * 'dimension' is the size of each vector
+ * 'k' would be the kth smallest number from selector()
+ * 'subsize' is the size of data_set sub
+ */
+int max_variance_index(int dimension, int k, int subsize, data_set & sub){
+    vector <double> var;
+    vector <double> vtr;
+    for (int i = 0; i<dimension; i++){
+        for (int j = 0; j<subsize; j++){
+            vtr.push_back((*sub[j])[i]);
+        }
+        double mean = selector(vtr, k);
+        double variance = 0.0;
+        for (int j = 0; j<subsize; j++){
+            vtr.push_back((*sub[j])[i]);
+            variance += ((*sub[j])[i]-mean)*((*sub[j])[i]-mean)/subsize;
+        }
+        var.push_back(variance);
+    }
+    int minIndex = 0;
+    for (int i = 1; i<dimension; i++){
+        if (var[i] < minIndex)
+            minIndex = i;
+    }
+    return minIndex;
+}
+
+
+
 /* help function for building tree
+ * 'c' is the size of the leaf
  * 'i' is the index of the info for each data
- * which is equal to the depth of the tree
- * 'size' is the size of each data
+ * 'dimension' is the # of entries for each vector
  * 'domain' is the index of the data each leaf will point to
  */
-kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_set &data)
+kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, data_set & data)
 {
-    kd_tree_node internal_node = kd_tree_node(0,0);
     vector<int> left_domain;
     vector<int> right_domain;
     
     data_set sub = data.subset(domain);
     int subsize = sub.size();
     int k = (int)subsize / 2;
-    euclid_vector vtr;
+    vector <double> vtr;
     for (int j=0; j<subsize; j++)
     {
-        vector<double> h = *sub[j];
-        vtr.push_back(h[i]);
+        vtr.push_back((*sub[j])[i]);
     }
     double median;
     median = selector(vtr,k);
+    
+    kd_tree_node internal_node = kd_tree_node(i,median);
 
     for (int j=0; j < subsize; j++)
     {
@@ -74,17 +105,23 @@ kd_tree_node build_tree_help(int c, int i, int size, vector<int> domain, data_se
         else
             right_domain.push_back(j);
     }
-    if (domain.size() > c)
-    {
-        srand(int(time(NULL))); //random seed
-        double randomIndex = rand() % size; //random number between 0 and size-1
-        *internal_node.left = build_tree_help(c, randomIndex, size, left_domain, data);
-        *internal_node.right = build_tree_help(c, randomIndex, size, right_domain, data);
+    
+    int index = max_variance_index(dimension, k, subsize, sub);
+    if (left_domain.size() > c){
+        kd_tree_node left_int = build_tree_help(c, index, dimension, left_domain, data);
+        internal_node.left = & left_int;
     }
-    if (domain.size() == c)
-    {
-        *internal_node.left = kd_tree_node(left_domain);
-        *internal_node.right = kd_tree_node(right_domain);
+    else{
+        kd_tree_node left_leaf = kd_tree_node(left_domain);
+        internal_node.left = &left_leaf;
+    }
+    if (right_domain.size() > c){
+        kd_tree_node right_int = build_tree_help(c, index, dimension, right_domain, data);
+        internal_node.right = & right_int;
+    }
+    else{
+        kd_tree_node right_leaf = kd_tree_node(right_domain);
+        internal_node.right = &right_leaf;
     }
     return internal_node;
 }
@@ -101,9 +138,10 @@ kd_tree_node kd_tree(int c, data_set &data)
     {
         domain.push_back(i);
     }
-    srand(int(time(NULL))); //random seed
-    double randomIndex = rand() % size; //random number between 0 and size-1
-    kd_tree_node root = build_tree_help(c, randomIndex, size, domain, data);
+    int dimension = (int)data[0]->size();
+    int k = (int)size/2;
+    int index = max_variance_index(dimension, k, size, data);
+    kd_tree_node root = build_tree_help(c, index, dimension, domain, data);
     return root;
 }
 
@@ -112,9 +150,9 @@ kd_tree_node kd_tree(int c, data_set &data)
 kd_tree_node search(euclid_vector & test, kd_tree_node node)
 {
     int i = node.get_index();
-    if (test[i] > node.get_pivot() && i<test.size())
+    if (test[i] > node.get_pivot() && node.right != NULL)
         return search(test, *node.right);
-    else if (test[i] <= node.get_pivot() && i<test.size())
+    else if (test[i] <= node.get_pivot() && node.left != NULL)
         return search(test, *node.left);
     return node;
 
@@ -123,7 +161,7 @@ kd_tree_node search(euclid_vector & test, kd_tree_node node)
 vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
 {
     kd_tree_node leaf = search(*test,root);
-    return *leaf.sub;
+    return leaf.sub_domain;
 }
 
 
@@ -131,9 +169,9 @@ vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
 
 kd_tree_node::kd_tree_node(vector<int> domain)//leaf node
 {
-    index = 0;
-    pivot = 0.0;
-    *sub = domain;
+    index = -1;
+    pivot = -1;
+    sub_domain = domain;
     left = NULL;
     right = NULL;
 }
@@ -142,7 +180,6 @@ kd_tree_node::kd_tree_node(int d, double p)//internal node
 {
     index = d;
     pivot = p;
-    sub = NULL;
     left = NULL;
     right = NULL;
 }

@@ -21,10 +21,10 @@ void printGlyph(euclid_vector * to_print)
 }
 
 int main() {
-    FILE * train_vtrs = fopen("data/mnist/train_vectors", "rb");
-    FILE * train_labels = fopen("data/mnist/train_labels", "rb");
-    FILE * test_vtrs = fopen("data/mnist/test_vectors", "rb");
-    FILE * test_labels = fopen("data/mnist/test_labels", "rb");
+    FILE * train_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_vectors", "rb");
+    FILE * train_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_labels", "rb");
+    FILE * test_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_vectors", "rb");
+    FILE * test_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_labels", "rb");
     load(train, train_vtrs);
     label(train, train_labels);
     printf("Loaded Train Set\n");
@@ -51,6 +51,7 @@ int main() {
 
     //need to add a parameter c
     int c = 0.05 * DATASIZE;
+    cout<<train[0]<<endl;
     for (int i = 0; i < test.size(); i++)
     {
         cout << test.get_label(test[i]) << " -> ";
