@@ -51,7 +51,6 @@ int main() {
 
     //need to add a parameter c
     int c = 0.05 * DATASIZE;
-    cout<<train[0]<<endl;
     for (int i = 0; i < test.size(); i++)
     {
         cout << test.get_label(test[i]) << " -> ";

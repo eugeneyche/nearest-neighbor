@@ -9,7 +9,7 @@ class kd_tree_node;
 
 double selector(vector<double> s, int k); //select the kth smallest
 int max_variance_index(int dimension, int k, int subsize, data_set & sub);
-kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, data_set &data);
+kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_set &data);
 kd_tree_node kd_tree(int c, data_set &data); // return root node
 kd_tree_node search(euclid_vector & test, kd_tree_node node);
 vector<int> sub_domain(euclid_vector * test, kd_tree_node root);
@@ -31,7 +31,7 @@ public:
     ~kd_tree_node();
     int get_index();
     double get_pivot();
-    friend kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, data_set &data);
+    friend kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_set &data);
     friend kd_tree_node search(euclid_vector & test, kd_tree_node node);
     friend vector<int> sub_domain(euclid_vector * test, kd_tree_node root);
     friend class data_set;

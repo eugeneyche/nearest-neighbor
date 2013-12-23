@@ -51,35 +51,33 @@ double selector(vector<double> s, int k)
 int max_variance_index(int dimension, int k, int subsize, data_set & sub){
     vector <double> var;
     vector <double> vtr;
-    for (int i = 0; i<dimension; i++){
-        for (int j = 0; j<subsize; j++){
+    for (int i = 0; i < dimension; i++){
+        for (int j = 0; j < subsize; j++){
             vtr.push_back((*sub[j])[i]);
         }
         double mean = selector(vtr, k);
         double variance = 0.0;
-        for (int j = 0; j<subsize; j++){
-            vtr.push_back((*sub[j])[i]);
-            variance += ((*sub[j])[i]-mean)*((*sub[j])[i]-mean)/subsize;
+        for (int j = 0; j < subsize; j++){
+            variance += (((*sub[j])[i]-mean)*((*sub[j])[i]-mean))/subsize;
         }
         var.push_back(variance);
     }
-    int minIndex = 0;
-    for (int i = 1; i<dimension; i++){
-        if (var[i] < minIndex)
-            minIndex = i;
+    int maxIndex = 0;
+    for (int i = 1; i < dimension; i++){
+        if (var[i] > var[maxIndex])
+            maxIndex = i;
     }
-    return minIndex;
+    return maxIndex;
 }
 
 
 
-/* help function for building tree
- * 'c' is the size of the leaf
+/* 'c' is the size of the leaf
  * 'i' is the index of the info for each data
  * 'dimension' is the # of entries for each vector
  * 'domain' is the index of the data each leaf will point to
  */
-kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, data_set & data)
+kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_set & data)
 {
     vector<int> left_domain;
     vector<int> right_domain;
@@ -108,7 +106,7 @@ kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, da
     
     int index = max_variance_index(dimension, k, subsize, sub);
     if (left_domain.size() > c){
-        kd_tree_node left_int = build_tree_help(c, index, dimension, left_domain, data);
+        kd_tree_node left_int = build_tree(c, index, dimension, left_domain, data);
         internal_node.left = & left_int;
     }
     else{
@@ -116,7 +114,7 @@ kd_tree_node build_tree_help(int c, int i, int dimension, vector<int> domain, da
         internal_node.left = &left_leaf;
     }
     if (right_domain.size() > c){
-        kd_tree_node right_int = build_tree_help(c, index, dimension, right_domain, data);
+        kd_tree_node right_int = build_tree(c, index, dimension, right_domain, data);
         internal_node.right = & right_int;
     }
     else{
@@ -141,7 +139,7 @@ kd_tree_node kd_tree(int c, data_set &data)
     int dimension = (int)data[0]->size();
     int k = (int)size/2;
     int index = max_variance_index(dimension, k, size, data);
-    kd_tree_node root = build_tree_help(c, index, dimension, domain, data);
+    kd_tree_node root = build_tree(c, index, dimension, domain, data);
     return root;
 }
 

@@ -61,13 +61,13 @@ euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c)
     euclid_vector * mn = NULL;
     double mn_dist = 0;
     double l_dist = 0;
-    for (int i = 0; i < train_set.size(); i++)
+    for (int i = 0; i < train.size(); i++)
     {
-        l_dist = distance_to(*test, *train_set[i]);
+        l_dist = distance_to(*test, *train[i]);
         if (mn == NULL || l_dist < mn_dist)
         {
             mn_dist = l_dist;
-            mn = train_set[i];
+            mn = train[i];
         }
     }
     return mn;
