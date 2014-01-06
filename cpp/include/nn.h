@@ -7,5 +7,5 @@
 using namespace std;
 
 euclid_vector * nn(euclid_vector * test, data_set & train_set);
-euclid_vector * kd_tree_nn(euclid_vector *test, data_set & train_set, int c);
+euclid_vector * kd_tree_nn(euclid_vector *test, data_set & train_set, int c, kd_tree_node * root);
 data_set k_nn(euclid_vector * test, data_set & train_st, double k);

@@ -49,20 +49,27 @@ int main() {
         printf("%d", count[i]);
     }*/
 
-    //need to add a parameter c
+    
+    int count_correct = 0;
     int c = 0.05 * DATASIZE;
+    kd_tree_node * root = kd_tree(c, train);
     for (int i = 0; i < test.size(); i++)
     {
         cout << test.get_label(test[i]) << " -> ";
         cout.flush();
-        euclid_vector * l_mn = kd_tree_nn(test[i], train, c);
+        euclid_vector * l_mn = kd_tree_nn(test[i], train, c, root);
         cout << train.get_label(l_mn);
         if (test.get_label(test[i]) != train.get_label(l_mn))
             cout << " X" << endl;
         else
+        {
             cout << endl;
+            count_correct++;
+        }
     }
-    
+    double rate = count_correct / test.size();
+    cout << " There are " << rate << "% correct labels" << endl;
+
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);

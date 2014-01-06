@@ -54,10 +54,9 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
 }
 
 /* return the nearest neighbor that is generated from kd-tree */
-euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c)
+euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree_node * root)
 {
-    kd_tree_node root = kd_tree(c, train_set);
-    data_set train = train_set.subset(sub_domain(test, root));
+    data_set train = train_set.subset(sub_domain(test, * root));
     euclid_vector * mn = NULL;
     double mn_dist = 0;
     double l_dist = 0;

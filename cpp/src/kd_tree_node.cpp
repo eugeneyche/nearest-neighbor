@@ -58,8 +58,10 @@ int max_variance_index(int dimension, int k, int subsize, data_set & sub){
         double mean = selector(vtr, k);
         double variance = 0.0;
         for (int j = 0; j < subsize; j++){
-            variance += (((*sub[j])[i]-mean)*((*sub[j])[i]-mean))/subsize;
+            double dif = (*sub[j])[i]-mean;
+            variance += dif * dif;
         }
+        variance = variance / subsize;
         var.push_back(variance);
     }
     int maxIndex = 0;
@@ -77,7 +79,7 @@ int max_variance_index(int dimension, int k, int subsize, data_set & sub){
  * 'dimension' is the # of entries for each vector
  * 'domain' is the index of the data each leaf will point to
  */
-kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_set & data)
+kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_set & data)
 {
     vector<int> left_domain;
     vector<int> right_domain;
@@ -93,7 +95,7 @@ kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_se
     double median;
     median = selector(vtr,k);
     
-    kd_tree_node internal_node = kd_tree_node(i,median);
+    kd_tree_node * internal_node = new kd_tree_node(i,median);
 
     for (int j=0; j < subsize; j++)
     {
@@ -106,20 +108,20 @@ kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_se
     
     int index = max_variance_index(dimension, k, subsize, sub);
     if (left_domain.size() > c){
-        kd_tree_node left_int = build_tree(c, index, dimension, left_domain, data);
-        internal_node.left = & left_int;
+        kd_tree_node * left_int = build_tree(c, index, dimension, left_domain, data);
+        internal_node->left = left_int;
     }
     else{
-        kd_tree_node left_leaf = kd_tree_node(left_domain);
-        internal_node.left = &left_leaf;
+        kd_tree_node * left_leaf = new kd_tree_node(left_domain);
+        internal_node->left = left_leaf;
     }
     if (right_domain.size() > c){
-        kd_tree_node right_int = build_tree(c, index, dimension, right_domain, data);
-        internal_node.right = & right_int;
+        kd_tree_node * right_int = build_tree(c, index, dimension, right_domain, data);
+        internal_node->right = right_int;
     }
     else{
-        kd_tree_node right_leaf = kd_tree_node(right_domain);
-        internal_node.right = &right_leaf;
+        kd_tree_node * right_leaf = new kd_tree_node(right_domain);
+        internal_node->right = right_leaf;
     }
     return internal_node;
 }
@@ -128,7 +130,7 @@ kd_tree_node build_tree(int c, int i, int dimension, vector<int> domain, data_se
 /* build kd_tree
  * return the root
  */
-kd_tree_node kd_tree(int c, data_set &data)
+kd_tree_node * kd_tree(int c, data_set &data)
 {
     int size = data.size();
     vector<int> domain;
@@ -139,7 +141,7 @@ kd_tree_node kd_tree(int c, data_set &data)
     int dimension = (int)data[0]->size();
     int k = (int)size/2;
     int index = max_variance_index(dimension, k, size, data);
-    kd_tree_node root = build_tree(c, index, dimension, domain, data);
+    kd_tree_node * root = build_tree(c, index, dimension, domain, data);
     return root;
 }
 
@@ -147,18 +149,20 @@ kd_tree_node kd_tree(int c, data_set &data)
 /* search for the data_set*/
 kd_tree_node search(euclid_vector & test, kd_tree_node node)
 {
-    int i = node.get_index();
-    if (test[i] > node.get_pivot() && node.right != NULL)
-        return search(test, *node.right);
-    else if (test[i] <= node.get_pivot() && node.left != NULL)
-        return search(test, *node.left);
+    if (node.left != NULL || node.right != NULL)
+    {
+        int i = node.get_index();
+        if (test[i] > node.get_pivot() && node.right != NULL)
+            return search(test, * node.right);
+        else if (test[i] <= node.get_pivot() && node.left != NULL)
+            return search(test, * node.left);
+    }
     return node;
-
 }
 
 vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
 {
-    kd_tree_node leaf = search(*test,root);
+    kd_tree_node leaf = search(* test, root);
     return leaf.sub_domain;
 }
 
