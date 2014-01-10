@@ -52,8 +52,9 @@ int main() {
     
     int count_correct = 0;
     int c = 0.05 * DATASIZE;
+    int size = test.size();
     kd_tree_node * root = kd_tree(c, train);
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < size; i++)
     {
         cout << test.get_label(test[i]) << " -> ";
         cout.flush();
@@ -67,14 +68,13 @@ int main() {
             count_correct++;
         }
     }
-    double rate = count_correct / test.size();
+    float rate = (float)count_correct / size;
     cout << " There are " << rate << "% correct labels" << endl;
 
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
     fclose(test_labels);
-    printf("\n");
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
