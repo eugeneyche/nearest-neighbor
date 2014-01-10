@@ -31,28 +31,31 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
     printf("Loaded Test Set\n");
-    int count [100] = {0};
-    for (int i = 0; i < test.size(); i++)
+    int count_correct = 0;
+    int c = 0.05 * DATASIZE;
+    int size = test.size();
+    kd_tree_node * root = kd_tree(c, train);
+    for (int i = 0; i < size; i++)
     {
-        data_set mn_nn = k_nn(test[i], train, 100);
-        for (int j = 0; j < mn_nn.size(); j++)
+        cout << test.get_label(test[i]) << " -> ";
+        cout.flush();
+        euclid_vector * l_mn = kd_tree_nn(test[i], train, c, root);
+        cout << train.get_label(l_mn);
+        if (test.get_label(test[i]) != train.get_label(l_mn))
+            cout << " X" << endl;
+        else
         {
-            if (mn_nn.get_label(j) == test.get_label(i))
-            {
-                count[j]++;
-            }
+            cout << endl;
+            count_correct++;
         }
     }
-    for (int i = 0; i < 100; i++)
-    {
-        if (i > 0) printf(" ");
-        printf("%d %lf", i, (60000. - count[i]) / 60000.);
-    }
+    float rate = (float)count_correct / size;
+    cout << " There are " << rate << "% correct labels" << endl;
+
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
     fclose(test_labels);
-    printf("\n");
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
