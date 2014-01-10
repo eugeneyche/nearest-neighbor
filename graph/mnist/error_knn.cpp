@@ -21,16 +21,14 @@ void printGlyph(euclid_vector * to_print)
 }
 
 int main() {
-    FILE * train_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_vectors", "rb");
-    FILE * train_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_labels", "rb");
-    FILE * test_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_vectors", "rb");
-    FILE * test_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_labels", "rb");
+    FILE * train_vtrs = fopen("data/mnist/train_vectors", "rb");
+    FILE * train_labels = fopen("data/mnist/train_labels", "rb");
+    FILE * test_vtrs = fopen("data/mnist/test_vectors", "rb");
+    FILE * test_labels = fopen("data/mnist/test_labels", "rb");
     load(train, train_vtrs);
     label(train, train_labels);
-    printf("Loaded Train Set\n");
     load(test, test_vtrs);
     label(test, test_labels);
-    printf("Loaded Test Set\n");
     int count [100] = {0};
     for (int i = 0; i < test.size(); i++)
     {
@@ -46,7 +44,7 @@ int main() {
     for (int i = 0; i < 100; i++)
     {
         if (i > 0) printf(" ");
-        printf("%d %lf", i, (60000. - count[i]) / 60000.);
+        printf("%d %lf", i + 1, (10000. - count[i]) / 10000.);
     }
     fclose(train_vtrs);
     fclose(train_labels);
