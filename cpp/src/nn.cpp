@@ -57,17 +57,30 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
 euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree_node * root)
 {
     data_set train = train_set.subset(sub_domain(test, * root));
-    euclid_vector * mn = NULL;
-    double mn_dist = 0;
-    double l_dist = 0;
-    for (int i = 0; i < train.size(); i++)
+    return nn(test, train);
+}
+
+
+/* return the data_set of all vector within c*distance of the query */
+data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * nn, double c)
+{
+    map <euclid_vector * , double> dist_mp;
+    for (int i = 0; i < train_st.size(); i++)
     {
-        l_dist = distance_to(*test, *train[i]);
-        if (mn == NULL || l_dist < mn_dist)
+        double dist = distance_to(*test, *(train_st[i]));
+        dist_mp[train_st[i]] = dist;
+    }
+    double dist = distance_to(*test, *nn);
+    double c_distance = c * dist;
+    vector <int> domain;
+    for (int i = 0; i < train_st.size(); i++)
+    {
+        if (dist_mp[train_st[i]] <= c_distance)
         {
-            mn_dist = l_dist;
-            mn = train[i];
+            domain.push_back(i);
         }
     }
-    return mn;
+    data_set c_approx = train_st.subset(domain);
+    return c_approx;
 }
+

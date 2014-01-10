@@ -20,28 +20,6 @@ void printGlyph(euclid_vector * to_print)
     }
 }
 
-int kd_tree_nn(int c, int count_correct, int size, data_set train)
-{
-    kd_tree_node * root = kd_tree(c, train);
-    for (int i = 0; i < size; i++)
-    {
-        cout << test.get_label(test[i]) << " -> ";
-        cout.flush();
-        euclid_vector * l_mn = kd_tree_nn(test[i], train, c, root);
-        cout << train.get_label(l_mn);
-        if (test.get_label(test[i]) != train.get_label(l_mn))
-            cout << " X" << endl;
-        else
-        {
-            cout << endl;
-            count_correct++;
-        }
-    }
-    return count_correct;
-}
-
-
-
 
 int main() {
     FILE * train_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_vectors", "rb");
@@ -54,15 +32,27 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
     printf("Loaded Test Set\n");
-
-    //kd-tree
-    int count_correct = 0;
-    int c = 0.05 * DATASIZE;
+    
+    //c-approximate NN
     int size = test.size();
-    count_correct = kd_tree_nn(c, count_correct, size, train);
-    float rate = (float)count_correct / size;
-    cout << " There are " << rate << "% correct labels" << endl;
-
+    int fraction[] = {0};
+    double c = 2.0;
+    double fraction_avg = 0.0;
+    for (int i = 0; i < size; i++)
+    {
+        euclid_vector * i_nn = nn(test[i], train);
+        data_set c_nn = c_approx_nn(test[i], train, i_nn, c);
+        for (int j = 0; j < c_nn.size(); j++)
+        {
+            if (c_nn.get_label(j) == test.get_label(i))
+            {
+                fraction[i]++;
+            }
+        }
+        fraction[i] = fraction[i] / c_nn.size();
+        fraction_avg += fraction[i];
+    }
+    fraction_avg = fraction_avg / size;
 
     fclose(train_vtrs);
     fclose(train_labels);
