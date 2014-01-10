@@ -130,7 +130,7 @@ kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_
 /* build kd_tree
  * return the root
  */
-kd_tree_node * kd_tree(int c, data_set &data)
+kd_tree_node * kd_tree(int c, data_set & data)
 {
     int size = data.size();
     vector<int> domain;
