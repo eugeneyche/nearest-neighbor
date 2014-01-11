@@ -79,7 +79,6 @@ data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * 
             domain.push_back(i);
         }
     }
-    data_set c_approx = train_st.subset(domain);
-    return c_approx;
+    return train_st.subset(domain);
 }
 
