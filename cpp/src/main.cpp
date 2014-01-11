@@ -53,6 +53,15 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
+    //kd-tree
+    /*int count_correct = 0;
+     int c = 0.05 * DATASIZE;
+     int size = test.size();
+     count_correct = kd_tree_nn(c, count_correct, size, train);
+     float rate = (float)count_correct / size;
+     cout << " There are " << rate << "% correct labels" << endl;
+     */
+
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
