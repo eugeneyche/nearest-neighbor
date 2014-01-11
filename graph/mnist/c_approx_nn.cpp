@@ -36,24 +36,27 @@ int main() {
     //c-approximate NN
     int size = test.size();
     int fraction[] = {0};
-    double c = 2.0;
-    double fraction_avg = 0.0;
-    for (int i = 0; i < size; i++)
+    double c[6] = {1.0,1.2,1.4,1.6,1.8,2.0};
+    double fraction_avg[6] = {0.0};
+    for (int k = 0; k < 6; k++)
     {
-        euclid_vector * i_nn = nn(test[i], train);
-        data_set c_nn = c_approx_nn(test[i], train, i_nn, c);
-        for (int j = 0; j < c_nn.size(); j++)
+        for (int i = 0; i < size; i++)
         {
-            if (c_nn.get_label(j) == test.get_label(i))
+            euclid_vector * i_nn = nn(test[i], train);
+            data_set c_nn = c_approx_nn(test[i], train, i_nn, c[k]);
+            for (int j = 0; j < c_nn.size(); j++)
             {
-                fraction[i]++;
+                if (c_nn.get_label(j) == test.get_label(i))
+                {
+                    fraction[i]++;
+                }
             }
+            fraction[i] = fraction[i] / c_nn.size();
+            fraction_avg[k] += fraction[i];
         }
-        fraction[i] = fraction[i] / c_nn.size();
-        fraction_avg += fraction[i];
+        fraction_avg[k] = fraction_avg[k] / size;
+        cout<<c[k]<<"   "<<fraction_avg[k]<<endl;
     }
-    fraction_avg = fraction_avg / size;
-
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
