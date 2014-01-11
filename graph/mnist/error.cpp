@@ -44,7 +44,7 @@ int main() {
     for (int i = 0; i < 100; i++)
     {
         if (i > 0) printf(" ");
-        printf("%d %lf", i + 1, (10000. - count[i]) / 10000.);
+        printf("%d %lf\n", i + 1, (10000. - count[i]) / 10000.);
     }
     fclose(train_vtrs);
     fclose(train_labels);

@@ -49,8 +49,7 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
                 domain.push_back(i);
         }
     }
-    train_st.subset(domain);
-    return data_set();
+    return train_st.subset(domain);
 }
 
 /* return the nearest neighbor that is generated from kd-tree */

@@ -50,24 +50,9 @@ int main() {
     FILE * test_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_labels", "rb");
     load(train, train_vtrs);
     label(train, train_labels);
-    printf("Loaded Train Set\n");
     load(test, test_vtrs);
     label(test, test_labels);
-    printf("Loaded Test Set\n");
 
-    //kd-tree
-    int count_correct = 0;
-    int c = 0.05 * DATASIZE;
-    int size = test.size();
-    count_correct = kd_tree_nn(c, count_correct, size, train);
-    float rate = (float)count_correct / size;
-    cout << " There are " << rate << "% correct labels" << endl;
-
-
-    fclose(train_vtrs);
-    fclose(train_labels);
-    fclose(test_vtrs);
-    fclose(test_labels);
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
