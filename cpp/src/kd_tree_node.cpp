@@ -1,6 +1,8 @@
 #include "kd_tree_node.h"
 #include <random>
 #include <iostream>
+#include <stack>
+
 
 /* select the kth smallest value in the vector */
 double selector(vector<double> s, int k)
@@ -145,6 +147,50 @@ kd_tree_node * kd_tree(int c, data_set & data)
     return root;
 }
 
+void save_tree(kd_tree_node * tree, FILE * out)
+{
+    stack <kd_tree_node *> to_build;
+    to_build.push(tree);
+    while (!to_build.empty())
+    {
+        kd_tree_node * curr = to_build.top();
+        to_build.pop();
+        bool exists = curr != NULL;
+        if (curr)
+        {
+            fwrite(&exists, sizeof(bool), 1, out); 
+            fwrite(&curr->index, sizeof(int), 1, out); 
+            fwrite(&curr->pivot, sizeof(double), 1, out); 
+            size_t sz = curr->sub_domain.size();
+            fwrite(&sz, sizeof(size_t), 1, out); 
+            fwrite(&curr->sub_domain[0], sizeof(int), curr->sub_domain.size(), out);
+            to_build.push(curr->right);
+            to_build.push(curr->left);
+        }
+    }
+}
+
+kd_tree_node * load_tree(FILE * in)
+{
+    bool exist;
+    fread(&exist, sizeof(bool), 1, in);
+    if (!exist)
+        return NULL;
+    kd_tree_node * res = new kd_tree_node();
+    fread(&res->index, sizeof(int), 1, in);
+    fread(&res->pivot, sizeof(double), 1, in);
+    size_t sz;
+    fread(&sz, sizeof(size_t), 1, in);
+    while (sz--)
+    {
+        int v;
+        fread(&v, sizeof(int), 1, in);
+        res->sub_domain.push_back(v);
+    }
+    res->left = load_tree(in);
+    res->right = load_tree(in);
+    return res;
+}
 
 /* search for the data_set*/
 kd_tree_node search(euclid_vector & test, kd_tree_node node)
@@ -168,6 +214,13 @@ vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
 
 
 /******* class declaration below *******/
+kd_tree_node::kd_tree_node()//leaf node
+{
+    index = -1;
+    pivot = -1;
+    left = NULL;
+    right = NULL;
+}
 
 kd_tree_node::kd_tree_node(vector<int> domain)//leaf node
 {

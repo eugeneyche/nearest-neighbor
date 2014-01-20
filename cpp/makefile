@@ -20,5 +20,12 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 clean:
 	$(RM) -r $(BUILDDIR) $(TARGET)
 
+new:
+	make clean
+	make
+
+directories:
+	mkdir bin
+
 .PHONY: 
 	clean
