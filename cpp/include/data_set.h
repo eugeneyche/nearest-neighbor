@@ -12,7 +12,9 @@ typedef vector <euclid_vector *> vector_space;
 
 class data_set;
 
+/* loads the vectors from a file */
 void load(data_set & st, FILE * in);
+/* loads the labels from a file */
 void label(data_set & st, FILE * in);
 
 class data_set

@@ -3,12 +3,16 @@
 #include "kd_tree_node.h"
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <algorithm>
 using namespace std;
 
 int DATASIZE = 60000;
 data_set train;
 data_set test;
+
+string janet_dir = "/Users/janetzhai/Desktop/KNN/KNN/";
+string eugene_dir = "data/mnist/";
 
 char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
 
@@ -40,31 +44,34 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree_no
 }
 
 
-
-
 int main() {
-    FILE * train_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_vectors", "rb");
-    FILE * train_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_labels", "rb");
-    FILE * test_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_vectors", "rb");
-    FILE * test_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_labels", "rb");
+    string path = janet_dir;
+    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
+    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
+    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
+    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
     load(train, train_vtrs);
     label(train, train_labels);
-    printf("Loaded Train Set\n");
     load(test, test_vtrs);
     label(test, test_labels);
-    printf("Loaded Test Set\n");
-    
+
 
     //kd-tree
-    FILE * kd_tree_out = fopen("/Users/janetzhai/Desktop/KNN/KNN/kd_tree", "wb");
+    FILE * kd_tree_out = fopen("tree", "wb");
 
+    //changed c and train_size just to test the load and store
     int c = 5;//0.05 * DATASIZE;
-    kd_tree_node * root = kd_tree(c, train);
+    int train_size = 30;//train.size();
+    kd_tree_node * root = kd_tree(c, train, train_size);
+    print_tree(root, 0);
     save_tree(root, kd_tree_out);
     fclose(kd_tree_out);
     
-    FILE * kd_tree_read = fopen("/Users/janetzhai/Desktop/KNN/KNN/kd_tree", "rb");
-    kd_tree_node * root2 = load_tree(kd_tree_read);//root2 should be the same as root
+    FILE * input = fopen("tree", "rb");
+    kd_tree_node * root2 = load_tree(input);//root2 should be the same as root
+    cout << " DONE " << endl;
+    print_tree(root2, 0);
+    delete root;
     
     /*
     int count_correct = 0;
@@ -102,10 +109,7 @@ int main() {
      */
 
 
-    fclose(train_vtrs);
-    fclose(train_labels);
-    fclose(test_vtrs);
-    fclose(test_labels);
+    fclose(input);
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);

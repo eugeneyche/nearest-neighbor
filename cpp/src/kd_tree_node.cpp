@@ -3,8 +3,22 @@
 #include <iostream>
 #include <stack>
 
+void print_tree(kd_tree_node * m_node, int depth)
+{
+    if (m_node == NULL)
+        return;
+    for (int i = 0; i < depth; i++)
+    {
+        cout << " ";
+    }
+    cout << m_node->index << " : ";
+    cout << m_node->sub_domain.size();
+    cout << endl;
+    print_tree(m_node->left, depth + 1); 
+    print_tree(m_node->right, depth + 1);
+}
 
-/* select the kth smallest value in the vector */
+/* gets the kth smallest values */
 double selector(vector<double> s, int k)
 {
 	srand(int(time(NULL))); //random seed
@@ -132,9 +146,8 @@ kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_
 /* build kd_tree
  * return the root
  */
-kd_tree_node * kd_tree(int c, data_set & data)
+kd_tree_node * kd_tree(int c, data_set & data, int size)
 {
-    int size = 30;//data.size();
     vector<int> domain;
     for (int i = 0; i < size; i++)
     {
@@ -148,7 +161,7 @@ kd_tree_node * kd_tree(int c, data_set & data)
 }
 
 
-
+/* saves the tree */
 void save_tree(kd_tree_node * tree, FILE * out)
 {
     stack <kd_tree_node *> to_build;
@@ -158,9 +171,9 @@ void save_tree(kd_tree_node * tree, FILE * out)
         kd_tree_node * curr = to_build.top();
         to_build.pop();
         bool exists = curr != NULL;
-        if (curr)
+        fwrite(&exists, sizeof(bool), 1, out); 
+        if (exists)
         {
-            fwrite(&exists, sizeof(bool), 1, out); 
             fwrite(&curr->index, sizeof(int), 1, out); 
             fwrite(&curr->pivot, sizeof(double), 1, out); 
             size_t sz = curr->sub_domain.size();
@@ -173,13 +186,15 @@ void save_tree(kd_tree_node * tree, FILE * out)
 }
 
 
-
+/* loads the tree */
 kd_tree_node * load_tree(FILE * in)
 {
     bool exist;
     fread(&exist, sizeof(bool), 1, in);
     if (!exist)
+    {
         return NULL;
+    }
     kd_tree_node * res = new kd_tree_node();
     fread(&res->index, sizeof(int), 1, in);
     fread(&res->pivot, sizeof(double), 1, in);
