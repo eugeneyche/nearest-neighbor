@@ -9,7 +9,6 @@ using namespace std;
 /* gets nearest neightbor of query (test) */
 euclid_vector * nn(euclid_vector * query, data_set & train_set);
 
-<<<<<<< HEAD
 /* get the k nearest neighbor of query */
 data_set k_nn(euclid_vector * query, data_set & train_st, double k);
 

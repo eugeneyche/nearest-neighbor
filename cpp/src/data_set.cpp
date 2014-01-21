@@ -27,9 +27,11 @@ void label(data_set & st, FILE * in)
     }
 }
 
-int max_variance_index(int dimension, int k, int subsize, data_set & sub){
+int max_variance_index(int k, data_set & sub){
     vector <double> var;
     vector <double> vtr;
+    int dimension = sub[0]->size();
+    int subsize = sub.size();
     for (int i = 0; i < dimension; i++){
         for (int j = 0; j < subsize; j++){
             vtr.push_back((*sub[j])[i]);
@@ -119,6 +121,16 @@ int data_set::get_label(int i)
 int data_set::get_label(euclid_vector * vtr)
 {
     return (*_labels)[vtr];
+}
+
+vector <int> data_set::get_domain()
+{
+    vector <int> domain;
+    for (int i = 0; i < _domain.size(); i++)
+    {
+        domain.push_back(i);
+    }
+    return domain;
 }
 
 euclid_vector * data_set::operator[](int i)

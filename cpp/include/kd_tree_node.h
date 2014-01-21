@@ -2,10 +2,7 @@
 #define _KD_TREE_NODE_H
 
 #include "data_set.h"
-#include <random>
-#include <iostream>
 #include <stack>
-
 using namespace std;
 
 class kd_tree_node;
@@ -40,7 +37,7 @@ private:
 public:
     kd_tree_node();
     kd_tree_node(int d, double p);
-    kd_tree_node(vector<int> domain);
+    kd_tree_node(vector <int> domain);
     ~kd_tree_node();
     int get_index();
     double get_pivot();

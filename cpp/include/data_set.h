@@ -17,7 +17,7 @@ void load(data_set & st, FILE * in);
 /* loads the labels from a file */
 void label(data_set & st, FILE * in);
 /* return the index of the vector with the max variance */
-int max_variance_index(int dimension, int k, int subsize, data_set & sub); 
+int max_variance_index(int k, data_set & sub); 
 
 class data_set
 {
@@ -36,6 +36,7 @@ public:
     void set_label(euclid_vector * vtr, int label);
     int get_label(int i);
     int get_label(euclid_vector * vtr);
+    vector <int> get_domain();
     euclid_vector * operator[](int i);
     data_set subset(vector <int> domain);
     friend void load(data_set & st, FILE * in);

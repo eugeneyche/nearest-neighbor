@@ -47,7 +47,7 @@ kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_
             right_domain.push_back(j);
     }
     
-    int index = max_variance_index(dimension, k, subsize, sub);
+    int index = max_variance_index(k, sub);
     if (left_domain.size() > c){
         kd_tree_node * left_int = build_tree(c, index, dimension, left_domain, data);
         internal_node->left = left_int;
@@ -80,7 +80,7 @@ kd_tree_node * kd_tree(int c, data_set & data, int size)
     }
     int dimension = (int)data[0]->size();
     int k = (int)size/2;
-    int index = max_variance_index(dimension, k, size, data);
+    int index = max_variance_index(k, data);
     kd_tree_node * root = build_tree(c, index, dimension, domain, data);
     return root;
 }
