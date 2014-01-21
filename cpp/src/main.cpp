@@ -45,7 +45,7 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree_no
 
 
 int main() {
-    string path = janet_dir;
+    string path = eugene_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");

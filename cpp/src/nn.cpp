@@ -4,14 +4,14 @@
 #include <time.h>
 using namespace std;
 
-euclid_vector * nn(euclid_vector * test, data_set & train_set)
+euclid_vector * nn(euclid_vector * query, data_set & train_set)
 {
     euclid_vector * mn = NULL;
     double mn_dist = 0;
     double l_dist = 0;
     for (int i = 0; i < train_set.size(); i++)
     {
-        l_dist = distance_to(*test, *train_set[i]);
+        l_dist = distance_to(*query, *train_set[i]);
         if (mn == NULL || l_dist < mn_dist)
         {
             mn_dist = l_dist;
@@ -22,13 +22,13 @@ euclid_vector * nn(euclid_vector * test, data_set & train_set)
 }
 
 
-data_set k_nn(euclid_vector * test, data_set & train_st, double k)
+data_set k_nn(euclid_vector * query, data_set & train_st, double k)
 {
     map <euclid_vector * , double> dist_mp;
     vector <double> dist_vtr; 
     for (int i = 0; i < train_st.size(); i++)
     {
-        double dist = distance_to(*test, *(train_st[i]));
+        double dist = distance_to(*query, *(train_st[i]));
         dist_mp[train_st[i]] = dist;
         dist_vtr.push_back(dist);
     }
@@ -54,23 +54,23 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
 }
 
 /* return the nearest neighbor that is generated from kd-tree */
-euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree_node * root)
+euclid_vector * kd_tree_nn(euclid_vector * query, data_set & train_set, int c, kd_tree_node * root)
 {
-    data_set train = train_set.subset(sub_domain(test, * root));
-    return nn(test, train);
+    data_set train = train_set.subset(sub_domain(query, root));
+    return nn(query, train);
 }
 
 
 /* return the data_set of all vector within c*distance of the query */
-data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * nn, double c)
+data_set c_approx_nn(euclid_vector * query, data_set & train_st, euclid_vector * nn, double c)
 {
     map <euclid_vector * , double> dist_mp;
     for (int i = 0; i < train_st.size(); i++)
     {
-        double dist = distance_to(*test, *(train_st[i]));
+        double dist = distance_to(*query, *(train_st[i]));
         dist_mp[train_st[i]] = dist;
     }
-    double dist = distance_to(*test, *nn);
+    double dist = distance_to(*query, *nn);
     double c_distance = c * dist;
     vector <int> domain;
     for (int i = 0; i < train_st.size(); i++)

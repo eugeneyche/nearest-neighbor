@@ -212,23 +212,24 @@ kd_tree_node * load_tree(FILE * in)
 }
 
 /* search for the data_set*/
-kd_tree_node search(euclid_vector & test, kd_tree_node node)
+kd_tree_node * search(euclid_vector * query, kd_tree_node * node)
 {
-    if (node.left != NULL || node.right != NULL)
+    if (node->left || node->right)
     {
-        int i = node.get_index();
-        if (test[i] > node.get_pivot() && node.right != NULL)
-            return search(test, * node.right);
-        else if (test[i] <= node.get_pivot() && node.left != NULL)
-            return search(test, * node.left);
+        int i = node->get_index();
+        if ((*query)[i] > node->get_pivot() && node->right != NULL)
+            return search(query, node->right);
+        else if ((*query)[i] <= node->get_pivot() && node->left != NULL)
+            return search(query, node->left);
     }
     return node;
 }
 
-vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
+/* search for the data_set*/
+vector<int> sub_domain(euclid_vector * test, kd_tree_node * root)
 {
-    kd_tree_node leaf = search(* test, root);
-    return leaf.sub_domain;
+    kd_tree_node * leaf = search(test, root);
+    return leaf->sub_domain;
 }
 
 
