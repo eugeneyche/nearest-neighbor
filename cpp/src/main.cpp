@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <ctime>
 using namespace std;
 
 int DATASIZE = 60000;
@@ -23,6 +24,22 @@ void printGlyph(euclid_vector * to_print)
         if (i % 28 == 27) printf("\n");
     }
 }
+
+void generate_kd_tree(string input_file_name, data_set train)
+{
+    clock_t start, end;
+    int c = 0.05 * DATASIZE;
+    int train_size = train.size();
+    start = clock();
+    kd_tree_node * root = kd_tree(c, train, train_size);
+    end = clock();
+    double time = double(end - start) / CLOCKS_PER_SEC;
+    cout << time << endl;
+    FILE * kd_tree_out = fopen((janet_dir+input_file_name).c_str(), "wb");
+    save_tree(root, kd_tree_out);
+    fclose(kd_tree_out);
+}
+
 
 int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree_node * root)
 {
@@ -44,49 +61,9 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree_no
 }
 
 
-int main() {
-    string path = janet_dir;
-    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
-    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
-    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
-    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
-    load(train, train_vtrs);
-    label(train, train_labels);
-    load(test, test_vtrs);
-    label(test, test_labels);
-
-
-    //kd-tree
-    FILE * kd_tree_out = fopen("tree", "wb");
-
-    //changed c and train_size just to test the load and store
-    int c = 5;//0.05 * DATASIZE;
-    int train_size = 30;//train.size();
-    kd_tree_node * root = kd_tree(c, train, train_size);
-    print_tree(root, 0);
-    save_tree(root, kd_tree_out);
-    fclose(kd_tree_out);
-    
-    FILE * input = fopen("tree", "rb");
-    kd_tree_node * root2 = load_tree(input);//root2 should be the same as root
-    cout << " DONE " << endl;
-    print_tree(root2, 0);
-    delete root;
-    
-    /*
-    int count_correct = 0;
-    int size = test.size();
-    count_correct = kd_tree_count(c, count_correct, size, train, root);
-    float rate = (float)count_correct / size;
-    cout << " There are " << rate << "% correct labels" << endl;
-    */
-
-    /*
-    //c-approximate NN
-    int size = test.size();
-    double c[6] = {1.0,1.2,1.4,1.6,1.8,2.0};
-    double fraction_avg[6] = {0.0};
-    for (int k = 0; k < 6; k++)
+void c_appr_nn(int size, int c_size, double c[], double fraction_avg[])
+{
+    for (int k = 0; k < c_size; k++)
     {
         for (int i = 0; i < size; i++)
         {
@@ -106,10 +83,47 @@ int main() {
         fraction_avg[k] = fraction_avg[k] / size;
         cout<<c[k]<<"   "<<fraction_avg[k]<<endl;
     }
+}
+
+
+int main() {
+    string path = janet_dir;
+    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
+    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
+    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
+    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
+    load(train, train_vtrs);
+    label(train, train_labels);
+    load(test, test_vtrs);
+    label(test, test_labels);
+
+
+    //genearte kd-tree and save it to file name "tree"
+    generate_kd_tree("tree", train);
+    
+    
+    /*
+    //read kd-tree from file "tree"
+    FILE * input = fopen("tree", "rb");
+    kd_tree_node * root = load_tree(input);
+    cout << "Done loading tree" << endl;
+    fclose(input);
+    
+    //
+    int count_correct = 0;
+    count_correct = kd_tree_count(c, count_correct, test.size(), train, root);
+    float rate = (float)count_correct / test.size();
+    cout << " There are " << rate << "% correct labels" << endl;
+    */
+
+    /*
+    //c-approximate NN
+    int c_size = 6; //6 different c
+    double c[c_size] = {1.0,1.2,1.4,1.6,1.8,2.0};
+    double fraction_avg[c_size] = {0.0};
+    c_appr_nn(test.size(), c_size, c[], fraction_avg[])
      */
 
-
-    fclose(input);
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
