@@ -27,6 +27,30 @@ void label(data_set & st, FILE * in)
     }
 }
 
+int max_variance_index(int dimension, int k, int subsize, data_set & sub){
+    vector <double> var;
+    vector <double> vtr;
+    for (int i = 0; i < dimension; i++){
+        for (int j = 0; j < subsize; j++){
+            vtr.push_back((*sub[j])[i]);
+        }
+        double mean = selector(vtr, k);
+        double variance = 0.0;
+        for (int j = 0; j < subsize; j++){
+            double dif = (*sub[j])[i]-mean;
+            variance += dif * dif;
+        }
+        variance = variance / subsize;
+        var.push_back(variance);
+    }
+    int maxIndex = 0;
+    for (int i = 1; i < dimension; i++){
+        if (var[i] > var[maxIndex])
+            maxIndex = i;
+    }
+    return maxIndex;
+}
+
 data_set::data_set(data_set & parent, vector <int> domain)
 {
     _parent = &parent;

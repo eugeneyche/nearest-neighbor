@@ -2,17 +2,15 @@
 #define _KD_TREE_NODE_H
 
 #include "data_set.h"
+#include <random>
+#include <iostream>
+#include <stack>
 
 using namespace std;
 
 class kd_tree_node;
 
 void print_tree(kd_tree_node * m_node, int depth);
-
-/* finds the kth smallest */
-double selector(vector<double> s, int k);
-/* return the index of the vector with the max variance */
-int max_variance_index(int dimension, int k, int subsize, data_set & sub); 
 
 /* build tree, called in kd_tree */
 kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_set & data); 
