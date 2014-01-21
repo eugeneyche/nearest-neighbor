@@ -134,7 +134,7 @@ kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_
  */
 kd_tree_node * kd_tree(int c, data_set & data)
 {
-    int size = data.size();
+    int size = 30;//data.size();
     vector<int> domain;
     for (int i = 0; i < size; i++)
     {
@@ -146,6 +146,8 @@ kd_tree_node * kd_tree(int c, data_set & data)
     kd_tree_node * root = build_tree(c, index, dimension, domain, data);
     return root;
 }
+
+
 
 void save_tree(kd_tree_node * tree, FILE * out)
 {
@@ -169,6 +171,8 @@ void save_tree(kd_tree_node * tree, FILE * out)
         }
     }
 }
+
+
 
 kd_tree_node * load_tree(FILE * in)
 {
