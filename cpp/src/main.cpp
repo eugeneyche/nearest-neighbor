@@ -3,12 +3,16 @@
 #include "kd_tree_node.h"
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <algorithm>
 using namespace std;
 
 int DATASIZE = 60000;
 data_set train;
 data_set test;
+
+string janet_dir = "/Users/janetzhai/Desktop/KNN/KNN/";
+string eugene_dir = "data/mnist/";
 
 char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
 
@@ -41,27 +45,25 @@ int kd_tree_nn(int c, int count_correct, int size, data_set train)
 }
 
 
-
-
 int main() {
-    FILE * train_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_vectors", "rb");
-    FILE * train_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/train_labels", "rb");
-    FILE * test_vtrs = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_vectors", "rb");
-    FILE * test_labels = fopen("/Users/janetzhai/Desktop/KNN/KNN/test_labels", "rb");
+    string path = eugene_dir;
+    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
+    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
+    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
+    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
     load(train, train_vtrs);
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
+    FILE * input = fopen("tree", "rb");
 
-    //kd-tree
-    /*int count_correct = 0;
-     int c = 0.05 * DATASIZE;
-     int size = test.size();
-     count_correct = kd_tree_nn(c, count_correct, size, train);
-     float rate = (float)count_correct / size;
-     cout << " There are " << rate << "% correct labels" << endl;
-     */
+    kd_tree_node * root = load_tree(input);
+    cout << " DONE " << endl;
+    print_tree(root, 0);
 
+    delete root;
+
+    fclose(input);
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
