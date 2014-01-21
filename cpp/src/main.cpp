@@ -1,6 +1,6 @@
 #include "data_set.h"
 #include "nn.h"
-#include "kd_tree_node.h"
+#include "kd_tree.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -31,7 +31,7 @@ void generate_kd_tree(string input_file_name, data_set train)
     int c = 0.05 * DATASIZE;
     int train_size = train.size();
     start = clock();
-    kd_tree_node * root = kd_tree(c, train, train_size);
+    kd_tree * root = kd_tree_root(c, train, train_size);
     end = clock();
     double time = double(end - start) / CLOCKS_PER_SEC;
     cout << time << endl;
@@ -41,7 +41,7 @@ void generate_kd_tree(string input_file_name, data_set train)
 }
 
 
-int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree_node * root)
+int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree * root)
 {
     for (int i = 0; i < size; i++)
     {
@@ -87,7 +87,7 @@ void c_appr_nn(int size, int c_size, double c[], double fraction_avg[])
 
 
 int main() {
-    string path = eugene_dir;
+    string path = janet_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -105,7 +105,7 @@ int main() {
     /*
     //read kd-tree from file "tree"
     FILE * input = fopen("tree", "rb");
-    kd_tree_node * root = load_tree(input);
+    kd_tree * root = load_tree(input);
     cout << "Done loading tree" << endl;
     fclose(input);
     
