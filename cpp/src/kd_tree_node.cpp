@@ -1,7 +1,4 @@
 #include "kd_tree_node.h"
-#include <random>
-#include <iostream>
-#include <stack>
 
 void print_tree(kd_tree_node * m_node, int depth)
 {
@@ -17,78 +14,6 @@ void print_tree(kd_tree_node * m_node, int depth)
     print_tree(m_node->left, depth + 1); 
     print_tree(m_node->right, depth + 1);
 }
-
-/* gets the kth smallest values */
-double selector(vector<double> s, int k)
-{
-	srand(int(time(NULL))); //random seed
-	int size = int(s.size());
-	double randomIndex = rand() % size; //random number between 0 and size-1
-    
-	vector<double> left; //data that are smaller than v
-	vector<double> right; // data that are larger than v
-	vector<double> v; //data that are equal to v
-    
-    /* iterate through to push the smaller to left, larger to right, the rest to v */
-	for (vector <double>::iterator itr = s.begin(); itr != s.end(); itr++)
-	{
-		if(*itr == s[randomIndex]){
-			v.push_back(*itr);
-		}
-		else if(*itr < s[randomIndex]){
-			left.push_back(*itr);
-		}
-		else{
-			right.push_back(*itr);
-		}
-	}
-    
-    /* three conditions */
-	if (left.size() >= k)
-    {// the kth smallest on the left
-		return selector(left, k);
-	}
-	else if(left.size()+v.size() >= k)
-    { // the kth smallest found
-		return s[randomIndex];
-	}
-	else
-    { // the kth smallest on the right
-		return selector(right, int (k-left.size()-v.size()));
-	}
-}
-
-
-/* variance function
- * 'dimension' is the size of each vector
- * 'k' would be the kth smallest number from selector()
- * 'subsize' is the size of data_set sub
- */
-int max_variance_index(int dimension, int k, int subsize, data_set & sub){
-    vector <double> var;
-    vector <double> vtr;
-    for (int i = 0; i < dimension; i++){
-        for (int j = 0; j < subsize; j++){
-            vtr.push_back((*sub[j])[i]);
-        }
-        double mean = selector(vtr, k);
-        double variance = 0.0;
-        for (int j = 0; j < subsize; j++){
-            double dif = (*sub[j])[i]-mean;
-            variance += dif * dif;
-        }
-        variance = variance / subsize;
-        var.push_back(variance);
-    }
-    int maxIndex = 0;
-    for (int i = 1; i < dimension; i++){
-        if (var[i] > var[maxIndex])
-            maxIndex = i;
-    }
-    return maxIndex;
-}
-
-
 
 /* 'c' is the size of the leaf
  * 'i' is the index of the info for each data
@@ -212,23 +137,24 @@ kd_tree_node * load_tree(FILE * in)
 }
 
 /* search for the data_set*/
-kd_tree_node search(euclid_vector & test, kd_tree_node node)
+kd_tree_node * search(euclid_vector * query, kd_tree_node * node)
 {
-    if (node.left != NULL || node.right != NULL)
+    if (node->left || node->right)
     {
-        int i = node.get_index();
-        if (test[i] > node.get_pivot() && node.right != NULL)
-            return search(test, * node.right);
-        else if (test[i] <= node.get_pivot() && node.left != NULL)
-            return search(test, * node.left);
+        int i = node->get_index();
+        if ((*query)[i] > node->get_pivot() && node->right != NULL)
+            return search(query, node->right);
+        else if ((*query)[i] <= node->get_pivot() && node->left != NULL)
+            return search(query, node->left);
     }
     return node;
 }
 
-vector<int> sub_domain(euclid_vector * test, kd_tree_node root)
+/* search for the data_set*/
+vector<int> sub_domain(euclid_vector * test, kd_tree_node * root)
 {
-    kd_tree_node leaf = search(* test, root);
-    return leaf.sub_domain;
+    kd_tree_node * leaf = search(test, root);
+    return leaf->sub_domain;
 }
 
 

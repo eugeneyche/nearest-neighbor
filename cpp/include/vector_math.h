@@ -8,5 +8,7 @@ typedef vector <double> euclid_vector;
 
 /* gets the squared distance between two vectors */
 double distance_to(euclid_vector & v1, euclid_vector & v2);
+/* finds the kth smallest */
+double selector(vector<double> s, int k);
 
 #endif
