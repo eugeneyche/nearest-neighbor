@@ -1,5 +1,4 @@
 #include "nn.h"
-#include "kd_tree.h"
 #include <iostream>
 #include <time.h>
 using namespace std;
@@ -54,7 +53,7 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
 }
 
 /* return the nearest neighbor that is generated from kd-tree */
-euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree * root)
+euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree_node * root)
 {
     data_set train = train_set.subset(sub_domain(test, root));
     return nn(test, train);
@@ -84,3 +83,12 @@ data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * 
     return c_approx;
 }
 
+
+/* return the nearest neighbor that is generated from kd-tree by spill the query */
+euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, spill_tree_node * spill_root)
+{
+    vector_space vector_set;
+    vector_space queries = query_nn_set(vector_set, train, test, spill_root);
+    data_set * set = new data_set(queries);
+    return nn(test, * set);
+}

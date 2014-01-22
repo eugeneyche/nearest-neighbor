@@ -1,6 +1,7 @@
 #include "data_set.h"
 #include "nn.h"
 #include "kd_tree.h"
+#include "spill_tree.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -31,7 +32,7 @@ void generate_kd_tree(string input_file_name, data_set train)
     int c = 0.05 * DATASIZE;
     int train_size = train.size();
     start = clock();
-    kd_tree * root = kd_tree_root(c, train, train_size);
+    kd_tree_node * root = kd_tree_root(c, train, train_size);
     end = clock();
     double time = double(end - start) / CLOCKS_PER_SEC;
     cout << time << endl;
@@ -41,7 +42,7 @@ void generate_kd_tree(string input_file_name, data_set train)
 }
 
 
-int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree * root)
+int kd_tree_count(int c, int count_correct, int size, data_set train, data_set test, kd_tree_node * root)
 {
     for (int i = 0; i < size; i++)
     {
@@ -56,6 +57,20 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, kd_tree * 
             cout << endl;
             count_correct++;
         }
+    }
+    return count_correct;
+}
+
+
+int spill_query_correctness(data_set * train, data_set test, kd_tree_node * root, int a)
+{
+    spill_tree_node * spill_root = build_query_tree(train, root, root->get_domain(), a);
+    int count_correct = 0;
+    for (int i = 0; i < test.size(); i++)
+    {
+        euclid_vector * spill_nn = spill_query_nn(test[i], train, spill_root);
+        if (test.get_label(test[i]) == train->get_label(spill_nn))
+            count_correct++;
     }
     return count_correct;
 }
@@ -105,23 +120,32 @@ int main() {
     /*
     //read kd-tree from file "tree"
     FILE * input = fopen("tree", "rb");
-    kd_tree * root = load_tree(input);
+    kd_tree_node * root = load_tree(input);
     cout << "Done loading tree" << endl;
     fclose(input);
     
-    //
+    //kd-tree NN
     int count_correct = 0;
     count_correct = kd_tree_count(c, count_correct, test.size(), train, root);
     float rate = (float)count_correct / test.size();
     cout << " There are " << rate << "% correct labels" << endl;
-    */
-
-    /*
+    
     //c-approximate NN
     int c_size = 6; //6 different c
     double c[c_size] = {1.0,1.2,1.4,1.6,1.8,2.0};
     double fraction_avg[c_size] = {0.0};
     c_appr_nn(test.size(), c_size, c[], fraction_avg[])
+     
+    //spill_query NN
+     int count_correct = 0;
+     int a_size = 6; //6 different c
+     double a[a_size] = {1.0,1.2,1.4,1.6,1.8,2.0};
+     for (int i = 0; i < a_size; i++)
+     {
+        count_correct = spill_query_correctness(train, test, root, a[i]);
+        float rate = (float)count_correct / test.size();
+        cout << a[i] << "   " << rate << endl;
+     }
      */
 
     fclose(train_vtrs);

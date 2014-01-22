@@ -1,6 +1,7 @@
 #include "data_set.h"
 #include "kd_tree.h"
 #include "vector_math.h"
+#include "spill_tree.h"
 #include <vector>
 #include <map>
 
@@ -13,10 +14,9 @@ euclid_vector * nn(euclid_vector * query, data_set & train_set);
 data_set k_nn(euclid_vector * query, data_set & train_st, double k);
 
 /* gets nearest neighbor of query through kd_tree*/
-euclid_vector * kd_tree_nn(euclid_vector * query, data_set & train_set, int c, kd_tree * root);
+euclid_vector * kd_tree_nn(euclid_vector * query, data_set & train_set, int c, kd_tree_node * root);
 
 /* return the data_set of all vector within c*distance of the query */
 data_set c_approx_nn(euclid_vector * query, data_set & train_st, euclid_vector * nn, double c);
 
-euclid_vector spill_query_nn(euclid_vector * train, data_set & train_set, kd_tree * root_p, double a);
-
+euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, spill_tree_node * spill_root);
