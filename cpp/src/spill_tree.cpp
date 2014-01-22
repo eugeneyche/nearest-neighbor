@@ -34,30 +34,31 @@ spill_tree_node * build_query_tree(data_set & train, kd_tree_node * root, vector
 
 
 /*return a set of nearest neighbor generated from kd_tree*/
-vector_space query_nn_set(vector_space vector_set, data_set * train_set, euclid_vector * test, spill_tree_node * spill_query_root)
+vector <int> query_nn_set(vector <int> domain, data_set * train_set, euclid_vector * test, spill_tree_node * spill_query_root)
 {
     if (spill_query_root->get_left() == NULL && spill_query_root->get_right() == NULL)
     {
-        data_set train_leaf = train_set->subset(spill_query_root->get_domain());
-        vector_set.push_back(nn(test, train_leaf));
-        return vector_set;
+        vector <int> leaf_domian = spill_query_root->get_domain();
+        for(int i = 0; i < leaf_domian.size(); i++)
+            domain.push_back(leaf_domian[i]);
+        return domain;
     }
     int index = spill_query_root->get_index();
     if (spill_query_root->in_range(test))
     {
-        vector_set = query_nn_set(vector_set, train_set, test, spill_query_root->get_left());
-        vector_set = query_nn_set(vector_set, train_set, test, spill_query_root->get_right());
-        return vector_set;
+        domain = query_nn_set(domain, train_set, test, spill_query_root->get_left());
+        domain = query_nn_set(domain, train_set, test, spill_query_root->get_right());
+        return domain;
     }
     else if ((*test)[index] < spill_query_root->get_pivot())
     {
-        return query_nn_set(vector_set, train_set, test, spill_query_root->get_left());
+        return query_nn_set(domain, train_set, test, spill_query_root->get_left());
     }
     else if ((*test)[index] > spill_query_root->get_pivot())
     {
-        return query_nn_set(vector_set, train_set, test, spill_query_root->get_right());
+        return query_nn_set(domain, train_set, test, spill_query_root->get_right());
     }
-    return vector_set;
+    return domain;
 }
 
 

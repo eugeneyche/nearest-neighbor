@@ -1,17 +1,17 @@
 #ifndef _SPILL_TREE_H
 #define _SPILL_TREE_H
 
-#include "nn.h"
+#include "kd_tree.h"
 #include <stack>
 using namespace std;
 
 class spill_tree_node;
 
 /*build query tree*/
-spill_tree_node * build_query_tree(data_set * train, kd_tree_node * root, vector <int> sub_domain, int a);
+spill_tree_node * build_query_tree(data_set & train, kd_tree_node * root, vector <int> sub_domain, int a);
 
 /*search in query tree and return a vector of vectors*/
-vector_space query_nn_set(vector_space vector_set, data_set * train_set, euclid_vector * test, spill_tree_node * spill_query_root);
+vector <int> query_nn_set(vector <int> domain, data_set * train_set, euclid_vector * test, spill_tree_node * spill_query_root);
 
 spill_tree_node * spill_tree(int c, double a,
         data_set & data);

@@ -1,7 +1,4 @@
-#include "data_set.h"
 #include "nn.h"
-#include "kd_tree.h"
-#include "spill_tree.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -13,7 +10,7 @@ int DATASIZE = 60000;
 data_set train;
 data_set test;
 
-string janet_dir = "/Users/janetzhai/Desktop/KNN/KNN/";
+string janet_dir = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
 string eugene_dir = "data/mnist/";
 
 char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
@@ -64,7 +61,7 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, data_set t
 
 int spill_query_correctness(data_set * train, data_set test, kd_tree_node * root, int a)
 {
-    spill_tree_node * spill_root = build_query_tree(train, root, root->get_domain(), a);
+    spill_tree_node * spill_root = build_query_tree(* train, root, root->get_domain(), a);
     int count_correct = 0;
     for (int i = 0; i < test.size(); i++)
     {
