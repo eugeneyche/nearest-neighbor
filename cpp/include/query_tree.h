@@ -22,7 +22,7 @@ private:
     query_tree_node * _left, 
                     * _right;
     friend query_tree_node * build_tree(double a, kd_tree_node * root,
-            data_set & train);
+            data_set & data);
 public:
     query_tree_node();
     query_tree_node(kd_tree_node * kd_node);
@@ -34,8 +34,6 @@ public:
     query_tree_node * get_left();
     query_tree_node * get_right();
     vector <int> get_domain();
-    friend vector <int> query_nn_set(vector <int> domain, data_set * train_set, 
-            euclid_vector * test, query_tree_node * query_query_root);
 };
 
 #endif

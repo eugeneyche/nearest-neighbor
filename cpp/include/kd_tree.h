@@ -42,8 +42,7 @@ public:
     kd_tree_node * get_left();
     kd_tree_node * get_right();
     vector<int> get_domain();
-    friend kd_tree_node * search(euclid_vector * test, kd_tree_node * node);
-    friend vector<int> kd_subdomain(euclid_vector * test, kd_tree_node * root);
+    friend vector<int> kd_subdomain(euclid_vector * query, kd_tree_node * root);
     friend void save_kd_tree(kd_tree_node * tree, FILE * out);
     friend kd_tree_node * load_kd_tree(FILE * in);
     friend class data_set;
