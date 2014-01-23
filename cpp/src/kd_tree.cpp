@@ -42,13 +42,21 @@ kd_tree_node * build_tree(int c, double a,
         values.push_back((*subset[i])[mx_var_index]);
     }
     double pivot = selector(values, (int)(values.size() * (0.5)));
-    double pivot_l = (a <= 0) ? selector(values, (int)(values.size() * (0.5 - a))) : pivot;
-    double pivot_r = (a <= 0) ? selector(values, (int)(values.size() * (0.5 + a))) : pivot;
+    double pivot_l, pivot_r;
+    if (a > 0)
+    {
+        pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
+        pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
+        #ifdef DEBUG
+        cerr << "[DEBUG: pivot_l: " << pivot_l << " pivot: " << pivot
+             << " pivot_r: " << pivot_r << "]" << endl;
+        #endif
+    }
     vector <int> l_subdomain;
     vector <int> r_subdomain;
     for (int i = 0; i < subdomain.size(); i++)
     {
-        if (pivot_l < values[i] && values[i] <= pivot_r)
+        if (a > 0 && pivot_l < values[i] && values[i] <= pivot_r)
         {
             l_subdomain.push_back(subdomain[i]);
             r_subdomain.push_back(subdomain[i]);
@@ -147,9 +155,6 @@ kd_tree_node::kd_tree_node(vector <int> subdomain)
 kd_tree_node::kd_tree_node(int index, double pivot, vector<int> subdomain)
 {
     _index = index;
-    #ifdef DEBUG
-    cerr << "[DEBUG: Index value" << _index << "]" << endl;
-    #endif
     _pivot = pivot;
     _domain = subdomain;
     _left = NULL;

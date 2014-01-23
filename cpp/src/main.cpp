@@ -21,6 +21,8 @@ void tc_save_kd_tree(const char * file_path);
 void tc_load_kd_tree(const char * file_path);
 void tc_kd_tree_k_nn_error(const char * file_path);
 void tc_kd_tree_true_nn(const char * file_path);
+void tc_save_spill_tree(const char * file_path, double a);
+void tc_load_spill_tree(const char * file_path);
 
 int main() {
     string path = eugene_dir;
@@ -34,7 +36,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    tc_kd_tree_true_nn("tree");
+    tc_save_spill_tree("spill_tree_0.015", 0.015);
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -177,7 +179,24 @@ void tc_kd_tree_true_nn(const char * file_path)
     fclose(input);
 }
 
+void tc_save_spill_tree(const char * file_path, double a)
+{
+    FILE * output = fopen(file_path, "wb");
+    kd_tree_node * root = spill_tree((int)(train.size() * 0.05), a ,train);
+    print_kd_tree(root);
+    save_kd_tree(root, output);
+    delete root;
+    fclose(output);
+}
 
+void tc_load_spill_tree(const char * file_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root = load_kd_tree(input);
+    print_kd_tree(root);
+    delete root;
+    fclose(input);
+}
 
 
 
