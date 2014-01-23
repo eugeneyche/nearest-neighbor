@@ -3,42 +3,41 @@
 #include <time.h>
 using namespace std;
 
-euclid_vector * nn(euclid_vector * test, data_set & train_set)
+euclid_vector * nn(euclid_vector * query, data_set & data)
 {
     euclid_vector * mn = NULL;
     double mn_dist = 0;
     double l_dist = 0;
-    for (int i = 0; i < train_set.size(); i++)
+    for (int i = 0; i < data.size(); i++)
     {
-        l_dist = distance_to(*test, *train_set[i]);
+        l_dist = distance_to(*query, *data[i]);
         if (mn == NULL || l_dist < mn_dist)
         {
             mn_dist = l_dist;
-            mn = train_set[i];
+            mn = data[i];
         }
     }
     return mn;
 }
 
-
-data_set k_nn(euclid_vector * test, data_set & train_st, double k)
+data_set k_nn(int k, euclid_vector * query, data_set & data)
 {
     map <euclid_vector * , double> dist_mp;
     vector <double> dist_vtr; 
-    for (int i = 0; i < train_st.size(); i++)
+    for (int i = 0; i < data.size(); i++)
     {
-        double dist = distance_to(*test, *(train_st[i]));
-        dist_mp[train_st[i]] = dist;
+        double dist = distance_to(*query, *(data[i]));
+        dist_mp[data[i]] = dist;
         dist_vtr.push_back(dist);
     }
     double k_dist = selector(dist_vtr, k);
     vector <int> domain;
-    for (int i = 0; domain.size() < k && i < train_st.size(); i++)
+    for (int i = 0; domain.size() < k && i < data.size(); i++)
     {
-        if (dist_mp[train_st[i]] <= k_dist)
+        if (dist_mp[data[i]] <= k_dist)
         {
             vector <int>::iterator itr = domain.begin();
-            while (itr != domain.end() && dist_mp[train_st[*itr]] < dist_mp[train_st[i]])
+            while (itr != domain.end() && dist_mp[data[*itr]] < dist_mp[data[i]])
             {
                 itr++;
             }
@@ -48,47 +47,51 @@ data_set k_nn(euclid_vector * test, data_set & train_st, double k)
                 domain.push_back(i);
         }
     }
-    train_st.subset(domain);
-    return data_set();
+    return data.subset(domain);
 }
 
-/* return the nearest neighbor that is generated from kd-tree */
-euclid_vector * kd_tree_nn(euclid_vector * test, data_set & train_set, int c, kd_tree_node * root)
-{
-    data_set train = train_set.subset(sub_domain(test, root));
-    return nn(test, train);
-}
-
-
-/* return the data_set of all vector within c*distance of the query */
-data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * nn, double c)
+data_set c_approx_nn(double c, euclid_vector * query, data_set & data, euclid_vector * nn)
 {
     map <euclid_vector * , double> dist_mp;
-    for (int i = 0; i < train_st.size(); i++)
+    for (int i = 0; i < data.size(); i++)
     {
-        double dist = distance_to(*test, *(train_st[i]));
-        dist_mp[train_st[i]] = dist;
+        double dist = distance_to(*query, *(data[i]));
+        dist_mp[data[i]] = dist;
     }
-    double dist = distance_to(*test, *nn);
+    double dist = distance_to(*query, *nn);
     double c_distance = c * dist;
     vector <int> domain;
-    for (int i = 0; i < train_st.size(); i++)
+    for (int i = 0; i < data.size(); i++)
     {
-        if (dist_mp[train_st[i]] <= c_distance)
+        if (dist_mp[data[i]] <= c_distance)
         {
             domain.push_back(i);
         }
     }
-    data_set c_approx = train_st.subset(domain);
+    data_set c_approx = data.subset(domain);
     return c_approx;
 }
 
-
-/* return the nearest neighbor that is generated from kd-tree by query the query */
-euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, query_tree_node * query_root)
+euclid_vector * kd_tree_nn(euclid_vector * query, data_set & data, kd_tree_node * root)
 {
-    vector <int> new_domain;
-    vector <int> domain = query_nn_set(new_domain, train, test, query_root);
-    data_set set = train->subset(domain);
-    return nn(test, set);
+    data_set subset = data.subset(kd_subdomain(query, root));
+    return nn(query, subset);
+}
+
+data_set kd_tree_k_nn(int k, euclid_vector * query, data_set & data, kd_tree_node * root)
+{
+    data_set subset = data.subset(kd_subdomain(query, root));
+    return k_nn(k, query, subset);
+}
+
+euclid_vector * query_tree_nn(euclid_vector * query, data_set & data, query_tree_node * root)
+{
+    data_set subset = data.subset(query_subdomain(query, root));
+    return nn(query, subset);
+}
+
+data_set query_tree_k_nn(int k, euclid_vector * query, data_set & data, query_tree_node * root)
+{
+    data_set subset = data.subset(query_subdomain(query, root));
+    return k_nn(k, query, subset);
 }

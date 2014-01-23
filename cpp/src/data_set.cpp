@@ -59,8 +59,7 @@ int max_variance_index(int k, data_set & sub)
     return maxIndex;
 }
 
-
-
+/* Class Definition */
 
 data_set::data_set(data_set & parent, vector <int> domain)
 {
@@ -104,6 +103,9 @@ data_set::~data_set()
         }
         delete _labels;
         delete _vectors;
+        #ifdef DEBUG
+        cerr << "[DEBUG: Deconstructing data_set]" << endl;
+        #endif
     }
 }
 

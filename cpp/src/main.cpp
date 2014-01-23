@@ -1,28 +1,170 @@
 #include "nn.h"
+#include "prettyprint.h"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <ctime>
+#include <cmath>
 using namespace std;
 
-int DATASIZE = 60000;
 data_set train;
 data_set test;
 
 string janet_dir = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
 string eugene_dir = "data/mnist/";
 
-char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
+void tc_knn_error();
+void tc_knn_purity();
+void tc_c_approx_nn();
+void tc_save_kd_tree(const char * file_path);
+void tc_load_kd_tree(const char * file_path);
+void tc_kd_tree_k_nn_error(const char * file_path);
 
-void printGlyph(euclid_vector * to_print)
+int main() {
+    string path = eugene_dir;
+    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
+    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
+    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
+    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
+
+    load(train, train_vtrs);
+    label(train, train_labels);
+    load(test, test_vtrs);
+    label(test, test_labels);
+
+    tc_kd_tree_k_nn_error("tree");
+
+    fclose(train_vtrs);
+    fclose(train_labels);
+    fclose(test_vtrs);
+    fclose(test_labels);
+}
+
+void tc_knn_error()
 {
-    for (int i = 0; i < 28 * 28; i++) {
-        printf("%c", gradient[(int)((*to_print)[i] / 255 * 10)]);
-        if (i % 28 == 27) printf("\n");
+    int count [100] = {0};
+    for (int i = 0; i < test.size(); i++)
+    {
+        data_set mn_nn = k_nn(100, test[i], train);
+        for (int j = 0; j < mn_nn.size(); j++)
+        {
+            if (mn_nn.get_label(j) == test.get_label(i))
+            {
+                count[j]++;
+            }
+        }
+    }
+    for (int i = 0; i < 100; i++)
+    {
+        if (i > 0) printf(" ");
+        printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
     }
 }
 
+void tc_knn_purity()
+{
+    int count [20] = {};
+    for (int i = 1; i <= test.size(); i++)
+    {
+        data_set mn_nn = k_nn(20, test[i], train);
+        for (int j = 0; j < mn_nn.size(); j++)
+        {
+            if (mn_nn.get_label(j) != test.get_label(i))
+                break;
+            count[j]++;
+        }
+    }
+    for (int i = 0; i < 20; i++)
+    {
+        printf("%10d%10lf\n", i + 1, count[i] / round(test.size()));
+    }
+}
+
+void tc_c_approx_nn()
+{
+    int size = test.size();
+    int fraction[] = {0};
+    double c[6] = {1.0,1.2,1.4,1.6,1.8,2.0};
+    double fraction_avg[6] = {0.0};
+    for (int k = 0; k < 6; k++)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            euclid_vector * i_nn = nn(test[i], train);
+            data_set c_nn = c_approx_nn(c[k], test[i], train, i_nn);
+            for (int j = 0; j < c_nn.size(); j++)
+            {
+                if (c_nn.get_label(j) == test.get_label(i))
+                {
+                    fraction[i]++;
+                }
+            }
+            fraction[i] = fraction[i] / c_nn.size();
+            fraction_avg[k] += fraction[i];
+        }
+        fraction_avg[k] = fraction_avg[k] / size;
+        /* TODO: make into .dat format? */
+        cout<<c[k]<<"   "<<fraction_avg[k]<<endl;
+    }
+}
+
+void tc_save_kd_tree(const char * file_path)
+{
+    FILE * output = fopen(file_path, "wb");
+    kd_tree_node * root = kd_tree((int)(train.size() * 0.05) ,train);
+    print_kd_tree(root);
+    save_kd_tree(root, output);
+    delete root;
+    fclose(output);
+}
+
+void tc_load_kd_tree(const char * file_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root = load_kd_tree(input);
+    print_kd_tree(root);
+    delete root;
+    fclose(input);
+}
+
+void tc_kd_tree_k_nn_error(const char * file_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    int count [100] = {0};
+    for (int i = 0; i < test.size(); i++)
+    {
+        data_set mn_nn = kd_tree_k_nn(100, test[i], train, root);
+        for (int j = 0; j < mn_nn.size(); j++)
+        {
+            #ifdef DEBUG
+            cerr << "[DEBUG: tc " << i << ":" << j << " | " <<  test.get_label(i) 
+                 << " -> " << mn_nn.get_label(j) << "]" << endl;
+            #endif
+            if (mn_nn.get_label(j) == test.get_label(i))
+            {
+                count[j]++;
+            }
+        }
+    }
+    for (int i = 0; i < 100; i++)
+    {
+        if (i > 0) printf(" ");
+        printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
+    }
+    fclose(input);
+}
+
+
+
+
+
+
+
+
+/* TODO: implement into tc format
 void generate_kd_tree(string input_file_name, data_set train)
 {
     clock_t start, end;
@@ -61,7 +203,7 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, data_set t
 
 int spill_query_correctness(data_set * train, data_set test, kd_tree_node * root, int a)
 {
-    query_tree_node * spill_root = build_query_tree(* train, root, root->get_domain(), a);
+    query_tree_node * spill_root = build_query_tree(* train, root, root->get_domain());
     int count_correct = 0;
     for (int i = 0; i < test.size(); i++)
     {
@@ -96,24 +238,4 @@ void c_appr_nn(int size, int c_size, double c[], double fraction_avg[])
         cout<<c[k]<<"   "<<fraction_avg[k]<<endl;
     }
 }
-
-
-int main() {
-    string path = eugene_dir;
-    FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
-    FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
-    FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
-    FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
-
-    load(train, train_vtrs);
-    label(train, train_labels);
-    load(test, test_vtrs);
-    label(test, test_labels);
-
-    generate_kd_tree("tree", train);
-
-    fclose(train_vtrs);
-    fclose(train_labels);
-    fclose(test_vtrs);
-    fclose(test_labels);
-}
+*/

@@ -15,7 +15,6 @@ double distance_to( euclid_vector & v1, euclid_vector & v2)
     return distance;
 }
 
-/* gets the kth smallest values */
 double selector(vector<double> s, int k)
 {
 	srand(int(time(NULL))); //random seed
@@ -42,7 +41,7 @@ double selector(vector<double> s, int k)
     
     /* three conditions */
 	if (left.size() >= k)
-    {// the kth smallest on the left
+    { // the kth smallest on the left
 		return selector(left, k);
 	}
 	else if(left.size()+v.size() >= k)

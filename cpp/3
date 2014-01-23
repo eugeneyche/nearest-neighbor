@@ -1,0 +1,37 @@
+#ifndef _QUERY_TREE_H
+#define _QUERY_TREE_H
+
+#include "kd_tree.h"
+#include <stack>
+using namespace std;
+
+class query_tree_node;
+
+/*search in query tree and return a vector of vectors*/
+vector <int> query_nn_set(vector <int> domain, data_set * train_set, euclid_vector * test, query_tree_node * query_query_root);
+
+class query_tree_node
+{
+private:
+    kd_tree_node * kd_node;
+    double pivot_l, pivot_r;
+    query_tree_node * left, * right;
+    vector <int> domain;
+    friend query_tree_node * build_query_tree(data_set & train, 
+            kd_tree_node * root, vector <int> subdomain, int a);
+public:
+    query_tree_node();
+    query_tree_node(vector <int> subdomain);
+    query_tree_node(int index, double pivot_l, double pivot, double pivot_r, vector <int> subdomain);
+    ~query_tree_node();
+    int get_index();
+    bool in_range(euclid_vector * query);
+    double get_pivot();
+    query_tree_node * get_left();
+    query_tree_node * get_right();
+    vector <int> get_domain();
+    friend vector <int> query_nn_set(vector <int> domain, data_set * train_set, 
+            euclid_vector * test, query_tree_node * query_query_root);
+};
+
+#endif

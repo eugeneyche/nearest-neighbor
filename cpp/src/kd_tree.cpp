@@ -1,56 +1,67 @@
 #include "kd_tree.h"
 
-void print_tree(kd_tree_node * m_node, int depth)
+vector <int> kd_subdomain(euclid_vector * query, kd_tree_node * root)
 {
-    if (m_node == NULL)
-        return;
-    for (int i = 0; i < depth; i++)
+    stack <kd_tree_node *> to_explore;
+    to_explore.push(root);
+    while (!to_explore.empty())
     {
-        cout << " ";
+        kd_tree_node * cur = to_explore.top();
+        to_explore.pop();
+        if (cur->get_left() && cur->get_right())
+        {
+            if ((*query)[cur->get_index()] <= cur->get_pivot())
+                to_explore.push(cur->get_left());
+            else
+                to_explore.push(cur->get_right());
+        }
+        else
+        {
+            return cur->get_domain();
+        }
     }
-    cout << m_node->index << " : ";
-    cout << m_node->domain.size();
-    cout << endl;
-    print_tree(m_node->left, depth + 1); 
-    print_tree(m_node->right, depth + 1);
+    return vector <int> ();
 }
 
 kd_tree_node * build_tree(int c, double a, 
-        data_set & data, vector <int> sub_domain)
+        data_set & data, vector <int> subdomain)
 {
     #ifdef DEBUG
-    cerr << "[DEBUG: Building kd-tree of size " << sub_domain.size() << "]" << endl;
+    cerr << "[DEBUG: Building kd-tree of size " << subdomain.size() << "]" << endl;
     #endif
-    if (sub_domain.size() < c)
-        return new kd_tree_node(sub_domain);
-    data_set subset = data.subset(sub_domain);
-    int mx_var_index = max_variance_index((int)sub_domain.size() / 2, subset);
+    if (subdomain.size() < c)
+        return new kd_tree_node(subdomain);
+    data_set subset = data.subset(subdomain);
+    int mx_var_index = max_variance_index((int)subdomain.size() / 2, subset);
+    #ifdef DEBUG
+    cerr << "[DEBUG: Max variance index: " << mx_var_index << "]" << endl;
+    #endif
     vector <double> values;
-    for (int i = 0; i < sub_domain.size(); i++)
+    for (int i = 0; i < subdomain.size(); i++)
     {
         values.push_back((*subset[i])[mx_var_index]);
     }
     double pivot = selector(values, (int)(values.size() * (0.5)));
     double pivot_l = (a <= 0) ? selector(values, (int)(values.size() * (0.5 - a))) : pivot;
     double pivot_r = (a <= 0) ? selector(values, (int)(values.size() * (0.5 + a))) : pivot;
-    vector <int> l_sub_domain;
-    vector <int> r_sub_domain;
-    for (int i = 0; i < sub_domain.size(); i++)
+    vector <int> l_subdomain;
+    vector <int> r_subdomain;
+    for (int i = 0; i < subdomain.size(); i++)
     {
         if (pivot_l < values[i] && values[i] <= pivot_r)
         {
-            l_sub_domain.push_back(sub_domain[i]);
-            r_sub_domain.push_back(sub_domain[i]);
+            l_subdomain.push_back(subdomain[i]);
+            r_subdomain.push_back(subdomain[i]);
             continue;
         }
         if (values[i] <= pivot)
-            l_sub_domain.push_back(sub_domain[i]);
+            l_subdomain.push_back(subdomain[i]);
         else
-            r_sub_domain.push_back(sub_domain[i]);
+            r_subdomain.push_back(subdomain[i]);
     }
-    kd_tree_node * result = new kd_tree_node(mx_var_index, pivot, sub_domain);
-    result->left = build_tree(c, a, data, l_sub_domain);
-    result->right = build_tree(c, a, data, r_sub_domain);
+    kd_tree_node * result = new kd_tree_node(mx_var_index, pivot, subdomain);
+    result->_left = build_tree(c, a, data, l_subdomain);
+    result->_right = build_tree(c, a, data, r_subdomain);
     return result;
 }
 
@@ -64,8 +75,7 @@ kd_tree_node * spill_tree(int c, double a, data_set & data)
     return build_tree(c, a, data, data.get_domain());
 }
 
-/* saves the tree */
-void save_tree(kd_tree_node * tree, FILE * out)
+void save_kd_tree(kd_tree_node * tree, FILE * out)
 {
     stack <kd_tree_node *> to_build;
     to_build.push(tree);
@@ -77,23 +87,21 @@ void save_tree(kd_tree_node * tree, FILE * out)
         fwrite(&exists, sizeof(bool), 1, out); 
         if (exists)
         {
-            fwrite(&curr->index, sizeof(int), 1, out); 
-            fwrite(&curr->pivot, sizeof(double), 1, out); 
-            size_t sz = curr->domain.size();
+            fwrite(&curr->_index, sizeof(int), 1, out); 
+            fwrite(&curr->_pivot, sizeof(double), 1, out); 
+            size_t sz = curr->_domain.size();
             fwrite(&sz, sizeof(size_t), 1, out); 
             #ifdef DEBUG
-            cerr << "[DEBUG: Saving node w/ pivot " << curr->pivot << " & size " << sz <<  "]" << endl;
+            cerr << "[DEBUG: Saving node w/ pivot " << curr->_pivot << " and size " << sz <<  "]" << endl;
             #endif
-            fwrite(&curr->domain[0], sizeof(int), curr->domain.size(), out);
-            to_build.push(curr->right);
-            to_build.push(curr->left);
+            fwrite(&curr->_domain[0], sizeof(int), curr->_domain.size(), out);
+            to_build.push(curr->_right);
+            to_build.push(curr->_left);
         }
     }
 }
 
-
-/* loads the tree */
-kd_tree_node * load_tree(FILE * in)
+kd_tree_node * load_kd_tree(FILE * in)
 {
     bool exist;
     fread(&exist, sizeof(bool), 1, in);
@@ -102,102 +110,81 @@ kd_tree_node * load_tree(FILE * in)
         return NULL;
     }
     kd_tree_node * res = new kd_tree_node();
-    fread(&res->index, sizeof(int), 1, in);
-    fread(&res->pivot, sizeof(double), 1, in);
+    fread(&res->_index, sizeof(int), 1, in);
+    fread(&res->_pivot, sizeof(double), 1, in);
     size_t sz;
     fread(&sz, sizeof(size_t), 1, in);
-    #ifdef DEBUG
-    cerr << "[DEBUG: Loading node w/ pivot " << res->pivot << " & size " << sz <<  "]" << endl;
-    #endif
     while (sz--)
     {
         int v;
         fread(&v, sizeof(int), 1, in);
-        res->domain.push_back(v);
+        res->_domain.push_back(v);
     }
-    res->left = load_tree(in);
-    res->right = load_tree(in);
+    res->_left = load_kd_tree(in);
+    res->_right = load_kd_tree(in);
     return res;
 }
 
-/* search for the data_set*/
-kd_tree_node * search(euclid_vector * query, kd_tree_node * node)
+/* class definition */
+
+kd_tree_node::kd_tree_node()
 {
-    if (node->left || node->right)
-    {
-        int i = node->get_index();
-        if ((*query)[i] > node->get_pivot() && node->right != NULL)
-            return search(query, node->right);
-        else if ((*query)[i] <= node->get_pivot() && node->left != NULL)
-            return search(query, node->left);
-    }
-    return node;
+    _index = -1;
+    _pivot = -1;
+    _left = NULL;
+    _right = NULL;
 }
 
-/* search for the data_set*/
-vector<int> sub_domain(euclid_vector * test, kd_tree_node * root)
+kd_tree_node::kd_tree_node(vector <int> subdomain)
 {
-    kd_tree_node * leaf = search(test, root);
-    return leaf->domain;
+    _index = -1;
+    _pivot = -1;
+    _domain = subdomain;
+    _left = NULL;
+    _right = NULL;
 }
 
-
-/******* class declaration below *******/
-kd_tree_node::kd_tree_node()//leaf node
+kd_tree_node::kd_tree_node(int index, double pivot, vector<int> subdomain)
 {
-    index = -1;
-    pivot = -1;
-    left = NULL;
-    right = NULL;
-}
-
-kd_tree_node::kd_tree_node(vector<int> sub_domain)//leaf node
-{
-    index = -1;
-    pivot = -1;
-    domain = sub_domain;
-    left = NULL;
-    right = NULL;
-}
-
-kd_tree_node::kd_tree_node(int d, double p, vector<int> sub_domain)//internal node
-{
-    index = d;
-    pivot = p;
-    domain = sub_domain;
-    left = NULL;
-    right = NULL;
+    _index = index;
+    #ifdef DEBUG
+    cerr << "[DEBUG: Index value" << _index << "]" << endl;
+    #endif
+    _pivot = pivot;
+    _domain = subdomain;
+    _left = NULL;
+    _right = NULL;
 }
 
 kd_tree_node::~kd_tree_node()
 {
-    if (left)
-        delete left;
-    if (right)
-        delete right;
+    if (_left)
+        delete _left;
+    if (_right)
+        delete _right;
 }
 
 int kd_tree_node::get_index(){
-    return index;
+    return _index;
 }
 
 double kd_tree_node::get_pivot()
 {
-    return pivot;
+    return _pivot;
 }
 
 vector<int> kd_tree_node::get_domain()
 {
-    return domain;
+    return _domain;
 }
 
 kd_tree_node * kd_tree_node::get_left()
 {
-    return left;
+    return _left;
 }
 
 kd_tree_node * kd_tree_node::get_right()
 {
-    return right;
+    return _right;
 }
 
