@@ -24,7 +24,7 @@ kd_tree_node * build_tree(int c, double a,
     if (sub_domain.size() < c)
         return new kd_tree_node(sub_domain);
     data_set subset = data.subset(sub_domain);
-    int mx_var_index = max_variance_index(sub_domain.size() / 2, subset);
+    int mx_var_index = max_variance_index((int)sub_domain.size() / 2, subset);
     vector <double> values;
     for (int i = 0; i < sub_domain.size(); i++)
     {

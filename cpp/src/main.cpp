@@ -27,7 +27,6 @@ void generate_kd_tree(string input_file_name, data_set train)
 {
     clock_t start, end;
     int c = 0.05 * DATASIZE;
-    int train_size = train.size();
     start = clock();
     kd_tree_node * root = kd_tree(c, train);
     end = clock();
@@ -36,6 +35,7 @@ void generate_kd_tree(string input_file_name, data_set train)
     FILE * kd_tree_out = fopen((janet_dir+input_file_name).c_str(), "wb");
     save_tree(root, kd_tree_out);
     fclose(kd_tree_out);
+    delete root;
 }
 
 
@@ -110,11 +110,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    FILE * input = fopen("tree", "rb");
-    kd_tree_node * tree = load_tree(input);
-    print_tree(tree, 0);
-    delete tree;
-    fclose(input);
+    generate_kd_tree("tree", train);
 
     fclose(train_vtrs);
     fclose(train_labels);
