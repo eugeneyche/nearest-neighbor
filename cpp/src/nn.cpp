@@ -84,11 +84,11 @@ data_set c_approx_nn(euclid_vector * test, data_set & train_st, euclid_vector * 
 }
 
 
-/* return the nearest neighbor that is generated from kd-tree by spill the query */
-euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, spill_tree_node * spill_root)
+/* return the nearest neighbor that is generated from kd-tree by query the query */
+euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, query_tree_node * query_root)
 {
     vector <int> new_domain;
-    vector <int> domain = query_nn_set(new_domain, train, test, spill_root);
+    vector <int> domain = query_nn_set(new_domain, train, test, query_root);
     data_set set = train->subset(domain);
     return nn(test, set);
 }

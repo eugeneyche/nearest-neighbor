@@ -37,6 +37,7 @@ public:
     int get_label(int i);
     int get_label(euclid_vector * vtr);
     vector <int> get_domain();
+    vector <int> get_abs_domain();
     euclid_vector * operator[](int i);
     data_set subset(vector <int> domain);
     friend void load(data_set & st, FILE * in);

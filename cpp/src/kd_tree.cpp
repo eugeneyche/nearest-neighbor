@@ -15,76 +15,52 @@ void print_tree(kd_tree_node * m_node, int depth)
     print_tree(m_node->right, depth + 1);
 }
 
-/* 'c' is the size of the leaf
- * 'i' is the index of the info for each data
- * 'dimension' is the # of entries for each vector
- * 'domain' is the index of the data each leaf will point to
- */
-kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_set & data)
+kd_tree_node * build_tree(int c, double a, 
+        data_set & data, vector <int> sub_domain)
 {
-    vector<int> left_domain;
-    vector<int> right_domain;
-    
-    data_set sub = data.subset(domain);
-    int subsize = sub.size();
-    int k = (int)subsize / 2;
-    vector <double> vtr;
-    for (int j=0; j<subsize; j++)
+    cout << sub_domain.size() << endl;
+    if (sub_domain.size() < c)
+        return new kd_tree_node(sub_domain);
+    data_set subset = data.subset(sub_domain);
+    int mx_var_index = max_variance_index(sub_domain.size() / 2, subset);
+    vector <double> values;
+    for (int i = 0; i < sub_domain.size(); i++)
     {
-        vtr.push_back((*sub[j])[i]);
+        values.push_back((*subset[i])[mx_var_index]);
     }
-    double median;
-    median = selector(vtr,k);
-    
-    kd_tree_node * internal_node = new kd_tree_node(i,median, domain);
-
-    for (int j=0; j < subsize; j++)
+    double pivot = selector(values, (int)(values.size() * (0.5)));
+    double pivot_l = (a <= 0) ? selector(values, (int)(values.size() * (0.5 - a))) : pivot;
+    double pivot_r = (a <= 0) ? selector(values, (int)(values.size() * (0.5 + a))) : pivot;
+    vector <int> l_sub_domain;
+    vector <int> r_sub_domain;
+    for (int i = 0; i < sub_domain.size(); i++)
     {
-        euclid_vector v = *sub[j];
-        if(v[i] <= median)
-            left_domain.push_back(domain[j]);
+        if (pivot_l < values[i] && values[i] <= pivot_r)
+        {
+            l_sub_domain.push_back(sub_domain[i]);
+            r_sub_domain.push_back(sub_domain[i]);
+            continue;
+        }
+        if (values[i] <= pivot)
+            l_sub_domain.push_back(sub_domain[i]);
         else
-            right_domain.push_back(domain[j]);
+            r_sub_domain.push_back(sub_domain[i]);
     }
-    
-    int index = max_variance_index(k, sub);
-    if (left_domain.size() > c){
-        kd_tree_node * left_int = build_tree(c, index, dimension, left_domain, data);
-        internal_node->left = left_int;
-    }
-    else{
-        kd_tree_node * left_leaf = new kd_tree_node(left_domain);
-        internal_node->left = left_leaf;
-    }
-    if (right_domain.size() > c){
-        kd_tree_node * right_int = build_tree(c, index, dimension, right_domain, data);
-        internal_node->right = right_int;
-    }
-    else{
-        kd_tree_node * right_leaf = new kd_tree_node(right_domain);
-        internal_node->right = right_leaf;
-    }
-    return internal_node;
+    kd_tree_node * result = new kd_tree_node(mx_var_index, pivot, sub_domain);
+    result->left = build_tree(c, a, data, l_sub_domain);
+    result->right = build_tree(c, a, data, r_sub_domain);
+    return result;
 }
 
-
-/* build kd_tree
- * return the root
- */
-kd_tree_node * kd_tree_root(int c, data_set & data, int size)
+kd_tree_node * kd_tree(int c, data_set & data)
 {
-    vector<int> domain;
-    for (int i = 0; i < size; i++)
-    {
-        domain.push_back(i);
-    }
-    int dimension = (int)data[0]->size();
-    int k = (int)size/2;
-    int index = max_variance_index(k, data);
-    kd_tree_node * root = build_tree(c, index, dimension, domain, data);
-    return root;
+    return build_tree(c, 0, data, data.get_domain());
 }
 
+kd_tree_node * spill_tree(int c, double a, data_set & data)
+{
+    return build_tree(c, a, data, data.get_domain());
+}
 
 /* saves the tree */
 void save_tree(kd_tree_node * tree, FILE * out)

@@ -9,10 +9,10 @@ class kd_tree_node;
 
 void print_tree(kd_tree_node * m_node, int depth);
 
-/* build tree, called in kd_tree */
-kd_tree_node * build_tree(int c, int i, int dimension, vector<int> domain, data_set & data); 
+kd_tree_node * kd_tree(int c, data_set & data);
+kd_tree_node * spill_tree(int c, double a, data_set & data);
 /* return root node */
-kd_tree_node * kd_tree_root(int c, data_set & data, int size);
+/* kd_tree_node * kd_tree_root(int c, data_set & data, int size); */
 /* search leaf */
 kd_tree_node * search(euclid_vector * test, kd_tree_node * node);
 /* gets the subdomain of a given subtree */
@@ -33,11 +33,13 @@ private:
     vector<int> domain;
     kd_tree_node * left;
     kd_tree_node * right;
+    friend kd_tree_node * build_tree(int c, double a, 
+            data_set & data, vector <int> sub_domain);
     
 public:
     kd_tree_node();
     kd_tree_node(int d, double p, vector<int> sub_domain);
-    kd_tree_node(vector <int> domain);
+    kd_tree_node(vector <int> sub_domain);
     ~kd_tree_node();
     int get_index();
     double get_pivot();

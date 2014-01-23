@@ -1,4 +1,4 @@
-#include "spill_tree.h"
+#include "query_tree.h"
 #include <vector>
 #include <map>
 
@@ -16,4 +16,4 @@ euclid_vector * kd_tree_nn(euclid_vector * query, data_set & train_set, int c, k
 /* return the data_set of all vector within c*distance of the query */
 data_set c_approx_nn(euclid_vector * query, data_set & train_st, euclid_vector * nn, double c);
 
-euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, spill_tree_node * root);
+euclid_vector * spill_query_nn(euclid_vector * test, data_set * train, query_tree_node * root);

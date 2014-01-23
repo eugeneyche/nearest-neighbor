@@ -29,7 +29,7 @@ void generate_kd_tree(string input_file_name, data_set train)
     int c = 0.05 * DATASIZE;
     int train_size = train.size();
     start = clock();
-    kd_tree_node * root = kd_tree_root(c, train, train_size);
+    kd_tree_node * root = kd_tree(c, train);
     end = clock();
     double time = double(end - start) / CLOCKS_PER_SEC;
     cout << time << endl;
@@ -61,7 +61,7 @@ int kd_tree_count(int c, int count_correct, int size, data_set train, data_set t
 
 int spill_query_correctness(data_set * train, data_set test, kd_tree_node * root, int a)
 {
-    spill_tree_node * spill_root = build_query_tree(* train, root, root->get_domain(), a);
+    query_tree_node * spill_root = build_query_tree(* train, root, root->get_domain(), a);
     int count_correct = 0;
     for (int i = 0; i < test.size(); i++)
     {
@@ -99,7 +99,7 @@ void c_appr_nn(int size, int c_size, double c[], double fraction_avg[])
 
 
 int main() {
-    string path = janet_dir;
+    string path = eugene_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -109,42 +109,19 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
+    vector <int> domain;
+    for (int i = 0; i < 1000; i++)
+    {
+        domain.push_back(i);
+    }
 
-    //genearte kd-tree and save it to file name "tree"
-    generate_kd_tree("tree", train);
-    
-    
-    /*
-    //read kd-tree from file "tree"
-    FILE * input = fopen("tree", "rb");
-    kd_tree_node * root = load_tree(input);
-    cout << "Done loading tree" << endl;
-    fclose(input);
-    
-    //kd-tree NN
-    int count_correct = 0;
-    count_correct = kd_tree_count(c, count_correct, test.size(), train, root);
-    float rate = (float)count_correct / test.size();
-    cout << " There are " << rate << "% correct labels" << endl;
-    
-    //c-approximate NN
-    int c_size = 6; //6 different c
-    double c[c_size] = {1.0,1.2,1.4,1.6,1.8,2.0};
-    double fraction_avg[c_size] = {0.0};
-    c_appr_nn(test.size(), c_size, c[], fraction_avg[])
-     
-    //spill_query NN
-     int count_correct = 0;
-     int a_size = 6; //6 different c
-     double a[a_size] = {1.0,1.2,1.4,1.6,1.8,2.0};
-     for (int i = 0; i < a_size; i++)
-     {
-        count_correct = spill_query_correctness(train, test, root, a[i]);
-        float rate = (float)count_correct / test.size();
-        cout << a[i] << "   " << rate << endl;
-     }
-     */
+    data_set sbst = train.subset(domain);
+    cout << "b4 build" << endl;
+    kd_tree_node * tree = kd_tree(100, sbst);
+    cout << "aft build" << endl;
+    print_tree(tree, 0);
 
+    delete tree;
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);

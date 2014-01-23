@@ -35,6 +35,7 @@ int max_variance_index(int k, data_set & sub)
     int subsize = sub.size();
     for (int i = 0; i < dimension; i++)
     {
+        vtr.clear();
         for (int j = 0; j < subsize; j++)
         {
             vtr.push_back((*sub[j])[i]);
@@ -132,6 +133,16 @@ int data_set::get_label(euclid_vector * vtr)
 }
 
 vector <int> data_set::get_domain()
+{
+    vector <int> domain;
+    for (int i = 0; i < _domain.size(); i++)
+    {
+        domain.push_back(i);
+    }
+    return domain;
+}
+
+vector <int> data_set::get_abs_domain()
 {
     vector <int> domain;
     for (int i = 0; i < _domain.size(); i++)
