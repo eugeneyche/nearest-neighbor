@@ -81,6 +81,9 @@ void save_tree(kd_tree_node * tree, FILE * out)
             fwrite(&curr->pivot, sizeof(double), 1, out); 
             size_t sz = curr->domain.size();
             fwrite(&sz, sizeof(size_t), 1, out); 
+            #ifdef DEBUG
+            cerr << "[DEBUG: Saving node w/ pivot " << curr->pivot << " & size " << sz <<  "]" << endl;
+            #endif
             fwrite(&curr->domain[0], sizeof(int), curr->domain.size(), out);
             to_build.push(curr->right);
             to_build.push(curr->left);
@@ -103,6 +106,9 @@ kd_tree_node * load_tree(FILE * in)
     fread(&res->pivot, sizeof(double), 1, in);
     size_t sz;
     fread(&sz, sizeof(size_t), 1, in);
+    #ifdef DEBUG
+    cerr << "[DEBUG: Loading node w/ pivot " << res->pivot << " & size " << sz <<  "]" << endl;
+    #endif
     while (sz--)
     {
         int v;

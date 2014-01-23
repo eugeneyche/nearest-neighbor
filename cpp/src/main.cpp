@@ -105,15 +105,16 @@ int main() {
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
     FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
 
-    FILE * output = fopen("tree", "wb");
     load(train, train_vtrs);
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
 
-    kd_tree_node * tree = kd_tree(0.05 * train.size(), train);
-    save_tree(tree, output);
+    FILE * input = fopen("tree", "rb");
+    kd_tree_node * tree = load_tree(input);
+    print_tree(tree, 0);
     delete tree;
+    fclose(input);
 
     fclose(train_vtrs);
     fclose(train_labels);
