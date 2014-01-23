@@ -11,8 +11,6 @@ void print_tree(kd_tree_node * m_node, int depth);
 
 kd_tree_node * kd_tree(int c, data_set & data);
 kd_tree_node * spill_tree(int c, double a, data_set & data);
-/* return root node */
-/* kd_tree_node * kd_tree_root(int c, data_set & data, int size); */
 /* search leaf */
 kd_tree_node * search(euclid_vector * test, kd_tree_node * node);
 /* gets the subdomain of a given subtree */

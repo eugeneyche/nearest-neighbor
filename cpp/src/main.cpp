@@ -27,7 +27,6 @@ void generate_kd_tree(string input_file_name, data_set train)
 {
     clock_t start, end;
     int c = 0.05 * DATASIZE;
-    int train_size = train.size();
     start = clock();
     kd_tree_node * root = kd_tree(c, train);
     end = clock();
@@ -36,6 +35,7 @@ void generate_kd_tree(string input_file_name, data_set train)
     FILE * kd_tree_out = fopen((janet_dir+input_file_name).c_str(), "wb");
     save_tree(root, kd_tree_out);
     fclose(kd_tree_out);
+    delete root;
 }
 
 
@@ -99,21 +99,18 @@ void c_appr_nn(int size, int c_size, double c[], double fraction_avg[])
 
 
 int main() {
-    string path = eugene_dir;
+    string path = janet_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
     FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
 
-    FILE * output = fopen("tree", "wb");
     load(train, train_vtrs);
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
 
-    kd_tree_node * tree = kd_tree(0.05 * train.size(), train);
-    save_tree(tree, output);
-    delete tree;
+    generate_kd_tree("tree", train);
 
     fclose(train_vtrs);
     fclose(train_labels);

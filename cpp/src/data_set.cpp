@@ -10,7 +10,7 @@ void load(data_set & st, FILE * in)
         double buffer [m];
         fread(buffer, sizeof(double), m, in);
         vtr->assign(buffer, buffer + m);
-        st._domain.push_back(st._domain.size());
+        st._domain.push_back((int)st._domain.size());
         st._vectors->push_back(vtr);
     }
 }
@@ -31,7 +31,7 @@ int max_variance_index(int k, data_set & sub)
 {
     vector <double> var;
     vector <double> vtr;
-    int dimension = sub[0]->size();
+    int dimension = (int)sub[0]->size();
     int subsize = sub.size();
     for (int i = 0; i < dimension; i++)
     {
@@ -88,7 +88,7 @@ data_set::data_set(vector_space vectors)
     _vectors = new vector_space;
     for (vector_space::iterator itr = vectors.begin(); itr != vectors.end(); itr++)
     {
-        _domain.push_back(_domain.size());
+        _domain.push_back((int)_domain.size());
         _vectors->push_back(*itr);
     }
 }
@@ -109,7 +109,7 @@ data_set::~data_set()
 
 int data_set::size()
 {
-    return _domain.size();
+    return (int)_domain.size();
 }
 
 void data_set::set_label(int i, int label)
