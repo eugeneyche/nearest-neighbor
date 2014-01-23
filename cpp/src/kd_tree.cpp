@@ -165,7 +165,10 @@ kd_tree_node::kd_tree_node(int d, double p, vector<int> sub_domain)//internal no
 
 kd_tree_node::~kd_tree_node()
 {
-    //destructor
+    if (left)
+        delete left;
+    if (right)
+        delete right;
 }
 
 int kd_tree_node::get_index(){
