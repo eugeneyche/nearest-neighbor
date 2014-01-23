@@ -23,7 +23,7 @@ kd_tree_node * load_kd_tree(FILE * in);
 
 class kd_tree_node
 {
-private:
+protected:
     int _index;
     double _pivot;
     vector<int> _domain;
@@ -31,18 +31,17 @@ private:
                  * _right;
     friend kd_tree_node * build_tree(int c, double a, 
             data_set & data, vector <int> subdomain);
-    
 public:
     kd_tree_node();
     kd_tree_node(vector <int> subdomain);
     kd_tree_node(int d, double p, vector<int> subdomain);
+    kd_tree_node(const kd_tree_node & copy);
     ~kd_tree_node();
-    int get_index();
-    double get_pivot();
-    kd_tree_node * get_left();
-    kd_tree_node * get_right();
-    vector<int> get_domain();
-    friend vector<int> kd_subdomain(euclid_vector * query, kd_tree_node * root);
+    int get_index() const;
+    double get_pivot() const;
+    kd_tree_node * get_left() const;
+    kd_tree_node * get_right() const;
+    vector <int> get_domain() const;
     friend void save_kd_tree(kd_tree_node * tree, FILE * out);
     friend kd_tree_node * load_kd_tree(FILE * in);
     friend class data_set;

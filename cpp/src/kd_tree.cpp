@@ -161,6 +161,15 @@ kd_tree_node::kd_tree_node(int index, double pivot, vector<int> subdomain)
     _right = NULL;
 }
 
+kd_tree_node::kd_tree_node(const kd_tree_node & copy)
+{
+    _index = copy.get_index();
+    _pivot = copy.get_pivot();
+    _domain = copy.get_domain();
+    _left = copy.get_left();
+    _right = copy.get_right();
+}
+
 kd_tree_node::~kd_tree_node()
 {
     if (_left)
@@ -169,26 +178,27 @@ kd_tree_node::~kd_tree_node()
         delete _right;
 }
 
-int kd_tree_node::get_index(){
+int kd_tree_node::get_index() const
+{
     return _index;
 }
 
-double kd_tree_node::get_pivot()
+double kd_tree_node::get_pivot() const
 {
     return _pivot;
 }
 
-vector<int> kd_tree_node::get_domain()
+vector<int> kd_tree_node::get_domain() const
 {
     return _domain;
 }
 
-kd_tree_node * kd_tree_node::get_left()
+kd_tree_node * kd_tree_node::get_left() const
 {
     return _left;
 }
 
-kd_tree_node * kd_tree_node::get_right()
+kd_tree_node * kd_tree_node::get_right() const
 {
     return _right;
 }

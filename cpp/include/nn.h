@@ -1,7 +1,7 @@
+#include "kd_tree.h"
 #include "query_tree.h"
 #include <vector>
 #include <map>
-
 using namespace std;
 
 /* gets nearest neightbor of query */

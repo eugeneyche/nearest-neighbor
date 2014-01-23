@@ -11,10 +11,16 @@ vector <int> query_subdomain(euclid_vector * query, query_tree_node * root)
         to_explore.pop();
         if (cur->get_left() && cur->get_right())
         {
+            #ifdef DEBUG
+            cerr << "[DEBUG: Querying node with index " << cur->get_index() << "]" << endl;
+            #endif
             if (cur->in_range(query))
             {
                 to_explore.push(cur->get_right());
                 to_explore.push(cur->get_left());
+                #ifdef DEBUG
+                cerr << "[DEBUG: Spill at node with index " << cur->get_index() << "]" << endl;
+                #endif
                 continue;
             }
             if ((*query)[cur->get_index()] <= cur->get_pivot())
@@ -46,6 +52,9 @@ query_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
         return NULL;
     if (root->get_left() && root->get_right())
     {
+        #ifdef DEBUG
+        cerr << "[DEBUG: Building query-tree index " << root->get_index() << "]" << endl;
+        #endif
         vector <double> values;
         vector <int> subdomain = root->get_domain();
         int mx_var_index = root->get_index();
@@ -56,7 +65,9 @@ query_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
         }
         pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
         pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
-
+        #ifdef DEBUG
+        cerr << "[DEBUG: pivot_l: " << pivot_l << " pivot_r: " << pivot_r << "]" << endl;
+        #endif
         query_tree_node * res = new query_tree_node(root, pivot_l, pivot_r);
         res->_left = build_tree(a, root->get_left(), data);
         res->_right = build_tree(a, root->get_right(), data);
@@ -72,61 +83,49 @@ query_tree_node * query_tree(double a, kd_tree_node * root, data_set & data)
 
 /* class definition */
 
-query_tree_node::query_tree_node()
+query_tree_node::query_tree_node() : kd_tree_node()
 {
-    _kd_node = NULL;
     _pivot_l = _pivot_r = -1;
     _left = _right = NULL;
 }
 
-query_tree_node::query_tree_node(kd_tree_node * kd_node)
+query_tree_node::query_tree_node(kd_tree_node * kd_node) : kd_tree_node(*kd_node)
 {
-    _kd_node = kd_node;
     _pivot_l = _pivot_r = -1;
     _left = _right = NULL;
 }
 
 query_tree_node::query_tree_node(kd_tree_node * kd_node, double pivot_l, double pivot_r)
+         : kd_tree_node(*kd_node)
 {
-    _kd_node = kd_node;
     _pivot_l = pivot_l;
     _pivot_r = pivot_r;
 }
 
-query_tree_node::~query_tree_node()
+query_tree_node::query_tree_node(const query_tree_node & copy) : kd_tree_node(copy)
 {
-    if (_left)
-        delete _left;
-    if (_right)
-        delete _right;
+    _pivot_l = copy._pivot_l;
+    _pivot_r = copy._pivot_r;
 }
 
-int query_tree_node::get_index()
+query_tree_node::~query_tree_node() 
 {
-    return _kd_node->get_index();
 }
 
-bool query_tree_node::in_range(euclid_vector * query)
+bool query_tree_node::in_range(euclid_vector * query) const
 {
+    #ifdef DEBUG
+    cerr << "[DEBUG: Query with value " << (*query)[get_index()] << ", pivot_l: " << _pivot_l << " pivot_r: " << _pivot_r << "]" << endl;
+    #endif
     return (_pivot_l < (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
 }
 
-double query_tree_node::get_pivot()
+query_tree_node * query_tree_node::get_left() const
 {
-    return _kd_node->get_pivot();
+    return (query_tree_node *)_left;
 }
 
-query_tree_node * query_tree_node::get_left()
+query_tree_node * query_tree_node::get_right() const
 {
-    return _left;
-}
-
-query_tree_node * query_tree_node::get_right()
-{
-    return _right;
-}
-
-vector <int> query_tree_node::get_domain()
-{
-    return _kd_node->get_domain();
+    return (query_tree_node *)_right;
 }

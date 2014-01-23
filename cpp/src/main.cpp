@@ -20,16 +20,12 @@ void tc_k_nn_error();
 void tc_k_nn_purity();
 /* % c[1:2] appromation nearest neighbor */
 void tc_c_approx_nn();
-/* generates and saves/prints kd_tree */
-void tc_save_kd_tree(const char * file_path);
-/* loads and prints kd_tree */
-void tc_load_kd_tree(const char * file_path);
 /* % error for the kth nearest neighbor based on kd_tree [1:100]*/
 void tc_kd_tree_k_nn_error(const char * file_path);
 /* % nearest neighbor based on kd_tree is actual nearest neighbor */
 void tc_kd_tree_true_nn(const char * file_path);
-/* generates and saves/prints spill_tree */
-void tc_save_spill_tree(const char * file_path, double a);
+/* % error for the kth nearest neighbor based on query_tree [1:100]*/
+void tc_query_tree_k_nn_error(double a, const char * file_path);
 
 int main() {
     string path = eugene_dir;
@@ -43,7 +39,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    tc_save_spill_tree("data/mnist/trees/spill_tree_0.2", 0.2);
+    tc_query_tree_k_nn_error(0.1, "data/mnist/trees/kd_tree");
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -118,25 +114,6 @@ void tc_c_approx_nn()
     }
 }
 
-void tc_save_kd_tree(const char * file_path)
-{
-    FILE * output = fopen(file_path, "wb");
-    kd_tree_node * root = kd_tree((int)(train.size() * 0.05) ,train);
-    print_kd_tree(root);
-    save_kd_tree(root, output);
-    delete root;
-    fclose(output);
-}
-
-void tc_load_kd_tree(const char * file_path)
-{
-    FILE * input = fopen(file_path, "rb");
-    kd_tree_node * root = load_kd_tree(input);
-    print_kd_tree(root);
-    delete root;
-    fclose(input);
-}
-
 void tc_kd_tree_k_nn_error(const char * file_path)
 {
     FILE * input = fopen(file_path, "rb");
@@ -163,6 +140,7 @@ void tc_kd_tree_k_nn_error(const char * file_path)
         printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
     }
     fclose(input);
+    delete root;
 }
 
 void tc_kd_tree_true_nn(const char * file_path)
@@ -184,14 +162,36 @@ void tc_kd_tree_true_nn(const char * file_path)
     }
     printf("%10d%10lf\n", 0, count / round(test.size()));
     fclose(input);
+    delete root;
 }
 
-void tc_save_spill_tree(const char * file_path, double a)
+void tc_query_tree_k_nn_error(double a, const char * file_path)
 {
-    FILE * output = fopen(file_path, "wb");
-    kd_tree_node * root = spill_tree((int)(train.size() * 0.05), a ,train);
-    print_kd_tree(root);
-    save_kd_tree(root, output);
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    query_tree_node * q_root = query_tree(a, root, train);
+    int count [100] = {0};
+    for (int i = 0; i < test.size(); i++)
+    {
+        data_set mn_nn = query_tree_k_nn(100, test[i], train, q_root);
+        for (int j = 0; j < mn_nn.size(); j++)
+        {
+            #ifdef DEBUG
+            cerr << "[DEBUG: tc " << i << ":" << j << " | " <<  test.get_label(i) 
+                 << " -> " << mn_nn.get_label(j) << "]" << endl;
+            #endif
+            if (mn_nn.get_label(j) == test.get_label(i))
+            {
+                count[j]++;
+            }
+        }
+    }
+    for (int i = 0; i < 100; i++)
+    {
+        printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
+    }
+    fclose(input);
+    delete q_root;
     delete root;
-    fclose(output);
 }
