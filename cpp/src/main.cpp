@@ -20,6 +20,7 @@ void tc_c_approx_nn();
 void tc_save_kd_tree(const char * file_path);
 void tc_load_kd_tree(const char * file_path);
 void tc_kd_tree_k_nn_error(const char * file_path);
+void tc_kd_tree_true_nn(const char * file_path);
 
 int main() {
     string path = eugene_dir;
@@ -33,7 +34,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    tc_kd_tree_k_nn_error("tree");
+    tc_kd_tree_true_nn("tree");
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -57,7 +58,6 @@ void tc_knn_error()
     }
     for (int i = 0; i < 100; i++)
     {
-        if (i > 0) printf(" ");
         printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
     }
 }
@@ -151,13 +151,31 @@ void tc_kd_tree_k_nn_error(const char * file_path)
     }
     for (int i = 0; i < 100; i++)
     {
-        if (i > 0) printf(" ");
         printf("%10d%10lf\n", i + 1, (test.size() - count[i]) / round(test.size()));
     }
     fclose(input);
 }
 
-
+void tc_kd_tree_true_nn(const char * file_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    int count;
+    for (int i = 0; i < test.size(); i++)
+    {
+        euclid_vector * kd_nn = kd_tree_nn(test[i], train, root);
+        euclid_vector * true_nn = nn(test[i], train);
+        #ifdef DEBUG
+        cerr << "[DEBUG: tc " << i << " | " <<  kd_nn 
+             << " -> " << true_nn << "]" << endl;
+        #endif
+        if (kd_nn == true_nn)
+            count++;
+    }
+    printf("%10d%10lf\n", 0, count / round(test.size()));
+    fclose(input);
+}
 
 
 
