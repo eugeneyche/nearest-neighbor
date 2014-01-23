@@ -104,24 +104,17 @@ int main() {
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
     FILE * test_labels = fopen((path + "test_labels").c_str(), "rb");
+
+    FILE * output = fopen("tree", "wb");
     load(train, train_vtrs);
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
 
-    vector <int> domain;
-    for (int i = 0; i < 1000; i++)
-    {
-        domain.push_back(i);
-    }
-
-    data_set sbst = train.subset(domain);
-    cout << "b4 build" << endl;
-    kd_tree_node * tree = kd_tree(100, sbst);
-    cout << "aft build" << endl;
-    print_tree(tree, 0);
-
+    kd_tree_node * tree = kd_tree(0.05 * train.size(), train);
+    save_tree(tree, output);
     delete tree;
+
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);

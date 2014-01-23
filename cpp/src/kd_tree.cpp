@@ -18,7 +18,9 @@ void print_tree(kd_tree_node * m_node, int depth)
 kd_tree_node * build_tree(int c, double a, 
         data_set & data, vector <int> sub_domain)
 {
-    cout << sub_domain.size() << endl;
+    #ifdef DEBUG
+    cerr << "[DEBUG: Building kd-tree of size " << sub_domain.size() << "]" << endl;
+    #endif
     if (sub_domain.size() < c)
         return new kd_tree_node(sub_domain);
     data_set subset = data.subset(sub_domain);

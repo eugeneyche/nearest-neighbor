@@ -6,7 +6,7 @@ TARGET := bin/main
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -std=c++11
+CFLAGS := -g -std=c++11 -DDEBUG=VERBOSE
 LIB := -L lib
 INC := -I include
 
