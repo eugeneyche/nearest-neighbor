@@ -95,9 +95,9 @@ query_tree_node::query_tree_node(kd_tree_node * kd_node, double pivot_l, double 
 
 query_tree_node::~query_tree_node()
 {
-    if (left)
+    if (_left)
         delete _left;
-    if (right)
+    if (_right)
         delete _right;
 }
 
