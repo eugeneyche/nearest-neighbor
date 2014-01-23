@@ -108,7 +108,7 @@ int query_tree_node::get_index()
 
 bool query_tree_node::in_range(euclid_vector * query)
 {
-    return (_pivot_l <= (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
+    return (_pivot_l < (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
 }
 
 double query_tree_node::get_pivot()

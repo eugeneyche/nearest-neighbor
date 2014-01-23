@@ -14,15 +14,22 @@ data_set test;
 string janet_dir = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
 string eugene_dir = "data/mnist/";
 
-void tc_knn_error();
-void tc_knn_purity();
+/* % error for the kth nearest neighbor [1:100] */
+void tc_k_nn_error();
+/* % purity for the [1:k]th nearest neighbor [1:20] */
+void tc_k_nn_purity();
+/* % c[1:2] appromation nearest neighbor */
 void tc_c_approx_nn();
+/* generates and saves/prints kd_tree */
 void tc_save_kd_tree(const char * file_path);
+/* loads and prints kd_tree */
 void tc_load_kd_tree(const char * file_path);
+/* % error for the kth nearest neighbor based on kd_tree [1:100]*/
 void tc_kd_tree_k_nn_error(const char * file_path);
+/* % nearest neighbor based on kd_tree is actual nearest neighbor */
 void tc_kd_tree_true_nn(const char * file_path);
+/* generates and saves/prints spill_tree */
 void tc_save_spill_tree(const char * file_path, double a);
-void tc_load_spill_tree(const char * file_path);
 
 int main() {
     string path = eugene_dir;
@@ -36,7 +43,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    tc_save_spill_tree("spill_tree_0.015", 0.015);
+    tc_save_spill_tree("data/mnist/trees/spill_tree_0.2", 0.2);
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -44,7 +51,7 @@ int main() {
     fclose(test_labels);
 }
 
-void tc_knn_error()
+void tc_k_nn_error()
 {
     int count [100] = {0};
     for (int i = 0; i < test.size(); i++)
@@ -64,7 +71,7 @@ void tc_knn_error()
     }
 }
 
-void tc_knn_purity()
+void tc_k_nn_purity()
 {
     int count [20] = {};
     for (int i = 1; i <= test.size(); i++)
@@ -188,18 +195,6 @@ void tc_save_spill_tree(const char * file_path, double a)
     delete root;
     fclose(output);
 }
-
-void tc_load_spill_tree(const char * file_path)
-{
-    FILE * input = fopen(file_path, "rb");
-    kd_tree_node * root = load_kd_tree(input);
-    print_kd_tree(root);
-    delete root;
-    fclose(input);
-}
-
-
-
 
 /* TODO: implement into tc format
 void generate_kd_tree(string input_file_name, data_set train)
