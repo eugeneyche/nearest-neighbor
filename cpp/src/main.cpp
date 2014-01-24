@@ -31,10 +31,8 @@ void tc_query_tree_k_nn_error(double a, const char * file_path, const char *outp
 /* % see nearest neighbor based on query_tree is actual nearest neighbor */
 double tc_query_tree_true_nn(double a, const char * file_path, vector<euclid_vector*> true_nn_set);
 
-
-
 int main() {
-    string path = janet_dir;
+    string path = eugene_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -44,18 +42,8 @@ int main() {
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
-    
-    double a[4] = {0.01, 0.05, 0.1, 0.2};
-    vector <euclid_vector *> true_nn_set = true_nn();
-    ofstream file((path+"spill_query_true_nn.dat"));
-    for (int i = 0; i < 4; i++)
-    {
-        for (int i = 0; i < 100; i++)
-        {
-            file << a[i] << "  " << tc_query_tree_true_nn(a[i], (path+"tree").c_str(), true_nn_set) << endl;
-        }
-    //tc_query_tree_k_nn_error(0.1, (path+"tree").c_str(), (path+"query_tree_knn_error.dat").c_str());
-    }
+
+    tc_kd_tree_true_nn("data/mnist/trees/spill_tree_0.05");
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -244,10 +232,10 @@ double tc_query_tree_true_nn(double a, const char * file_path, vector <euclid_ve
     for (int i = 0; i < test.size(); i++)
     {
         euclid_vector * q_nn = query_tree_nn(test[i], train, q_root);
-#ifdef DEBUG
+        #ifdef DEBUG
         cerr << "[DEBUG: tc " << i << " | " <<  q_nn
         << " -> " << true_nn_set[i] << "]" << endl;
-#endif
+        #endif
         if (q_nn == true_nn_set[i])
             count++;
     }
