@@ -46,16 +46,14 @@ int main() {
     label(test, test_labels);
     
     double a[4] = {0.01, 0.05, 0.1, 0.2};
-    vector <euclid_vector *> true_nn_set = true_nn();
-    ofstream file((path+"spill_query_true_nn.dat"));
-    for (int i = 0; i < 4; i++)
+/*  vector <euclid_vector *> true_nn_set = true_nn();
+    ofstream nnfile(path+"nn.dat");
+    for (int i = 0; i < true_nn_set.size(); i++)
     {
-        for (int i = 0; i < 100; i++)
-        {
-            file << a[i] << "  " << tc_query_tree_true_nn(a[i], (path+"tree").c_str(), true_nn_set) << endl;
-        }
-    //tc_query_tree_k_nn_error(0.1, (path+"tree").c_str(), (path+"query_tree_knn_error.dat").c_str());
+        nnfile << true_nn_set[i] << endl;
     }
+*/
+    tc_query_tree_k_nn_error(a[3], (path+"tree").c_str(), (path+"query_tree_0.2_k_nn_error.dat").c_str());
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -70,6 +68,9 @@ vector < euclid_vector *> true_nn()
     vector <euclid_vector *> true_nn_set;
     for (int i = 0; i < test.size(); i++)
     {
+        #ifdef DEBUG
+        cerr << "[DEBUG: tc " << i << "]" << endl;
+        #endif
         true_nn_set.push_back(nn(test[i], train));
     }
     return true_nn_set;
@@ -241,6 +242,7 @@ double tc_query_tree_true_nn(double a, const char * file_path, vector <euclid_ve
     root = load_kd_tree(input);
     query_tree_node * q_root = query_tree(a, root, train);
     int count = 0;
+    cout << test.size() <<endl;
     for (int i = 0; i < test.size(); i++)
     {
         euclid_vector * q_nn = query_tree_nn(test[i], train, q_root);
@@ -254,5 +256,6 @@ double tc_query_tree_true_nn(double a, const char * file_path, vector <euclid_ve
     fclose(input);
     delete q_root;
     delete root;
+    cout << count << endl;
     return count / round(test.size());
 }
