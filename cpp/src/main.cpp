@@ -32,7 +32,7 @@ void tc_query_tree_k_nn_error(double a, const char * file_path, const char *outp
 double tc_query_tree_true_nn(double a, const char * file_path, vector<euclid_vector*> true_nn_set);
 
 int main() {
-    string path = eugene_dir;
+    string path = janet_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -42,8 +42,16 @@ int main() {
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
-
-    tc_kd_tree_true_nn("data/mnist/trees/spill_tree_0.05");
+    
+    double a[4] = {0.01, 0.05, 0.1, 0.2};
+/*  vector <euclid_vector *> true_nn_set = true_nn();
+    ofstream nnfile(path+"nn.dat");
+    for (int i = 0; i < true_nn_set.size(); i++)
+    {
+        nnfile << true_nn_set[i] << endl;
+    }
+*/
+    tc_query_tree_k_nn_error(a[3], (path+"tree").c_str(), (path+"query_tree_0.2_k_nn_error.dat").c_str());
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -58,6 +66,9 @@ vector < euclid_vector *> true_nn()
     vector <euclid_vector *> true_nn_set;
     for (int i = 0; i < test.size(); i++)
     {
+        #ifdef DEBUG
+        cerr << "[DEBUG: tc " << i << "]" << endl;
+        #endif
         true_nn_set.push_back(nn(test[i], train));
     }
     return true_nn_set;
