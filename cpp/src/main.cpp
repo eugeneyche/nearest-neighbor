@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <stack>
 #include <algorithm>
 #include <ctime>
 #include <cmath>
@@ -30,9 +31,11 @@ void tc_kd_tree_true_nn(const char * file_path);
 void tc_query_tree_k_nn_error(double a, const char * file_path, const char *output_path);
 /* % see nearest neighbor based on query_tree is actual nearest neighbor */
 double tc_query_tree_true_nn(double a, const char * file_path, vector<euclid_vector*> true_nn_set);
+/* # of vectors at leaves */
+int tc_spill_tree_leaves(const char * file_path);
 
 int main() {
-    string path = janet_dir;
+    string path = eugene_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -43,15 +46,7 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
     
-    double a[4] = {0.01, 0.05, 0.1, 0.2};
-/*  vector <euclid_vector *> true_nn_set = true_nn();
-    ofstream nnfile(path+"nn.dat");
-    for (int i = 0; i < true_nn_set.size(); i++)
-    {
-        nnfile << true_nn_set[i] << endl;
-    }
-*/
-    tc_query_tree_k_nn_error(a[3], (path+"tree").c_str(), (path+"query_tree_0.2_k_nn_error.dat").c_str());
+    printf("%lf %d\n", 0.2, tc_spill_tree_leaves("data/mnist/trees/spill_tree_0.2"));
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -254,4 +249,31 @@ double tc_query_tree_true_nn(double a, const char * file_path, vector <euclid_ve
     delete q_root;
     delete root;
     return count / round(test.size());
+}
+
+int tc_spill_tree_leaves(const char * file_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    stack <kd_tree_node *> to_process;
+    to_process.push(root);
+    int total_leaves = 0;
+    while (!to_process.empty())
+    {
+        kd_tree_node * focus = to_process.top();
+        to_process.pop();
+        if (!focus->get_left() && !focus->get_right())
+        {
+            total_leaves += focus->get_domain().size();
+        }
+        else
+        {
+            if (focus->get_left())
+                to_process.push(focus->get_left());
+            if (focus->get_right())
+                to_process.push(focus->get_right());
+        }
+    }
+    return total_leaves;
 }
