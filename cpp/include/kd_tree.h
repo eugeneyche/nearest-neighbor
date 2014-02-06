@@ -13,11 +13,13 @@ vector<int> kd_subdomain(euclid_vector * query, kd_tree_node * root);
 
 /* generates a kd_tree for given data, with leaf size c */
 kd_tree_node * kd_tree(int c, data_set & data);
+
 /* generates a spill_tree for given data, with leaf size c */
 kd_tree_node * spill_tree(int c, double a, data_set & data);
 
 /* saves kd_tree into given file */
 void save_kd_tree(kd_tree_node * tree, FILE * out);
+
 /* loads kd_tree from given file */
 kd_tree_node * load_kd_tree(FILE * in);
 

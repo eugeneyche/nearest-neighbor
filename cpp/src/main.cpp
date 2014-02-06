@@ -15,6 +15,8 @@ data_set test;
 string janet_dir = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
 string eugene_dir = "data/mnist/";
 
+/* build kd_tree based on c and data and save to file out */
+void build_save_root(int c, data_set & data, FILE * out);
 /* return vector of true nn */
 vector < euclid_vector *> true_nn();
 /* % error for the kth nearest neighbor [1:100] */
@@ -33,9 +35,12 @@ void tc_query_tree_k_nn_error(double a, const char * file_path, const char *outp
 double tc_query_tree_true_nn(double a, const char * file_path, vector<euclid_vector*> true_nn_set);
 /* # of vectors at leaves */
 int tc_spill_tree_leaves(const char * file_path);
+/* write # of vectors in leaves for each query in file */
+void tc_virtual_spill_tree_leaves(double a, const char * file_path, const char * output_path);
+
 
 int main() {
-    string path = eugene_dir;
+    string path = janet_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -45,8 +50,20 @@ int main() {
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
+    double a[3] = {0.05, 0.1, 0.15};
+    string c[3] = {"0.02", "0.05", "0.1"};
+    vector < euclid_vector *> nn = true_nn();
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            double error_rate = tc_query_tree_true_nn(a[j], (path + "kd_tree_" + c[i]).c_str(), nn);
+            cout << "a=" << a[j] << " c=" << c[i] << " error rate=" << error_rate << endl;
+        }
+    }
     
-    printf("%lf %d\n", 0.2, tc_spill_tree_leaves("data/mnist/trees/spill_tree_0.2"));
+    //tc_virtual_spill_tree_leaves(0.05, (path + "kd_tree_0.05").c_str(), (path + "virtual_c0.05_a0.05_leaves").c_str());
+    //printf("%lf %d\n", 0.2, tc_spill_tree_leaves("data/mnist/trees/spill_tree_0.2"));
 
     fclose(train_vtrs);
     fclose(train_labels);
@@ -54,6 +71,12 @@ int main() {
     fclose(test_labels);
 }
 
+
+void build_save_root(int c, data_set & data, FILE * out)
+{
+    kd_tree_node * root = kd_tree(c, data);
+    save_kd_tree(root, out);
+}
 
 
 vector < euclid_vector *> true_nn()
@@ -277,3 +300,23 @@ int tc_spill_tree_leaves(const char * file_path)
     }
     return total_leaves;
 }
+
+void tc_virtual_spill_tree_leaves(double a, const char * file_path, const char * output_path)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    query_tree_node * q_root = query_tree(a, root, train);
+    vector <long> leaves_size;
+    for (int i = 0; i < test.size(); i++)
+    {
+        data_set subset = test.subset(query_subdomain(test[i], q_root));
+        leaves_size.push_back(subset.get_domain().size());
+    }
+    ofstream file(output_path);
+    for (int i = 0; i < test.size(); i++)
+    {
+        file << i << "  " << leaves_size[i] << endl;
+    }
+}
+
