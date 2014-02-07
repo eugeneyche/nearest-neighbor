@@ -37,10 +37,11 @@ double tc_query_tree_true_nn(double a, const char * file_path, vector<euclid_vec
 int tc_spill_tree_leaves(const char * file_path);
 /* write # of vectors in leaves for each query in file */
 void tc_virtual_spill_tree_leaves(double a, const char * file_path, const char * output_path);
-
+/* count the # of hits */
+void tc_virtual_k_nn_hit_rate(double a, const char * file_path, const char * output_path, vector <euclid_vector *> true_nn_set);
 
 int main() {
-    string path = eugene_dir;
+    string path = janet_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -51,7 +52,17 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    FILE * in = fopen("data/mnist/trees/kd_tree_0.1", "rb");
+    vector <euclid_vector * > nn = true_nn();
+    double a[3] = {0.05, 0.1, 0.15};
+    string c[3] = {"0.02", "0.05", "0.1"};
+    for(int i=0; i<3; i++)
+    {
+        for (int j=0; j<3; j++)
+        {
+            tc_virtual_k_nn_hit_rate(a[i], (path + "kd_tree_" + c[j]).c_str(), (path + "virtual_knn_c0.02_a0.05").c_str(), nn);
+        }
+    }
+    /*FILE * in = fopen("data/mnist/trees/kd_tree_0.1", "rb");
     kd_tree_node * root = load_kd_tree(in);
 
     query_tree_node * qroot = query_tree(0.1, root, train);
@@ -61,7 +72,7 @@ int main() {
     delete qroot;
     delete root;
     fclose(in);
-
+*/
     fclose(train_vtrs);
     fclose(train_labels);
     fclose(test_vtrs);
@@ -317,3 +328,35 @@ void tc_virtual_spill_tree_leaves(double a, const char * file_path, const char *
     }
 }
 
+void tc_virtual_k_nn_hit_rate(double a, const char * file_path, const char * output_path, vector <euclid_vector *> true_nn_set)
+{
+    FILE * input = fopen(file_path, "rb");
+    kd_tree_node * root;
+    root = load_kd_tree(input);
+    query_tree_node * q_root = query_tree(a, root, train);
+    int count [100] = {0};
+    for (int i = 0; i < test.size(); i++)
+    {
+        euclid_vector * q_nn = query_tree_nn(test[i], train, q_root);
+        data_set mn_nn = k_nn(100, test[i], train);
+        for (int j = 0; j < 100; j++)
+        {
+            for (int k = 0; k <= j; k++)
+            {
+                if (mn_nn[k] == q_nn)
+                {
+                    count[j]++;
+                    break;
+                }
+            }
+        }
+    }
+    ofstream file(output_path);
+    for (int i = 0; i < 100; i++)
+    {
+        file << i + 1 << "  " << (test.size() - count[i]) / round(test.size()) << endl;
+    }
+    fclose(input);
+    delete q_root;
+    delete root;
+}
