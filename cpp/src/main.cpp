@@ -40,7 +40,7 @@ void tc_virtual_spill_tree_leaves(double a, const char * file_path, const char *
 
 
 int main() {
-    string path = janet_dir;
+    string path = eugene_dir;
     FILE * train_vtrs = fopen((path + "train_vectors").c_str(), "rb");
     FILE * train_labels = fopen((path + "train_labels").c_str(), "rb");
     FILE * test_vtrs = fopen((path + "test_vectors").c_str(), "rb");
@@ -50,20 +50,17 @@ int main() {
     label(train, train_labels);
     load(test, test_vtrs);
     label(test, test_labels);
-    double a[3] = {0.05, 0.1, 0.15};
-    string c[3] = {"0.02", "0.05", "0.1"};
-    vector < euclid_vector *> nn = true_nn();
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            double error_rate = tc_query_tree_true_nn(a[j], (path + "kd_tree_" + c[i]).c_str(), nn);
-            cout << "a=" << a[j] << " c=" << c[i] << " error rate=" << error_rate << endl;
-        }
-    }
+
+    FILE * in = fopen("data/mnist/trees/kd_tree_0.1", "rb");
+    kd_tree_node * root = load_kd_tree(in);
+
+    query_tree_node * qroot = query_tree(0.1, root, train);
+    print_tree(root);
+    print_tree(qroot);
     
-    //tc_virtual_spill_tree_leaves(0.05, (path + "kd_tree_0.05").c_str(), (path + "virtual_c0.05_a0.05_leaves").c_str());
-    //printf("%lf %d\n", 0.2, tc_spill_tree_leaves("data/mnist/trees/spill_tree_0.2"));
+    delete qroot;
+    delete root;
+    fclose(in);
 
     fclose(train_vtrs);
     fclose(train_labels);

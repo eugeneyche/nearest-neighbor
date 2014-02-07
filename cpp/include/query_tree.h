@@ -27,6 +27,8 @@ public:
     query_tree_node(const query_tree_node & copy);
     ~query_tree_node();
     bool in_range(euclid_vector * query) const;
+    double get_pivot_l() const;
+    double get_pivot_r() const;
     query_tree_node * get_left() const;
     query_tree_node * get_right() const;
 };

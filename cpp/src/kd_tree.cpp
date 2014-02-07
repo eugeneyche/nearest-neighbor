@@ -195,11 +195,17 @@ vector<int> kd_tree_node::get_domain() const
 
 kd_tree_node * kd_tree_node::get_left() const
 {
+    #ifdef DEBUG
+    cerr << "[DEBUG: Using kd_tree_node::get_left()]" << endl;
+    #endif
     return _left;
 }
 
 kd_tree_node * kd_tree_node::get_right() const
 {
+    #ifdef DEBUG
+    cerr << "[DEBUG: Using kd_tree_node::get_right()]" << endl;
+    #endif
     return _right;
 }
 

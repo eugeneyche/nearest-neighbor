@@ -41,8 +41,8 @@ public:
     ~kd_tree_node();
     int get_index() const;
     double get_pivot() const;
-    kd_tree_node * get_left() const;
-    kd_tree_node * get_right() const;
+    virtual kd_tree_node * get_left() const;
+    virtual kd_tree_node * get_right() const;
     vector <int> get_domain() const;
     friend void save_kd_tree(kd_tree_node * tree, FILE * out);
     friend kd_tree_node * load_kd_tree(FILE * in);

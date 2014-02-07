@@ -12,7 +12,7 @@ void print_glyph(euclid_vector * to_print)
 
 bool kd_tree_active [999];
 
-void print_kd_tree(kd_tree_node * m_node, int offset, bool last)
+void print_tree(kd_tree_node * m_node, int offset, bool last)
 {
     if (offset == 0)
     {
@@ -32,14 +32,22 @@ void print_kd_tree(kd_tree_node * m_node, int offset, bool last)
     }
     
     cout << ((m_node->get_left() && m_node->get_right()) ? "┬" : "╴");
-    cout << " index: " << m_node->get_index() << " domain: " << m_node->get_domain().size() << endl;
+    cout << " index: " << m_node->get_index() << " domain: " << m_node->get_domain().size();
+    cout << " pivot: " << m_node->get_pivot();
+    query_tree_node * q_node;
+    if (q_node = dynamic_cast <query_tree_node *> (m_node))
+    {
+        cout << " pivot_l: " << q_node->get_pivot_l()
+             << " pivot_r: " << q_node->get_pivot_r();
+    }
+    cout << endl;
     if (last)
         kd_tree_active[offset] = false;
     if (m_node->get_left() && m_node->get_right())
     {
         kd_tree_active[offset + 1] = true;
-        print_kd_tree(m_node->get_left(), offset + 1, false);
-        print_kd_tree(m_node->get_right(), offset + 1, true);
+        print_tree(m_node->get_left(), offset + 1, false);
+        print_tree(m_node->get_right(), offset + 1, true);
     }
 }
 

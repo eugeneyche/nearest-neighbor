@@ -109,8 +109,7 @@ query_tree_node::query_tree_node(const query_tree_node & copy) : kd_tree_node(co
 }
 
 query_tree_node::~query_tree_node() 
-{
-}
+{}
 
 bool query_tree_node::in_range(euclid_vector * query) const
 {
@@ -120,12 +119,29 @@ bool query_tree_node::in_range(euclid_vector * query) const
     return (_pivot_l < (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
 }
 
+double query_tree_node::get_pivot_l() const
+{
+    return _pivot_l;
+}
+
+double query_tree_node::get_pivot_r() const
+{
+    return _pivot_r;
+}
+
 query_tree_node * query_tree_node::get_left() const
 {
-    return (query_tree_node *)_left;
+    #ifdef DEBUG
+    cerr << "[DEBUG: Using query_tree_node::get_left()]" << endl;
+    #endif
+    return dynamic_cast <query_tree_node *> (_left);
 }
 
 query_tree_node * query_tree_node::get_right() const
 {
-    return (query_tree_node *)_right;
+    #ifdef DEBUG
+    cerr << "[DEBUG: Using query_tree_node::get_right()]" << endl;
+    #endif
+    return dynamic_cast <query_tree_node *> (_right);
 }
+
