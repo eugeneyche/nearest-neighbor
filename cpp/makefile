@@ -24,9 +24,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 clean:
 	$(RM) -r $(BUILDDIR) $(TARGET)
 
-new:
-	make clean
-	make
+new: clean $(TARGET)
 
 directories:
 	mkdir bin
