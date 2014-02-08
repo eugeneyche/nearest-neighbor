@@ -27,14 +27,14 @@ kd_tree_node * build_tree(int c, double a,
         data_set & data, vector <int> subdomain)
 {
     #ifdef DEBUG
-    cerr << "[DEBUG: Building kd-tree of size " << subdomain.size() << "]" << endl;
+    fprintf(stderr, "[DEBUG: Building kd-tree of size %ld]\n", subdomain.size());
     #endif
     if (subdomain.size() < c)
         return new kd_tree_node(subdomain);
     data_set subset = data.subset(subdomain);
     int mx_var_index = max_variance_index((int)subdomain.size() / 2, subset);
     #ifdef DEBUG
-    cerr << "[DEBUG: Max variance index: " << mx_var_index << "]" << endl;
+    fprintf(stderr, "[DEBUG: Max variance index: %d]\n", mx_var_index);
     #endif
     vector <double> values;
     for (int i = 0; i < subset.size(); i++)
@@ -48,8 +48,7 @@ kd_tree_node * build_tree(int c, double a,
         pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
         pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
         #ifdef DEBUG
-        cerr << "[DEBUG: pivot_l: " << pivot_l << " pivot: " << pivot
-             << " pivot_r: " << pivot_r << "]" << endl;
+        fprintf(stderr, "[DEBUG: privot_l: %lf pivot_r: %lf]\n", pivot_l, pivot_r);
         #endif
     }
     vector <int> l_subdomain;
@@ -100,7 +99,7 @@ void save_kd_tree(kd_tree_node * root, FILE * out)
             size_t sz = curr->_domain.size();
             fwrite(&sz, sizeof(size_t), 1, out); 
             #ifdef DEBUG
-            cerr << "[DEBUG: Saving node w/ pivot " << curr->_pivot << " and size " << sz <<  "]" << endl;
+            fprintf(stderr, "[DEBUG: Saving node w/ pivot %lf and size %ld]\n", curr->_pivot, sz);
             #endif
             fwrite(&curr->_domain[0], sizeof(int), curr->_domain.size(), out);
             to_build.push(curr->_right);

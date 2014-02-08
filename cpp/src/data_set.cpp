@@ -104,7 +104,7 @@ data_set::~data_set()
         delete _labels;
         delete _vectors;
         #ifdef DEBUG
-        cerr << "[DEBUG: Deconstructing data_set]" << endl;
+        fprintf(stderr, "[DEBUG: Deconstructing data_set]\n");
         #endif
     }
 }

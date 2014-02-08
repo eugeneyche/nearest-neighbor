@@ -9,9 +9,7 @@ void print_glyph(euclid_vector * to_print)
         if (i % 28 == 27) printf("\n");
     }
 }
-
-bool kd_tree_active [999];
-
+bool kd_tree_active [999]; 
 void print_tree(kd_tree_node * m_node, int offset, bool last)
 {
     if (offset == 0)
@@ -25,32 +23,30 @@ void print_tree(kd_tree_node * m_node, int offset, bool last)
     {
         if (i == offset - 1)
         {
-            cout << (last ? "└" : "├");
+            printf("%s", (last ? "└" : "├"));
             continue;
         }
-            cout << (kd_tree_active[i + 1] ? "│":  " ");
+        printf("%s", (kd_tree_active[i + 1] ? "│":  " "));
     }
-    
-    cout << ((m_node->get_left() && m_node->get_right()) ? "┬" : "╴");
-    cout << " index: " << m_node->get_index() << " domain: " << m_node->get_domain().size();
-    cout << " pivot: " << m_node->get_pivot();
-    #ifdef DEBUG
-    vector <int> m_domain = m_node->get_domain();
-    cout << " domain: ";
-    for (int i = 0; i < m_domain.size() && i < 10; i++)
-    {
-        cout << m_domain[i] << " ";
-        if (i == 9)
-            cout << "...";
-    }
-    #endif
+    printf("%s index: %d domain_size: %ld pivot: %lf", 
+            ((m_node->get_left() && m_node->get_right()) ? "┬" : "╴"), m_node->get_index(), 
+            m_node->get_pivot());
     virtual_spill_tree_node * q_node;
     if (q_node = dynamic_cast <virtual_spill_tree_node *> (m_node))
     {
-        cout << " pivot_l: " << q_node->get_pivot_l()
-             << " pivot_r: " << q_node->get_pivot_r();
+        printf(" pivot_l: %lf pivot_r: %lf", q_node->get_pivot_l(), q_node->get_pivot_r());
     }
-    cout << endl;
+    #ifdef DEBUG
+    vector <int> m_domain = m_node->get_domain();
+    printf(" domain: ");
+    for (int i = 0; i < m_domain.size() && i < 10; i++)
+    {
+        printf(" %d ", m_domain[i]);
+        if (i == 9)
+            printf("...", m_domain[i]);
+    }
+    #endif
+    printf("\n");
     if (last)
         kd_tree_active[offset] = false;
     if (m_node->get_left() && m_node->get_right())

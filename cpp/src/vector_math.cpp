@@ -53,5 +53,3 @@ double selector(vector<double> s, int k)
 		return selector(right, int (k-left.size()-v.size()));
 	}
 }
-
-

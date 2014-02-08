@@ -12,16 +12,14 @@ vector <int> virtual_spill_subdomain(euclid_vector * query, virtual_spill_tree_n
         if (cur->get_left() && cur->get_right())
         {
             #ifdef DEBUG
-            cerr << "[DEBUG: Querying node with index " << cur->get_index() 
-                 << "]" << endl;
+            fprintf(stderr, "[DEBUG: Querying node with index %d]\n", cur->get_index());
             #endif
             if (cur->in_range(query))
             {
                 to_explore.push(cur->get_right());
                 to_explore.push(cur->get_left());
                 #ifdef DEBUG
-                cerr << "[DEBUG: Spill at node with index " 
-                     << cur->get_index() << "]" << endl;
+                fprintf(stderr, "[DEBUG: Spill at node with index %d]\n", cur->get_index());
                 #endif
             }
             else if ((*query)[cur->get_index()] <= cur->get_pivot())
@@ -54,7 +52,7 @@ virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & d
     if (root->get_left() && root->get_right())
     {
         #ifdef DEBUG
-        cerr << "[DEBUG: Building query-tree index " << root->get_index() << "]" << endl;
+        fprintf(stderr, "[DEBUG: Building virtual_spill_tree at index %d]\n", root->get_index());
         #endif
         vector <double> values;
         vector <int> subdomain = root->get_domain();
@@ -67,7 +65,7 @@ virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & d
         pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
         pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
         #ifdef DEBUG
-        cerr << "[DEBUG: pivot_l: " << pivot_l << " pivot_r: " << pivot_r << "]" << endl;
+        fprintf(stderr, "[DEBUG: pivot_l: %lf pivot_r: %lf]\n", pivot_l, pivot_r);
         #endif
         virtual_spill_tree_node * res = new virtual_spill_tree_node(root, pivot_l, pivot_r);
         res->_index = mx_var_index;
@@ -115,8 +113,8 @@ virtual_spill_tree_node::~virtual_spill_tree_node()
 bool virtual_spill_tree_node::in_range(euclid_vector * query) const
 {
     #ifdef DEBUG
-    cerr << "[DEBUG: Query with value " << (*query)[get_index()] << ", pivot_l: " 
-         << _pivot_l << " pivot_r: " << _pivot_r << "]" << endl;
+    fprintf(stderr, "[DEBUG: Query with value %lf, pivot_l: %lf pivot_r %lf]\n", 
+            (*query)[get_index()], _pivot_l, _pivot_r);
     #endif
     return (_pivot_l <= (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
 }

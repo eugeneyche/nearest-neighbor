@@ -4,7 +4,6 @@
 #include "vector_math.h"
 #include <cstdio>
 #include <map>
-#include <iostream>
 using namespace std;
 
 typedef map <euclid_vector *, int> label_space;

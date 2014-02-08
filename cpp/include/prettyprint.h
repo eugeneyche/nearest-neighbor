@@ -2,7 +2,7 @@
 #define _PRETTYPRINT_H
 
 #include "nn.h"
-#include <iostream>
+#include <cstdio>
 #include <string>
 using namespace std;
 
