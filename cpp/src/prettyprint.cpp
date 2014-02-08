@@ -44,8 +44,8 @@ void print_tree(kd_tree_node * m_node, int offset, bool last)
             cout << "...";
     }
     #endif
-    query_tree_node * q_node;
-    if (q_node = dynamic_cast <query_tree_node *> (m_node))
+    virtual_spill_tree_node * q_node;
+    if (q_node = dynamic_cast <virtual_spill_tree_node *> (m_node))
     {
         cout << " pivot_l: " << q_node->get_pivot_l()
              << " pivot_r: " << q_node->get_pivot_r();

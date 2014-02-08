@@ -84,14 +84,14 @@ data_set kd_tree_k_nn(int k, euclid_vector * query, data_set & data, kd_tree_nod
     return k_nn(k, query, subset);
 }
 
-euclid_vector * query_tree_nn(euclid_vector * query, data_set & data, query_tree_node * root)
+euclid_vector * virtual_spill_tree_nn(euclid_vector * query, data_set & data, virtual_spill_tree_node * root)
 {
-    data_set subset = data.subset(query_subdomain(query, root));
+    data_set subset = data.subset(virtual_spill_subdomain(query, root));
     return nn(query, subset);
 }
 
-data_set query_tree_k_nn(int k, euclid_vector * query, data_set & data, query_tree_node * root)
+data_set virtual_spill_tree_k_nn(int k, euclid_vector * query, data_set & data, virtual_spill_tree_node * root)
 {
-    data_set subset = data.subset(query_subdomain(query, root));
+    data_set subset = data.subset(virtual_spill_subdomain(query, root));
     return k_nn(k, query, subset);
 }

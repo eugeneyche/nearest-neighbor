@@ -40,8 +40,8 @@ public:
     vector <int> get_abs_domain();
     euclid_vector * operator[](int i);
     data_set subset(vector <int> domain);
-    friend void load(data_set & st, FILE * in);
-    friend void label(data_set & st, FILE * in);
+    friend void load_data_set(data_set & st, FILE * in);
+    friend void label_data_set(data_set & st, FILE * in);
 };
 
 #endif

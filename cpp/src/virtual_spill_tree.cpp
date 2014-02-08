@@ -1,13 +1,13 @@
-#include "query_tree.h"
+#include "virtual_spill_tree.h"
 
-vector <int> query_subdomain(euclid_vector * query, query_tree_node * root)
+vector <int> virtual_spill_subdomain(euclid_vector * query, virtual_spill_tree_node * root)
 {
-    stack <query_tree_node *> to_explore;
+    stack <virtual_spill_tree_node *> to_explore;
     set <int> domain_st;
     to_explore.push(root);
     while (!to_explore.empty())
     {
-        query_tree_node * cur = to_explore.top();
+        virtual_spill_tree_node * cur = to_explore.top();
         to_explore.pop();
         if (cur->get_left() && cur->get_right())
         {
@@ -47,7 +47,7 @@ vector <int> query_subdomain(euclid_vector * query, query_tree_node * root)
     return domain;
 }
 
-query_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
+virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
 {
     if (root == NULL)
         return NULL;
@@ -69,50 +69,50 @@ query_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
         #ifdef DEBUG
         cerr << "[DEBUG: pivot_l: " << pivot_l << " pivot_r: " << pivot_r << "]" << endl;
         #endif
-        query_tree_node * res = new query_tree_node(root, pivot_l, pivot_r);
+        virtual_spill_tree_node * res = new virtual_spill_tree_node(root, pivot_l, pivot_r);
         res->_index = mx_var_index;
         res->_left = build_tree(a, root->get_left(), data);
         res->_right = build_tree(a, root->get_right(), data);
         return res;
     }
-    return new query_tree_node(root);
+    return new virtual_spill_tree_node(root);
 }
 
-query_tree_node * query_tree(double a, kd_tree_node * root, data_set & data)
+virtual_spill_tree_node * virtual_spill_tree(double a, kd_tree_node * root, data_set & data)
 {
     return build_tree(a, root, data);
 }
 
 /* class definition */
 
-query_tree_node::query_tree_node() : kd_tree_node()
+virtual_spill_tree_node::virtual_spill_tree_node() : kd_tree_node()
 {
     _pivot_l = _pivot_r = -1;
     _left = _right = NULL;
 }
 
-query_tree_node::query_tree_node(kd_tree_node * kd_node) : kd_tree_node(*kd_node)
+virtual_spill_tree_node::virtual_spill_tree_node(kd_tree_node * kd_node) : kd_tree_node(*kd_node)
 {
     _pivot_l = _pivot_r = -1;
     _left = _right = NULL;
 }
 
-query_tree_node::query_tree_node(kd_tree_node * kd_node, double pivot_l, double pivot_r) : kd_tree_node(*kd_node)
+virtual_spill_tree_node::virtual_spill_tree_node(kd_tree_node * kd_node, double pivot_l, double pivot_r) : kd_tree_node(*kd_node)
 {
     _pivot_l = pivot_l;
     _pivot_r = pivot_r;
 }
 
-query_tree_node::query_tree_node(const query_tree_node & copy) : kd_tree_node(copy)
+virtual_spill_tree_node::virtual_spill_tree_node(const virtual_spill_tree_node & copy) : kd_tree_node(copy)
 {
     _pivot_l = copy._pivot_l;
     _pivot_r = copy._pivot_r;
 }
 
-query_tree_node::~query_tree_node() 
+virtual_spill_tree_node::~virtual_spill_tree_node() 
 {}
 
-bool query_tree_node::in_range(euclid_vector * query) const
+bool virtual_spill_tree_node::in_range(euclid_vector * query) const
 {
     #ifdef DEBUG
     cerr << "[DEBUG: Query with value " << (*query)[get_index()] << ", pivot_l: " 
@@ -121,23 +121,23 @@ bool query_tree_node::in_range(euclid_vector * query) const
     return (_pivot_l <= (*query)[get_index()] && (*query)[get_index()] <= _pivot_r);
 }
 
-double query_tree_node::get_pivot_l() const
+double virtual_spill_tree_node::get_pivot_l() const
 {
     return _pivot_l;
 }
 
-double query_tree_node::get_pivot_r() const
+double virtual_spill_tree_node::get_pivot_r() const
 {
     return _pivot_r;
 }
 
-query_tree_node * query_tree_node::get_left() const
+virtual_spill_tree_node * virtual_spill_tree_node::get_left() const
 {
-    return dynamic_cast <query_tree_node *> (_left);
+    return dynamic_cast <virtual_spill_tree_node *> (_left);
 }
 
-query_tree_node * query_tree_node::get_right() const
+virtual_spill_tree_node * virtual_spill_tree_node::get_right() const
 {
-    return dynamic_cast <query_tree_node *> (_right);
+    return dynamic_cast <virtual_spill_tree_node *> (_right);
 }
 

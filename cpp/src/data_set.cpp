@@ -1,6 +1,6 @@
 #include "data_set.h"
 
-void load(data_set & st, FILE * in)
+void load_data_set(data_set & st, FILE * in)
 {
     int n, m;
     fscanf(in, "%d %d\n", &n, &m);
@@ -15,7 +15,7 @@ void load(data_set & st, FILE * in)
     }
 }
 
-void label(data_set & st, FILE * in)
+void label_data_set(data_set & st, FILE * in)
 {
     int n;
     fscanf(in, "%d\n", &n);
