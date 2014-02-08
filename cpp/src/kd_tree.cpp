@@ -37,7 +37,7 @@ kd_tree_node * build_tree(int c, double a,
     cerr << "[DEBUG: Max variance index: " << mx_var_index << "]" << endl;
     #endif
     vector <double> values;
-    for (int i = 0; i < subdomain.size(); i++)
+    for (int i = 0; i < subset.size(); i++)
     {
         values.push_back((*subset[i])[mx_var_index]);
     }
@@ -83,10 +83,10 @@ kd_tree_node * spill_tree(int c, double a, data_set & data)
     return build_tree(c, a, data, data.get_domain());
 }
 
-void save_kd_tree(kd_tree_node * tree, FILE * out)
+void save_kd_tree(kd_tree_node * root, FILE * out)
 {
     stack <kd_tree_node *> to_build;
-    to_build.push(tree);
+    to_build.push(root);
     while (!to_build.empty())
     {
         kd_tree_node * curr = to_build.top();
@@ -188,24 +188,18 @@ double kd_tree_node::get_pivot() const
     return _pivot;
 }
 
-vector<int> kd_tree_node::get_domain() const
+vector <int> kd_tree_node::get_domain() const
 {
     return _domain;
 }
 
 kd_tree_node * kd_tree_node::get_left() const
 {
-    #ifdef DEBUG
-    cerr << "[DEBUG: Using kd_tree_node::get_left()]" << endl;
-    #endif
     return _left;
 }
 
 kd_tree_node * kd_tree_node::get_right() const
 {
-    #ifdef DEBUG
-    cerr << "[DEBUG: Using kd_tree_node::get_right()]" << endl;
-    #endif
     return _right;
 }
 

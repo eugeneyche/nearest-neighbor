@@ -34,6 +34,16 @@ void print_tree(kd_tree_node * m_node, int offset, bool last)
     cout << ((m_node->get_left() && m_node->get_right()) ? "┬" : "╴");
     cout << " index: " << m_node->get_index() << " domain: " << m_node->get_domain().size();
     cout << " pivot: " << m_node->get_pivot();
+    #ifdef DEBUG
+    vector <int> m_domain = m_node->get_domain();
+    cout << " domain: ";
+    for (int i = 0; i < m_domain.size() && i < 10; i++)
+    {
+        cout << m_domain[i] << " ";
+        if (i == 9)
+            cout << "...";
+    }
+    #endif
     query_tree_node * q_node;
     if (q_node = dynamic_cast <query_tree_node *> (m_node))
     {

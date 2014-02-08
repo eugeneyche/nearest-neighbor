@@ -136,12 +136,7 @@ int data_set::get_label(euclid_vector * vtr)
 
 vector <int> data_set::get_domain()
 {
-    vector <int> domain;
-    for (int i = 0; i < _domain.size(); i++)
-    {
-        domain.push_back(i);
-    }
-    return domain;
+    return _domain;
 }
 
 vector <int> data_set::get_abs_domain()

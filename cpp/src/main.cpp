@@ -51,16 +51,21 @@ int main() {
     load(test, test_vtrs);
     label(test, test_labels);
 
-    FILE * in = fopen("data/mnist/trees/kd_tree_0.1", "rb");
-    kd_tree_node * root = load_kd_tree(in);
+    FILE * input = fopen("tree", "rb");
+    kd_tree_node * root = load_kd_tree(input);
+    fclose(input);
+    query_tree_node * qroot = query_tree(0.01, root, train);
 
-    query_tree_node * qroot = query_tree(0.1, root, train);
     print_tree(root);
-    print_tree(qroot);
-    
+    for (int i = 0; i < 10; i++)
+    {
+        euclid_vector * mnn = nn(test[i], train);
+        euclid_vector * kdnn = kd_tree_nn(test[i], train, root);
+        euclid_vector * qnn = query_tree_nn(test[i], train, qroot);
+        printf("%ld %ld %ld\n", mnn, kdnn, qnn);
+    }
     delete qroot;
     delete root;
-    fclose(in);
 
     fclose(train_vtrs);
     fclose(train_labels);

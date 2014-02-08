@@ -18,7 +18,7 @@ kd_tree_node * kd_tree(int c, data_set & data);
 kd_tree_node * spill_tree(int c, double a, data_set & data);
 
 /* saves kd_tree into given file */
-void save_kd_tree(kd_tree_node * tree, FILE * out);
+void save_kd_tree(kd_tree_node * root, FILE * out);
 
 /* loads kd_tree from given file */
 kd_tree_node * load_kd_tree(FILE * in);
