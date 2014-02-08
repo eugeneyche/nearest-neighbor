@@ -2,6 +2,7 @@
 #include "test.h"
 #include "prettyprint.h"
 #include <fstream>
+#include <iostream>
 #include <cstdio>
 #include <string>
 #include <stack>
@@ -9,9 +10,6 @@
 #include <ctime>
 #include <cmath>
 using namespace std;
-
-data_set train;
-data_set test;
 
 char janet_dir [] = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
 char eugene_dir [] = "data/mnist/";
