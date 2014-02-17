@@ -1,9 +1,8 @@
 #include "nn.h"
 #include "test.h"
 #include "prettyprint.h"
-#include <fstream>
-#include <iostream>
 #include <cstdio>
+#include <vector>
 #include <string>
 #include <stack>
 #include <algorithm>
@@ -17,19 +16,33 @@ char eugene_dir [] = "data/mnist/";
 int main() {
     test_setup(eugene_dir);
 
-    FILE * input = fopen("tree", "rb");
-    kd_tree_node * root = load_kd_tree(input);
-    fclose(input);
-    virtual_spill_tree_node * qroot = virtual_spill_tree(0.01, root, get_train_set());
+    double alpha_values [] = {0, 0.0025, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05, 0.1, 0.2};
 
-    print_tree(root);
+    vector <euclid_vector *> true_nn;
+    for (int i = 0; i < get_test_set().size(); i++)
+    {
+        true_nn.push_back(nn(get_test_set()[i], get_train_set()));
+    }
+
+    char buffer [999];
     for (int i = 0; i < 10; i++)
     {
-        euclid_vector * mnn = nn(get_test_set()[i], get_train_set());
-        euclid_vector * kdnn = kd_tree_nn(get_test_set()[i], get_train_set(), root);
-        euclid_vector * qnn = virtual_spill_tree_nn(get_test_set()[i], get_train_set(), qroot);
-        printf("%ld %ld %ld\n", mnn, kdnn, qnn);
+        buffer[0] = '\0';
+        sprintf(buffer, "data/mnist/trees/mnist_spill_tree_%g", alpha_values[i]);
+        FILE * input = fopen(buffer, "rb");
+        kd_tree_node * root = load_kd_tree(input);
+        print_tree(root);
+        int count = 0;;
+        for (int j = 0; j < get_test_set().size(); j++)
+        {
+            euclid_vector * kdnn = kd_tree_nn(get_test_set()[j], get_train_set(), root);
+            if (true_nn[j] == kdnn)
+            {
+                count++;
+            }
+        }
+        printf("%lg %lg\n", alpha_values[i], (double)count / get_test_set().size());
+        delete root;
+        fclose(input);
     }
-    delete qroot;
-    delete root;
 }

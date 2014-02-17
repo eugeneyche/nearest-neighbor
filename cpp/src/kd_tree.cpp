@@ -48,7 +48,7 @@ kd_tree_node * build_tree(int c, double a,
         pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
         pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
         #ifdef DEBUG
-        fprintf(stderr, "[DEBUG: privot_l: %lf pivot_r: %lf]\n", pivot_l, pivot_r);
+        fprintf(stderr, "[DEBUG: pivot_l: %lf pivot_r: %lf]\n", pivot_l, pivot_r);
         #endif
     }
     vector <int> l_subdomain;

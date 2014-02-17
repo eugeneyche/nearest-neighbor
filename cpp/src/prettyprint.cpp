@@ -28,20 +28,20 @@ void print_tree(kd_tree_node * m_node, int offset, bool last)
         }
         printf("%s", (kd_tree_active[i + 1] ? "│":  " "));
     }
-    printf("%s index: %d domain_size: %ld pivot: %lf", 
+    printf("%s index: %d domain_size: %d pivot: %lg", 
             ((m_node->get_left() && m_node->get_right()) ? "┬" : "╴"), m_node->get_index(), 
-            m_node->get_pivot());
+            m_node->get_domain().size(), m_node->get_pivot());
     virtual_spill_tree_node * q_node;
     if (q_node = dynamic_cast <virtual_spill_tree_node *> (m_node))
     {
-        printf(" pivot_l: %lf pivot_r: %lf", q_node->get_pivot_l(), q_node->get_pivot_r());
+        printf(" pivot_l: %g pivot_r: %g", q_node->get_pivot_l(), q_node->get_pivot_r());
     }
     #ifdef DEBUG
     vector <int> m_domain = m_node->get_domain();
-    printf(" domain: ");
+    printf(" domain:");
     for (int i = 0; i < m_domain.size() && i < 10; i++)
     {
-        printf(" %d ", m_domain[i]);
+        printf(" %d", m_domain[i]);
         if (i == 9)
             printf("...", m_domain[i]);
     }
