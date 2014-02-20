@@ -18,7 +18,7 @@ class virtual_spill_tree_node : public kd_tree_node
 {
 protected:
     double _pivot_l, _pivot_r;
-    friend virtual_spill_tree_node * build_tree(double a, kd_tree_node * root,
+    friend virtual_spill_tree_node * build_virtual_tree(double a, kd_tree_node * root,
             data_set & data);
 public:
     virtual_spill_tree_node();

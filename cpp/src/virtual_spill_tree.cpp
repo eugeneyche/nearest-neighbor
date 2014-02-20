@@ -45,7 +45,7 @@ vector <int> virtual_spill_subdomain(euclid_vector * query, virtual_spill_tree_n
     return domain;
 }
 
-virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & data)
+virtual_spill_tree_node * build_virtual_tree(double a, kd_tree_node * root, data_set & data)
 {
     if (root == NULL)
         return NULL;
@@ -69,8 +69,8 @@ virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & d
         #endif
         virtual_spill_tree_node * res = new virtual_spill_tree_node(root, pivot_l, pivot_r);
         res->_index = mx_var_index;
-        res->_left = build_tree(a, root->get_left(), data);
-        res->_right = build_tree(a, root->get_right(), data);
+        res->_left = build_virtual_tree(a, root->get_left(), data);
+        res->_right = build_virtual_tree(a, root->get_right(), data);
         return res;
     }
     return new virtual_spill_tree_node(root);
@@ -78,7 +78,7 @@ virtual_spill_tree_node * build_tree(double a, kd_tree_node * root, data_set & d
 
 virtual_spill_tree_node * virtual_spill_tree(double a, kd_tree_node * root, data_set & data)
 {
-    return build_tree(a, root, data);
+    return build_virtual_tree(a, root, data);
 }
 
 /* class definition */
