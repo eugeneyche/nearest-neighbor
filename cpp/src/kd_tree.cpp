@@ -32,7 +32,7 @@ kd_tree_node * build_tree(int c, double a,
     if (subdomain.size() < c)
         return new kd_tree_node(subdomain);
     data_set subset = data.subset(subdomain);
-    int mx_var_index = max_variance_index((int)subdomain.size() / 2, subset);
+    int mx_var_index = max_variance_index(subset);
     #ifdef DEBUG
     fprintf(stderr, "[DEBUG: Max variance index: %d]\n", mx_var_index);
     #endif

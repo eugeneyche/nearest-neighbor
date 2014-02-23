@@ -27,7 +27,7 @@ void label_data_set(data_set & st, FILE * in)
     }
 }
 
-int max_variance_index(int k, data_set & sub)
+int max_variance_index(data_set & sub)
 {
     vector <double> var;
     vector <double> vtr;
@@ -40,7 +40,7 @@ int max_variance_index(int k, data_set & sub)
         {
             vtr.push_back((*sub[j])[i]);
         }
-        double mean = selector(vtr, k);
+        double mean = selector(vtr, int(sub.size()/2));
         double variance = 0.0;
         for (int j = 0; j < subsize; j++)
         {

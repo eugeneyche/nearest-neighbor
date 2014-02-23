@@ -16,7 +16,7 @@ void load(data_set & st, FILE * in);
 /* loads the labels from a file */
 void label(data_set & st, FILE * in);
 /* return the index of the vector with the max variance */
-int max_variance_index(int k, data_set & sub); 
+int max_variance_index(data_set & sub); 
 
 class data_set
 {
