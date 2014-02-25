@@ -52,13 +52,7 @@
 	5.3 virtual_spill_tree_node * virtual_spill_tree(double a, kd_tree_node * root, data_set & data)
 			generates a virtual_spill_tree for given data, with range parameter a based on kd_tree
 
-6. query_tree.h & query_tree.cpp
-	5.1 class query_tree_node
-	5.2 vector <int> query_subdomain(euclid_vector * query, query_tree_node * root)
-			get subdomain from the leaf of the query_tree for a given query
-	5.3 query_tree_node * query_tree(double a, kd_tree_node * root, data_set & data)
-			generates a query_tree for given data, with range parameter a based on kd_tree
 
-7.  test.h & test.cpp
+6.  test.h & test.cpp
 	7.1 test_setup(char * path)
 			load data from files
