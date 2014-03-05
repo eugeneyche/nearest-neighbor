@@ -2,7 +2,7 @@
 #define _DATA_SET_H
 
 #include "vector_math.h"
-#include <cstdio>
+#include <fstream>
 #include <map>
 using namespace std;
 
@@ -12,9 +12,9 @@ typedef vector <euclid_vector *> vector_space;
 class data_set;
 
 /* loads the vectors from a file */
-void load(data_set & st, FILE * in);
+void load(data_set & st, ifstream & in);
 /* loads the labels from a file */
-void label(data_set & st, FILE * in);
+void label(data_set & st, ifstream & in);
 /* return the index of the vector with the max variance */
 int max_variance_index(data_set & sub); 
 
@@ -39,8 +39,8 @@ public:
     vector <int> get_abs_domain();
     euclid_vector * operator[](int i);
     data_set subset(vector <int> domain);
-    friend void load_data_set(data_set & st, FILE * in);
-    friend void label_data_set(data_set & st, FILE * in);
+    friend void load_data_set(data_set & st, ifstream & in);
+    friend void label_data_set(data_set & st, ifstream & in);
 };
 
 #endif

@@ -13,45 +13,24 @@ data_set & get_test_set()
     return test_st;
 }
 
-void test_setup(char * path)
+void test_setup(string path)
 {
-    char buffer [999], * path_end;
-    FILE * in;
-    buffer[0] = '\0';
-    strcat(buffer, path);
-    path_end = buffer + strlen(buffer);
     
-    strcat(buffer, "train_vectors");
-    in = fopen(buffer, "rb");
-    load_data_set(train_st, in);
-    fclose(in);
-    *path_end = '\0';
+    ifstream train_vtr_in (path + "train_vectors", ios::binary);
+    ifstream test_vtr_in (path + "test_vectors", ios::binary);
+    ifstream train_label_in (path + "train_labels", ios::binary);
+    ifstream test_label_in (path + "test_labels", ios::binary);
 
-    strcat(buffer, "train_labels");
-    in = fopen(buffer, "rb");
-    label_data_set(train_st, in);
-    fclose(in);
-    *path_end = '\0';
+    load_data_set(train_st, train_vtr_in);
+    load_data_set(test_st, test_vtr_in);
+    label_data_set(train_st, train_label_in);
+    label_data_set(test_st, test_label_in);
 
-    strcat(buffer, "test_vectors");
-    in = fopen(buffer, "rb");
-    load_data_set(test_st, in);
-    fclose(in);
-    *path_end = '\0';
-
-    strcat(buffer, "test_labels");
-    in = fopen(buffer, "rb");
-    label_data_set(test_st, in);
-    fclose(in);
-    *path_end = '\0';
+    train_vtr_in.close();
+    test_vtr_in.close();
+    train_label_in.close();
+    test_label_in.close();
 }
-
-kd_tree_node * get_kd_tree_from_file(char * path)
-{
-    FILE * in = fopen(path, "rb");
-    fclose(in);
-}
-
 
 /* TODO: integrate into workflow later on 
 

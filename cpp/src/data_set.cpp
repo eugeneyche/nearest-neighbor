@@ -1,50 +1,52 @@
 #include "data_set.h"
 
-void load_data_set(data_set & st, FILE * in)
+void load_data_set(data_set & st, ifstream & in)
 {
     int n, m;
-    fscanf(in, "%d %d\n", &n, &m);
+    in >> n >> m;
+    in.ignore();
     for (int i = 0; i < n; i++)
     {
         euclid_vector * vtr = new euclid_vector;
         double buffer [m];
-        fread(buffer, sizeof(double), m, in);
+        in.read((char *)buffer, sizeof(double) * m);
         vtr->assign(buffer, buffer + m);
         st._domain.push_back((int)st._domain.size());
         st._vectors->push_back(vtr);
     }
 }
 
-void label_data_set(data_set & st, FILE * in)
+void label_data_set(data_set & st, ifstream & in)
 {
     int n;
-    fscanf(in, "%d\n", &n);
+    in >> n;
+    in.ignore();
     int buffer [n];
-    fread(buffer, sizeof(int), n, in);
+    in.read((char *)buffer, sizeof(int) * n);
     for (int i = 0; i < n; i++)
     {
         st.set_label(i, buffer[i]);
     }
 }
 
-int max_variance_index(data_set & sub)
+int max_variance_index(data_set & subset)
 {
     vector <double> var;
     vector <double> vtr;
-    int dimension = (int)sub[0]->size();
-    int subsize = sub.size();
+    int dimension = (int)subset[0]->size();
+    int subsize = subset.size();
     for (int i = 0; i < dimension; i++)
     {
         vtr.clear();
         for (int j = 0; j < subsize; j++)
         {
-            vtr.push_back((*sub[j])[i]);
+            vtr.push_back((*subset[j])[i]);
         }
-        double mean = selector(vtr, int(sub.size()/2));
+        double mean = selector(vtr, int(subset.size()/2));
         double variance = 0.0;
         for (int j = 0; j < subsize; j++)
         {
-            double dif = (*sub[j])[i]-mean;
+            double dif = (*subset[j])[i]-mean;
             variance += dif * dif;
         }
         variance = variance / subsize;
@@ -137,16 +139,6 @@ int data_set::get_label(euclid_vector * vtr)
 vector <int> data_set::get_domain()
 {
     return _domain;
-}
-
-vector <int> data_set::get_abs_domain()
-{
-    vector <int> domain;
-    for (int i = 0; i < _domain.size(); i++)
-    {
-        domain.push_back(i);
-    }
-    return domain;
 }
 
 euclid_vector * data_set::operator[](int i)

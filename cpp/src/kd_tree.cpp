@@ -26,16 +26,10 @@ vector <int> kd_subdomain(euclid_vector * query, kd_tree_node * root)
 kd_tree_node * build_tree(int c, double a, 
         data_set & data, vector <int> subdomain)
 {
-    #ifdef DEBUG
-    fprintf(stderr, "[DEBUG: Building kd-tree of size %ld]\n", subdomain.size());
-    #endif
     if (subdomain.size() < c)
         return new kd_tree_node(subdomain);
     data_set subset = data.subset(subdomain);
     int mx_var_index = max_variance_index(subset);
-    #ifdef DEBUG
-    fprintf(stderr, "[DEBUG: Max variance index: %d]\n", mx_var_index);
-    #endif
     vector <double> values;
     for (int i = 0; i < subset.size(); i++)
     {
@@ -47,9 +41,6 @@ kd_tree_node * build_tree(int c, double a,
     {
         pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
         pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
-        #ifdef DEBUG
-        fprintf(stderr, "[DEBUG: pivot_l: %lf pivot_r: %lf]\n", pivot_l, pivot_r);
-        #endif
     }
     vector <int> l_subdomain;
     vector <int> r_subdomain;
@@ -82,7 +73,7 @@ kd_tree_node * spill_tree(int c, double a, data_set & data)
     return build_tree(c, a, data, data.get_domain());
 }
 
-void save_kd_tree(kd_tree_node * root, FILE * out)
+void save_kd_tree(kd_tree_node * root, ofstream & out)
 {
     stack <kd_tree_node *> to_build;
     to_build.push(root);
@@ -91,40 +82,37 @@ void save_kd_tree(kd_tree_node * root, FILE * out)
         kd_tree_node * curr = to_build.top();
         to_build.pop();
         bool exists = curr != NULL;
-        fwrite(&exists, sizeof(bool), 1, out); 
+        out.write((char *)&exists, sizeof(bool)); 
         if (exists)
         {
-            fwrite(&curr->_index, sizeof(int), 1, out); 
-            fwrite(&curr->_pivot, sizeof(double), 1, out); 
+            out.write((char *)&curr->_index, sizeof(int)); 
+            out.write((char *)&curr->_pivot, sizeof(double)); 
             size_t sz = curr->_domain.size();
-            fwrite(&sz, sizeof(size_t), 1, out); 
-            #ifdef DEBUG
-            fprintf(stderr, "[DEBUG: Saving node w/ pivot %lf and size %ld]\n", curr->_pivot, sz);
-            #endif
-            fwrite(&curr->_domain[0], sizeof(int), curr->_domain.size(), out);
+            out.write((char *)&sz, sizeof(size_t)); 
+            out.write((char *)&curr->_domain[0], sizeof(int) * curr->_domain.size());
             to_build.push(curr->_right);
             to_build.push(curr->_left);
         }
     }
 }
 
-kd_tree_node * load_kd_tree(FILE * in)
+kd_tree_node * load_kd_tree(ifstream & in)
 {
     bool exist;
-    fread(&exist, sizeof(bool), 1, in);
+    in.read((char *)&exist, sizeof(bool));
     if (!exist)
     {
         return NULL;
     }
     kd_tree_node * res = new kd_tree_node();
-    fread(&res->_index, sizeof(int), 1, in);
-    fread(&res->_pivot, sizeof(double), 1, in);
+    in.read((char *)&res->_index, sizeof(int));
+    in.read((char *)&res->_pivot, sizeof(double));
     size_t sz;
-    fread(&sz, sizeof(size_t), 1, in);
+    in.read((char *)&sz, sizeof(size_t));
     while (sz--)
     {
         int v;
-        fread(&v, sizeof(int), 1, in);
+        in.read((char *)&v, sizeof(int));
         res->_domain.push_back(v);
     }
     res->_left = load_kd_tree(in);

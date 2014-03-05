@@ -10,35 +10,16 @@
 #include <cmath>
 using namespace std;
 
-char janet_dir [] = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
-char eugene_dir [] = "data/mnist/";
+string janet_dir = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/";
+string eugene_dir = "data/mnist/";
 
 int main() {
     test_setup(eugene_dir);
 
-    double alpha_values [] = {0, 0.0025, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05, 0.1, 0.2};
-    
-    char buffer [999];
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < get_test_set().size(); i++)
     {
-        buffer[0] = '\0';
-        sprintf(buffer, "data/mnist/trees/mnist_spill_tree_%g", alpha_values[i]);
-        FILE * input = fopen(buffer, "rb");
-        kd_tree_node * root = load_kd_tree(input);
-        int count = 0;;
-        for (int j = 0; j < get_test_set().size(); j++)
-        {
-            euclid_vector * kdnn = kd_tree_nn(get_test_set()[j], get_train_set(), root);
-            if (get_test_set().get_label(j) == get_train_set().get_label(kdnn))
-            {
-                count++;
-            }
-        }
-        printf("%lg %lg\n", alpha_values[i], (double)count / get_test_set().size());
-        delete root;
-        fclose(input);
+        print_glyph(get_test_set()[i]);
     }
-    
     /*
     vector <euclid_vector *> true_nn;
     for (int i = 0; i < get_test_set().size(); i++)

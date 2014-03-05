@@ -44,8 +44,8 @@ public:
     virtual kd_tree_node * get_left() const;
     virtual kd_tree_node * get_right() const;
     vector <int> get_domain() const;
-    friend void save_kd_tree(kd_tree_node * tree, FILE * out);
-    friend kd_tree_node * load_kd_tree(FILE * in);
+    friend void save_kd_tree(kd_tree_node * tree, ofstream & out);
+    friend kd_tree_node * load_kd_tree(ifstream & in);
     friend class data_set;
 };
 
