@@ -99,4 +99,5 @@ void cifar10_generate()
         vtr_out.close();
         cerr << "    ==> finished test set" << endl;
     }
+    cerr << "==> finished cifar10 data" << endl;    
 }
