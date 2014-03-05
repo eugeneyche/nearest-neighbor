@@ -1,5 +1,0 @@
-Convertor
-Author: Eugene Che
-
-Convertor contains means of taking the original mnist data set and converting it into the generically loaded dataset accepted by the program.
-To use, make an out directory, compile mnist.cpp, and run the binary.
