@@ -2,11 +2,16 @@
 #define _NN_H
 
 #include "data_set.h"
+#include <map>
+#include <vector>
 using namespace std;
 
 template<class Label, class T>
 vector<T>  * nearest_neighbor(vector<T> * query, DataSet<Label, T> st)
 {
+    static map<vector<T> *, vector<T> *> mem; 
+    if (mem[query])
+        return mem[query];
     vector<T> * mn_vtr = NULL;
     double mn_dist = 0;
     double l_dist = 0;
@@ -19,6 +24,7 @@ vector<T>  * nearest_neighbor(vector<T> * query, DataSet<Label, T> st)
             mn_vtr = st[i];
         }
     }
+    mem[query] = mn_vtr;
     return mn_vtr;
 }
 

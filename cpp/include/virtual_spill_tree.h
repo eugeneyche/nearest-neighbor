@@ -3,6 +3,7 @@
 
 #include "kd_tree.h"
 #include <map>
+#include <set>
 #include <utility>
 using namespace std;
 
@@ -104,6 +105,48 @@ void VirtualSpillTree<Label, T>::save(ofstream & out) const
                 to_save.push(cur->_left);
         }
     }
+}
+
+template<class Label, class T>
+vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
+{
+    queue<KDTreeNode<Label, T> *> to_explore;
+    set<size_t> domain_st;
+    to_explore.push(_root);
+    while (!to_explore.empty())
+    {
+        KDTreeNode<Label, T> * cur = to_explore.top();
+        to_explore.pop();
+        if (cur->get_left() && cur->get_right())
+        {
+            range cur_range = _range_mp[cur];
+            if (cur_range->first <= query[cur->get_index()] &&
+                query[cur->get_index()] <= cur_range->second)
+            {
+                to_explore.push(cur->get_right());
+                to_explore.push(cur->get_left());
+            }
+            else if ((*query)[cur->get_index()] <= cur->get_pivot())
+                to_explore.push(cur->get_left());
+            else
+                to_explore.push(cur->get_right());
+        }
+        else
+        {
+            vector <int> l_domain = cur->get_domain();
+            for (int i = 0; i < l_domain.size(); i++)
+            {
+                domain_st.insert(l_domain[i]);
+            }
+        }
+    }
+    set <size_t>::iterator st_i;
+    vector <size_t> domain;
+    for (st_i = domain_st.begin(); st_i != domain_st.end(); st_i++)
+    {
+        domain.push_back(*st_i);
+    }
+    return domain;
 }
 
 #endif
