@@ -1,59 +1,31 @@
 #include "data_set.h"
 
-void load_data_set(data_set & st, ifstream & in)
+template<class Label, class T>
+size_t max_variance_index(DataSet<Label, T> & subset)
 {
-    int n, m;
-    in >> n >> m;
-    in.ignore();
-    for (int i = 0; i < n; i++)
-    {
-        euclid_vector * vtr = new euclid_vector;
-        double buffer [m];
-        in.read((char *)buffer, sizeof(double) * m);
-        vtr->assign(buffer, buffer + m);
-        st._domain.push_back((int)st._domain.size());
-        st._vectors->push_back(vtr);
-    }
-}
-
-void label_data_set(data_set & st, ifstream & in)
-{
-    int n;
-    in >> n;
-    in.ignore();
-    int buffer [n];
-    in.read((char *)buffer, sizeof(int) * n);
-    for (int i = 0; i < n; i++)
-    {
-        st.set_label(i, buffer[i]);
-    }
-}
-
-int max_variance_index(data_set & subset)
-{
-    vector <double> var;
-    vector <double> vtr;
-    int dimension = (int)subset[0]->size();
-    int subsize = subset.size();
-    for (int i = 0; i < dimension; i++)
+    vector<T> var;
+    vector<T> vtr;
+    size_t dimension = subset[0]->size();
+    size_t subsize = subset.size();
+    for (size_t i = 0; i < dimension; i++)
     {
         vtr.clear();
-        for (int j = 0; j < subsize; j++)
+        for (size_t j = 0; j < subsize; j++)
         {
             vtr.push_back((*subset[j])[i]);
         }
-        double mean = selector(vtr, int(subset.size()/2));
+        size_t mean = selector(vtr, subset.size() / 2);
         double variance = 0.0;
-        for (int j = 0; j < subsize; j++)
+        for (size_t j = 0; j < subsize; j++)
         {
-            double dif = (*subset[j])[i]-mean;
+            double dif = (*subset[j])[i] - mean;
             variance += dif * dif;
         }
         variance = variance / subsize;
         var.push_back(variance);
     }
-    int maxIndex = 0;
-    for (int i = 1; i < dimension; i++)
+    size_t maxIndex = 0;
+    for (size_t i = 1; i < dimension; i++)
     {
         if (var[i] > var[maxIndex])
             maxIndex = i;
@@ -62,39 +34,60 @@ int max_variance_index(data_set & subset)
 }
 
 /* Class Definition */
-
-data_set::data_set(data_set & parent, vector <int> domain)
+template<class Label, class T>
+DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain)
 {
     _parent = &parent;
     _labels = parent._labels;
     _vectors = parent._vectors;
-    for (vector <int>::iterator itr = domain.begin(); itr != domain.end(); itr++)
+    vector<size_t>::iterator itr;
+    for (itr = domain.begin(); itr != domain.end(); itr++)
     {
         _domain.push_back(parent._domain[*itr]);
     }
 }
 
-data_set::data_set()
+template<class Label, class T>
+DataSet<Label, T>::DataSet()
 {
     _parent = NULL;
     _labels = new label_space;
     _vectors = new vector_space;
 }
 
+template<class Label, class T>
+DataSet<Label, T>::DataSet(istream & in)
+{
+    size_t n, m;
+    in >> n >> m;
+    in.ignore();
+    for (size_t i = 0; i < n; i++)
+    {
+        vector<T> * vtr = new vector<T>;
+        T buffer [m];
+        in.read((char *)buffer, sizeof(T) * m);
+        vtr->assign(buffer, buffer + m);
+        _domain.push_back(_domain.size());
+        _vectors->push_back(vtr);
+    }
+}
 
-data_set::data_set(vector_space vectors)
+template<class Label, class T>
+DataSet<Label, T>::DataSet(vector_space vectors)
 {
     _parent = NULL;
     _labels = new label_space;
     _vectors = new vector_space;
-    for (vector_space::iterator itr = vectors.begin(); itr != vectors.end(); itr++)
+    typename vector_space::iterator itr;
+    for (itr = vectors.begin(); itr != vectors.end(); itr++)
     {
-        _domain.push_back((int)_domain.size());
+        _domain.push_back((size_t)_domain.size());
         _vectors->push_back(*itr);
     }
 }
 
-data_set::~data_set()
+template<class Label, class T>
+DataSet<Label, T>::~DataSet()
 {
     if (_parent == NULL)
     {
@@ -106,47 +99,69 @@ data_set::~data_set()
         delete _labels;
         delete _vectors;
         #ifdef DEBUG
-        fprintf(stderr, "[DEBUG: Deconstructing data_set]\n");
+        fprintf(stderr, "[DEBUG: Deconstructing DataSet]\n");
         #endif
     }
 }
 
-int data_set::size()
+template<class Label, class T>
+size_t DataSet<Label, T>::size()
 {
-    return (int)_domain.size();
+    return _domain.size();
 }
 
-void data_set::set_label(int i, int label)
+template<class Label, class T>
+void DataSet<Label, T>::label(istream & in)
 {
-    set_label((*this)[i], label);
+    size_t n;
+    in >> n;
+    in.ignore();
+    Label buffer [n];
+    in.read((char *)buffer, sizeof(Label) * n);
+    for (size_t i = 0; i < n; i++)
+    {
+        set_label(i, buffer[i]);
+    }
 }
 
-void data_set::set_label(euclid_vector * vtr, int label)
+template<class Label, class T>
+void DataSet<Label, T>::set_label(size_t index, Label label)
+{
+    set_label((*this)[index], label);
+}
+
+template<class Label, class T>
+void DataSet<Label, T>::set_label(vector<T> * vtr, Label label)
 {
     (*_labels)[vtr] = label;
 }
 
-int data_set::get_label(int i)
+template<class Label, class T>
+int DataSet<Label, T>::get_label(size_t index)
 {
-    return get_label((*this)[i]);
+    return get_label((*this)[index]);
 }
 
-int data_set::get_label(euclid_vector * vtr)
+template<class Label, class T>
+int DataSet<Label, T>::get_label(vector<T> * vtr)
 {
     return (*_labels)[vtr];
 }
 
-vector <int> data_set::get_domain()
+template<class Label, class T>
+vector<size_t> DataSet<Label, T>::get_domain()
 {
     return _domain;
 }
 
-euclid_vector * data_set::operator[](int i)
+template<class Label, class T>
+vector<T> * DataSet<Label, T>::operator[](size_t index)
 {
-    return (*_vectors)[_domain[i]];
+    return (*_vectors)[_domain[index]];
 }
 
-data_set data_set::subset(vector <int> domain)
+template<class Label, class T>
+DataSet<Label, T> DataSet<Label, T>::subset(vector<size_t> domain)
 {
-    return data_set(*this, domain);
+    return DataSet<Label, T>(*this, domain);
 }

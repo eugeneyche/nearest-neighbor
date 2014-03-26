@@ -1,192 +1,169 @@
 #include "kd_tree.h"
+#include <queue>
+#include <map>
+using namespace std;
 
-vector <int> kd_subdomain(euclid_vector * query, kd_tree_node * root)
-{
-    stack <kd_tree_node *> to_explore;
-    to_explore.push(root);
-    while (!to_explore.empty())
-    {
-        kd_tree_node * cur = to_explore.top();
-        to_explore.pop();
-        if (cur->get_left() && cur->get_right())
-        {
-            if ((*query)[cur->get_index()] <= cur->get_pivot())
-                to_explore.push(cur->get_left());
-            else
-                to_explore.push(cur->get_right());
-        }
-        else
-        {
-            return cur->get_domain();
-        }
-    }
-    return vector <int> ();
-}
+#define UNDEF (-1)
 
-kd_tree_node * build_tree(int c, double a, 
-        data_set & data, vector <int> subdomain)
+template<class Label, class T>
+static KDTreeNode<Label, T> * build_tree(size_t c,
+        DataSet<Label, T> & st, vector<size_t> domain)
 {
-    if (subdomain.size() < c)
-        return new kd_tree_node(subdomain);
-    data_set subset = data.subset(subdomain);
-    int mx_var_index = max_variance_index(subset);
-    vector <double> values;
-    for (int i = 0; i < subset.size(); i++)
+    if (domain.size() < c)
+        return new KDTreeNode<Label, T>(domain);
+    DataSet<Label, T> subst = st.subset(domain);
+    int mx_var_index = max_variance_index(subst);
+    vector<T> values;
+    for (int i = 0; i < subst.size(); i++)
     {
-        values.push_back((*subset[i])[mx_var_index]);
+        values.push_back((*subst[i])[mx_var_index]);
     }
-    double pivot = selector(values, (int)(values.size() * (0.5)));
-    double pivot_l, pivot_r;
-    if (a > 0)
+    double pivot = selector(values, (T)(values.size() * 0.5));
+    vector<size_t> subdomain_l;
+    vector<size_t> subdomain_r;
+    for (int i = 0; i < domain.size(); i++)
     {
-        pivot_l = selector(values, (int)(values.size() * (0.5 - a)));
-        pivot_r = selector(values, (int)(values.size() * (0.5 + a)));
-    }
-    vector <int> l_subdomain;
-    vector <int> r_subdomain;
-    for (int i = 0; i < subdomain.size(); i++)
-    {
-        if (a > 0 && pivot_l < values[i] && values[i] <= pivot_r)
-        {
-            l_subdomain.push_back(subdomain[i]);
-            r_subdomain.push_back(subdomain[i]);
-            continue;
-        }
         if (values[i] <= pivot)
-            l_subdomain.push_back(subdomain[i]);
+            subdomain_l.push_back(domain[i]);
         else
-            r_subdomain.push_back(subdomain[i]);
+            subdomain_r.push_back(domain[i]);
     }
-    kd_tree_node * result = new kd_tree_node(mx_var_index, pivot, subdomain);
-    result->_left = build_tree(c, a, data, l_subdomain);
-    result->_right = build_tree(c, a, data, r_subdomain);
+    KDTreeNode<Label, T> * result = new KDTreeNode<Label, T>
+            (mx_var_index, pivot, domain);
+    result->_left = build_tree(c, st, subdomain_l);
+    result->_right = build_tree(c, st, subdomain_r);
     return result;
 }
 
-kd_tree_node * kd_tree(int c, data_set & data)
+template<class Label, class T>
+KDTreeNode<Label, T>::KDTreeNode(const vector<size_t> domain) :
+  _index (UNDEF),
+  _pivot (UNDEF),
+  _left (NULL),
+  _right (NULL),
+  _domain (domain)
+{ }
+
+template<class Label, class T>
+KDTreeNode<Label, T>::KDTreeNode(size_t index, 
+        T pivot, vector<size_t> domain) :
+  _index (index),
+  _pivot (pivot),
+  _left (NULL), 
+  _right (NULL),
+  _domain (domain)
+{ }
+
+template<class Label, class T>
+KDTreeNode<Label, T>::KDTreeNode(istream & in)
 {
-    return build_tree(c, 0, data, data.get_domain());
+     in.read((char *)&_index, sizeof(size_t));
+     in.read((char *)&_pivot, sizeof(T));
+     size_t sz;
+     in.read((char *)&sz, sizeof(size_t));
+     while (sz--)
+     {
+         size_t v;
+         in.read((char *)&v, sizeof(size_t));
+         _domain.push_back(v);
+     }
 }
 
-kd_tree_node * spill_tree(int c, double a, data_set & data)
+template<class Label, class T>
+KDTreeNode<Label, T>::~KDTreeNode()
 {
-    return build_tree(c, a, data, data.get_domain());
+    if (_left) delete _left;
+    if (_right) delete _right;
 }
 
-void save_kd_tree(kd_tree_node * root, ofstream & out)
+template<class Label, class T>
+void KDTreeNode<Label, T>::save(ostream & out) const
 {
-    stack <kd_tree_node *> to_build;
-    to_build.push(root);
-    while (!to_build.empty())
+    out.write((char *)&_index, sizeof(size_t)); 
+    out.write((char *)&_pivot, sizeof(T)); 
+    size_t sz = _domain.size();
+    out.write((char *)&sz, sizeof(size_t)); 
+    out.write((char *)&_domain[0], 
+            sizeof(size_t) * _domain.size());
+}
+
+template<class Label, class T>
+KDTree<Label, T>::KDTree(DataSet<Label, T> & st) :
+  _root (NULL),
+  _st (st)
+{ }
+
+template<class Label, class T>
+KDTree<Label, T>::KDTree(size_t c, DataSet<Label, T> & st) :
+  _root (build_tree(c, st, st.get_domain())),
+  _st (st)
+{ }
+
+template<class Label, class T>
+KDTree<Label, T>::KDTree(istream & in, DataSet<Label, T> & st) :
+  _st (st)
+{
+    queue<KDTreeNode<Label, T> *&> to_load;
+    to_load.push(_root);
+    while (!to_load.empty())
     {
-        kd_tree_node * curr = to_build.top();
-        to_build.pop();
-        bool exists = curr != NULL;
+        KDTreeNode<Label, T> * cur = to_load.front();
+        bool exist;
+        in.read((char *)&exist, sizeof(bool));
+        if (!exist)
+        {
+            cur = NULL; 
+        }
+        *cur = new KDTreeNode<Label, T>(in);
+        to_load.push(cur->_left);
+        to_load.push(cur->_right);
+    }
+}
+
+template<class Label, class T>
+KDTree<Label, T>::~KDTree()
+{
+    if (_root) delete _root;
+}
+
+template<class Label, class T>
+void KDTree<Label, T>::save(ostream & out) const
+{
+    queue<KDTreeNode<Label, T> *> to_save;
+    to_save.push(_root);
+    while (!to_save.empty())
+    {
+        KDTreeNode<Label, T> * cur = to_save.front();
+        to_save.pop();
+        bool exists = cur != NULL;
         out.write((char *)&exists, sizeof(bool)); 
         if (exists)
         {
-            out.write((char *)&curr->_index, sizeof(int)); 
-            out.write((char *)&curr->_pivot, sizeof(double)); 
-            size_t sz = curr->_domain.size();
-            out.write((char *)&sz, sizeof(size_t)); 
-            out.write((char *)&curr->_domain[0], sizeof(int) * curr->_domain.size());
-            to_build.push(curr->_right);
-            to_build.push(curr->_left);
+            cur->save(out);
+            to_save.push(cur->_left);
+            to_save.push(cur->_right);
         }
     }
 }
 
-kd_tree_node * load_kd_tree(ifstream & in)
+template<class Label, class T>
+vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query)
 {
-    bool exist;
-    in.read((char *)&exist, sizeof(bool));
-    if (!exist)
+    queue<KDTreeNode<Label, T> *> expl;
+    expl.push(_root);
+    while (!expl.empty())
     {
-        return NULL;
+        KDTreeNode<Label, T> * cur = expl.top();
+        expl.pop();
+        if (cur->_left && cur->_right)
+        {
+            if ((*query)[cur->_index] <= cur->_pivot)
+                expl.push(cur->_left);
+            else
+                expl.push(cur->_right);
+        }
+        else
+            return cur->_domain;
     }
-    kd_tree_node * res = new kd_tree_node();
-    in.read((char *)&res->_index, sizeof(int));
-    in.read((char *)&res->_pivot, sizeof(double));
-    size_t sz;
-    in.read((char *)&sz, sizeof(size_t));
-    while (sz--)
-    {
-        int v;
-        in.read((char *)&v, sizeof(int));
-        res->_domain.push_back(v);
-    }
-    res->_left = load_kd_tree(in);
-    res->_right = load_kd_tree(in);
-    return res;
+    return vector<size_t>();
 }
-
-/* class definition */
-
-kd_tree_node::kd_tree_node()
-{
-    _index = -1;
-    _pivot = -1;
-    _left = NULL;
-    _right = NULL;
-}
-
-kd_tree_node::kd_tree_node(vector <int> subdomain)
-{
-    _index = -1;
-    _pivot = -1;
-    _domain = subdomain;
-    _left = NULL;
-    _right = NULL;
-}
-
-kd_tree_node::kd_tree_node(int index, double pivot, vector<int> subdomain)
-{
-    _index = index;
-    _pivot = pivot;
-    _domain = subdomain;
-    _left = NULL;
-    _right = NULL;
-}
-
-kd_tree_node::kd_tree_node(const kd_tree_node & copy)
-{
-    _index = copy.get_index();
-    _pivot = copy.get_pivot();
-    _domain = copy.get_domain();
-    _left = copy.get_left();
-    _right = copy.get_right();
-}
-
-kd_tree_node::~kd_tree_node()
-{
-    if (_left)
-        delete _left;
-    if (_right)
-        delete _right;
-}
-
-int kd_tree_node::get_index() const
-{
-    return _index;
-}
-
-double kd_tree_node::get_pivot() const
-{
-    return _pivot;
-}
-
-vector <int> kd_tree_node::get_domain() const
-{
-    return _domain;
-}
-
-kd_tree_node * kd_tree_node::get_left() const
-{
-    return _left;
-}
-
-kd_tree_node * kd_tree_node::get_right() const
-{
-    return _right;
-}
-

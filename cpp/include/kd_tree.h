@@ -2,51 +2,56 @@
 #define _KD_TREE_H
 
 #include "data_set.h"
-#include <stack>
-#include <set>
 using namespace std;
 
-class kd_tree_node;
+template<class Label, class T>
+class KDTreeNode;
 
-/* get subdomain for a given query */
-vector<int> kd_subdomain(euclid_vector * query, kd_tree_node * root);
+template<class Label, class T>
+class KDTree;
 
-/* generates a kd_tree for given data, with leaf size c */
-kd_tree_node * kd_tree(int c, data_set & data);
-
-/* generates a spill_tree for given data, with leaf size c */
-kd_tree_node * spill_tree(int c, double a, data_set & data);
-
-/* saves kd_tree into given file */
-void save_kd_tree(kd_tree_node * root, FILE * out);
-
-/* loads kd_tree from given file */
-kd_tree_node * load_kd_tree(FILE * in);
-
-class kd_tree_node
+template<class Label, class T>
+class KDTreeNode
 {
 protected:
-    int _index;
-    double _pivot;
-    vector<int> _domain;
-    kd_tree_node * _left,
-                 * _right;
-    friend kd_tree_node * build_tree(int c, double a, 
-            data_set & data, vector <int> subdomain);
+    size_t _index;
+    T _pivot;
+    KDTreeNode * _left, * _right;
+    vector<size_t> _domain;
 public:
-    kd_tree_node();
-    kd_tree_node(vector <int> subdomain);
-    kd_tree_node(int d, double p, vector<int> subdomain);
-    kd_tree_node(const kd_tree_node & copy);
-    ~kd_tree_node();
-    int get_index() const;
-    double get_pivot() const;
-    virtual kd_tree_node * get_left() const;
-    virtual kd_tree_node * get_right() const;
-    vector <int> get_domain() const;
-    friend void save_kd_tree(kd_tree_node * tree, ofstream & out);
-    friend kd_tree_node * load_kd_tree(ifstream & in);
-    friend class data_set;
+    KDTreeNode(const vector<size_t> domain);
+    KDTreeNode(size_t index, T pivot, vector<size_t> domain);
+    KDTreeNode(istream & in);
+    ~KDTreeNode();
+    virtual void save(ostream & out) const;
+    virtual size_t get_index() const
+    { return _index; }
+    virtual T get_pivot() const
+    { return _pivot; }
+    virtual KDTreeNode * get_left() const
+    { return _left; }
+    virtual KDTreeNode * get_right() const
+    { return _right; }
+    vector<size_t> get_domain() const
+    { return _domain; }
+    friend class KDTree<Label, T>;
+};
+
+template<class Label, class T>
+class KDTree
+{
+protected:
+    KDTreeNode<Label, T> * _root;
+    DataSet<Label, T> & _st;
+public:
+    KDTree(DataSet<Label, T> & st);
+    KDTree(size_t c, DataSet<Label, T> & st);
+    KDTree(istream & in, DataSet<Label, T> & st);
+    ~KDTree();
+    virtual operator KDTreeNode<Label, T> * () const
+    { return _root; }
+    virtual void save(ostream & out) const;
+    virtual vector<size_t> subdomain(vector<T> * query);
 };
 
 #endif

@@ -2,15 +2,14 @@
 #define _VECTOR_MATH_H
 
 #include <vector>
-#include <random>
 using namespace std;
 
-/* gets the squared distance between two vectors */
-template<class T>
-double distance_to(vector<T> & v1, vector<T> & v2);
 
+/* gets the squared distance between two vectors */
+template <class T>
+double distance_to(vector<T> & v1, vector<T> & v2);
 /* finds the kth smallest */
-template<class T>
-T selector(vector<T> st, size_t k);
+template <class T>
+double selector(vector<T> s, unsigned int k);
 
 #endif

@@ -6,41 +6,40 @@
 #include <map>
 using namespace std;
 
-typedef map <euclid_vector *, int> label_space;
-typedef vector <euclid_vector *> vector_space;
+template<class Label, class T>
+class DataSet;
 
-class data_set;
+template<class Label, class T>
+void label_DataSet(DataSet<Label, T> & st, istream & in);
 
-/* loads the vectors from a file */
-void load(data_set & st, ifstream & in);
-/* loads the labels from a file */
-void label(data_set & st, ifstream & in);
-/* return the index of the vector with the max variance */
-int max_variance_index(data_set & sub); 
+template<class Label, class T>
+size_t max_variance_index(DataSet<Label, T> & subset); 
 
-class data_set
+template<class Label, class T>
+class DataSet
 {
+    typedef map<vector<T> *, Label> label_space;
+    typedef vector<vector<T> *> vector_space;
 private:
-    data_set * _parent;
+    DataSet<Label, T> * _parent;
     label_space * _labels;
     vector_space * _vectors;
-    vector <int> _domain;
-    data_set(data_set & parent, vector <int> domain);
+    vector<size_t> _domain;
+    DataSet(DataSet<Label, T> & parent, vector<size_t> domain);
+    DataSet(vector_space vectors);
 public:
-    data_set();
-    data_set(vector_space vectors);
-    ~data_set();
-    int size();
-    void set_label(int i, int label);
-    void set_label(euclid_vector * vtr, int label);
-    int get_label(int i);
-    int get_label(euclid_vector * vtr);
-    vector <int> get_domain();
-    vector <int> get_abs_domain();
-    euclid_vector * operator[](int i);
-    data_set subset(vector <int> domain);
-    friend void load_data_set(data_set & st, ifstream & in);
-    friend void label_data_set(data_set & st, ifstream & in);
+    DataSet();
+    DataSet(istream & in);
+    ~DataSet();
+    size_t size();
+    void label(istream & in);
+    void set_label(size_t index, Label label);
+    void set_label(vector<T> * vtr, Label label);
+    int get_label(size_t index);
+    int get_label(vector<T> * vtr);
+    vector<size_t> get_domain();
+    vector<T> * operator[](size_t index);
+    DataSet<Label, T> subset(vector<size_t> domain);
 };
 
 #endif

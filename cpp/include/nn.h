@@ -1,22 +1,16 @@
-#include "kd_tree.h"
-#include "virtual_spill_tree.h"
-#include <vector>
-#include <map>
+#ifndef _NN_H
+#define _NN_H
+
+#include "data_set.h"
 using namespace std;
 
-/* gets nearest neightbor of query */
-euclid_vector * nn(euclid_vector * query, data_set & data);
-/* gets k nearest neighbor of query */
-data_set k_nn(int k, euclid_vector * query, data_set & data);
-/* return the data_set of all vector within c*distance of the query */
-data_set c_approx_nn(double c, euclid_vector * query, data_set & data, euclid_vector * nn);
-/* gets nearest neighbor of query through kd_tree */
-euclid_vector * kd_tree_nn(euclid_vector * query, data_set & data, kd_tree_node * root);
-/* gets k nearest neighbor of query through kd_tree */
-data_set kd_tree_k_nn(int k, euclid_vector * query, data_set & data, kd_tree_node * root);
-/* gets nearest neighbor of query through query_tree */
-euclid_vector * virtual_spill_tree_nn(euclid_vector * query, data_set & data, virtual_spill_tree_node * root);
-/* gets k nearest neighbor of query through query_tree */
-data_set virtual_spill_tree_k_nn(int k, euclid_vector * query, data_set & data, virtual_spill_tree_node * root);
+template<class Label, class T>
+vector<T>  * nearest_neighbor(vector<T> * query, DataSet<Label, T> st);
 
+template<class Label, class T>
+DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T> st);
 
+template<class Label, class T>
+DataSet<Label, T> c_approximate_nearest_neighbor(double c, vector<T> * nn);
+
+#endif

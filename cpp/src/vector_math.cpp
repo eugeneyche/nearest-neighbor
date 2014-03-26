@@ -1,37 +1,39 @@
 #include "vector_math.h"
-#include <random>
 using namespace std;
 
-double distance_to( euclid_vector & v1, euclid_vector & v2)
+template<class T>
+long double distance_to(vector<T> & v1, vector<T> & v2)
 {
     if (v1.size() != v2.size())
         return -1;
-    double distance = 0;
+    long double distance = 0;
     for (int i = 0; i < v1.size(); i++)
     {
-        double d = v2[i] - v1[i];
+        long double d = (long double)v2[i] - (long double)v1[i];
         distance += d * d;
     }
     return distance;
 }
 
-double selector(vector<double> s, int k)
+template<class T>
+T selector(vector<T> st, size_t k)
 {
-	srand(int(time(NULL))); //random seed
-	int size = int(s.size());
-	double randomIndex = rand() % size; //random number between 0 and size-1
+	srand(int(time(NULL))); /* random seed */
+	size_t sz = st.size();
+	double randomIndex = rand() % sz; /* random number between 0 and size-1 */
     
-	vector<double> left; //data that are smaller than v
-	vector<double> right; // data that are larger than v
-	vector<double> v; //data that are equal to v
+	vector<T> left; /* data that are smaller than v */
+	vector<T> right; /* data that are larger than v */
+	vector<T> v; /* data that are equal to v */
     
     /* iterate through to push the smaller to left, larger to right, the rest to v */
-	for (vector <double>::iterator itr = s.begin(); itr != s.end(); itr++)
+    typename vector<T>::iterator itr;
+	for (itr = st.begin(); itr != st.end(); itr++)
 	{
-		if(*itr == s[randomIndex]){
+		if(*itr == st[randomIndex]){
 			v.push_back(*itr);
 		}
-		else if(*itr < s[randomIndex]){
+		else if(*itr < st[randomIndex]){
 			left.push_back(*itr);
 		}
 		else{
@@ -41,15 +43,15 @@ double selector(vector<double> s, int k)
     
     /* three conditions */
 	if (left.size() >= k)
-    { // the kth smallest on the left
+    { /* the kth smallest on the left */
 		return selector(left, k);
 	}
-	else if(left.size()+v.size() >= k)
-    { // the kth smallest found
-		return s[randomIndex];
+	else if(left.size() + v.size() >= k)
+    { /* the kth smallest found */
+		return st[randomIndex];
 	}
 	else
-    { // the kth smallest on the right
-		return selector(right, int (k-left.size()-v.size()));
+    { /* the kth smallest on the right */
+		return selector(right, (size_t)(k-left.size() - v.size()));
 	}
 }
