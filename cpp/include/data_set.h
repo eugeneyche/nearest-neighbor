@@ -2,6 +2,7 @@
 #define _DATA_SET_H
 
 #include "vector_math.h"
+#include <iostream>
 #include <fstream>
 #include <map>
 using namespace std;
@@ -22,12 +23,12 @@ public:
     DataSet();
     DataSet(ifstream & in);
     ~DataSet();
-    size_t size();
+    size_t size() const;
     void label(ifstream & in);
-    int get_label(size_t index);
-    int get_label(vector<T> * vtr);
-    vector<size_t> get_domain();
-    vector<T> * operator[](size_t index);
+    int get_label(size_t index) const;
+    int get_label(vector<T> * vtr) const;
+    vector<size_t> get_domain() const;
+    vector<T> * operator[](size_t index) const;
     DataSet<Label, T> subset(vector<size_t> domain);
 };
 
@@ -65,11 +66,11 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 }
 
 template<class Label, class T>
-DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain)
+DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain) :
+  _parent (&parent),
+  _labels (parent._labels),
+  _vectors (parent._vectors)
 {
-    _parent = &parent;
-    _labels = parent._labels;
-    _vectors = parent._vectors;
     vector<size_t>::iterator itr;
     for (itr = domain.begin(); itr != domain.end(); itr++)
     {
@@ -78,15 +79,18 @@ DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain)
 }
 
 template<class Label, class T>
-DataSet<Label, T>::DataSet()
+DataSet<Label, T>::DataSet() :
+  _parent (NULL),
+  _labels (new label_space),
+  _vectors (new vector_space)
 {
-    _parent = NULL;
-    _labels = new label_space;
-    _vectors = new vector_space;
 }
 
 template<class Label, class T>
-DataSet<Label, T>::DataSet(ifstream & in)
+DataSet<Label, T>::DataSet(ifstream & in) :
+  _parent (NULL),
+  _labels (new label_space),
+  _vectors (new vector_space)
 {
     size_t n, m;
     in.read((char *)&n, sizeof(size_t));
@@ -103,11 +107,11 @@ DataSet<Label, T>::DataSet(ifstream & in)
 }
 
 template<class Label, class T>
-DataSet<Label, T>::DataSet(vector_space vectors)
+DataSet<Label, T>::DataSet(vector_space vectors) :
+  _parent (NULL),
+  _labels (new label_space),
+  _vectors (new vector_space)
 {
-    _parent = NULL;
-    _labels = new label_space;
-    _vectors = new vector_space;
     typename vector_space::iterator itr;
     for (itr = vectors.begin(); itr != vectors.end(); itr++)
     {
@@ -132,7 +136,7 @@ DataSet<Label, T>::~DataSet()
 }
 
 template<class Label, class T>
-size_t DataSet<Label, T>::size()
+size_t DataSet<Label, T>::size() const
 {
     return _domain.size();
 }
@@ -146,31 +150,33 @@ void DataSet<Label, T>::label(ifstream & in)
     in.read((char *)buffer, sizeof(Label) * n);
     for (size_t i = 0; i < n; i++)
     {
-        set_label(i, buffer[i]);
+        (*_labels)[(*this)[i]] = buffer[i];
     }
 }
 
 template<class Label, class T>
-int DataSet<Label, T>::get_label(size_t index)
+int DataSet<Label, T>::get_label(size_t index) const
 {
     return get_label((*this)[index]);
 }
 
 template<class Label, class T>
-int DataSet<Label, T>::get_label(vector<T> * vtr)
+int DataSet<Label, T>::get_label(vector<T> * vtr) const
 {
     return (*_labels)[vtr];
 }
 
 template<class Label, class T>
-vector<size_t> DataSet<Label, T>::get_domain()
+vector<size_t> DataSet<Label, T>::get_domain() const
 {
     return _domain;
 }
 
 template<class Label, class T>
-vector<T> * DataSet<Label, T>::operator[](size_t index)
+vector<T> * DataSet<Label, T>::operator[](size_t index) const
 {
+    cout << _vectors->size() << endl;
+    cout << _vectors << endl;
     return (*_vectors)[_domain[index]];
 }
 

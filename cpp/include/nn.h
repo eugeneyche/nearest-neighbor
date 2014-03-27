@@ -7,24 +7,20 @@
 using namespace std;
 
 template<class Label, class T>
-vector<T>  * nearest_neighbor(vector<T> * query, DataSet<Label, T> st)
+vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> st)
 {
-    static map<vector<T> *, vector<T> *> mem; 
-    if (mem[query])
-        return mem[query];
     vector<T> * mn_vtr = NULL;
     double mn_dist = 0;
     double l_dist = 0;
-    for (int i = 0; i < st.size(); i++)
+    for (size_t i = 0; i < st.size(); i++)
     {
-        l_dist = distance_to(*query, *st[i]);
+        l_dist = distance_to(query, st[i]);
         if (mn_vtr == NULL || l_dist < mn_dist)
         {
             mn_dist = l_dist;
             mn_vtr = st[i];
         }
     }
-    mem[query] = mn_vtr;
     return mn_vtr;
 }
 

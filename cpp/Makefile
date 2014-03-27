@@ -11,7 +11,7 @@ LIB := -L lib
 INC := -I include
 
 ifdef DEBUG
-CFLAGS += -g -DDEBUG=VERBOSE
+CFLAGS += -g -DDEBUG=$(DEBUG)
 endif
 
 $(TARGET): $(OBJECTS)

@@ -19,14 +19,19 @@ void print_glyph(vector<byte> * to_print)
 int main() 
 {
     ifstream test_vtr_in ("data/mnist/test_vectors", ios::binary);
-    ifstream train_vtr_in ("data/mnist/test_vectors", ios::binary);
-    DataSet<byte, byte> trainSet (test_vtr_in);
-    for (int i = 0; i < trainSet.size(); i++)
-    {
-        print_glyph(trainSet[i]);
-        cout << ">>>" << endl;
-        print_glyph(nn(trainSet[i]));
-        cout << "---" << endl;
-    }
+    ifstream test_lbl_in ("data/mnist/test_labels", ios::binary);
+    ifstream train_vtr_in ("data/mnist/train_vectors", ios::binary);
+    ifstream train_lbl_in ("data/mnist/train_labels", ios::binary);
+    DataSet<byte, byte> testSet (test_vtr_in);
+    DataSet<byte, byte> trainSet (train_vtr_in);
+
+    testSet.label(test_lbl_in);
+    trainSet.label(train_lbl_in);
+    print_glyph(testSet[0]);
+    nearest_neighbor(trainSet[0], testSet);
+    print_glyph(testSet[0]);
     test_vtr_in.close();
+    test_lbl_in.close();
+    train_vtr_in.close();
+    train_lbl_in.close();
 }

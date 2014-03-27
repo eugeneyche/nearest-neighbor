@@ -7,14 +7,14 @@ using namespace std;
 
 /* gets the squared distance between two vectors */
 template<class T>
-double distance_to(vector<T> & v1, vector<T> & v2)
+double distance_to(const vector<T> * v1, const vector<T> * v2)
 {
-    if (v1.size() != v2.size())
+    if (v1->size() != v2->size())
         return -1;
     long double distance = 0;
-    for (int i = 0; i < v1.size(); i++)
+    for (size_t i = 0; i < v1->size(); i++)
     {
-        long double d = (long double)v2[i] - (long double)v1[i];
+        long double d = (long double)(*v2)[i] - (long double)(*v1)[i];
         distance += d * d;
     }
     return distance;

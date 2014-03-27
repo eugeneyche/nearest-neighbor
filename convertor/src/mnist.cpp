@@ -65,7 +65,6 @@ void mnist_generate()
             lbls.push_back(l_lbl);
             vtrs.push_back(l_vtr);
         }
-        lbl_out << lbls.size() << endl;
         lbl_out.write((char *)&lbl_sz, sizeof(size_t));
         lbl_out.write((char *)&lbls[0], sizeof(byte) * lbls.size());
         vtr_out.write((char *)&vtr_sz, sizeof(size_t));
@@ -126,7 +125,6 @@ void mnist_generate()
             lbls.push_back(l_lbl);
             vtrs.push_back(l_vtr);
         }
-        lbl_out << lbls.size() << endl;
         lbl_out.write((char *)&lbl_sz, sizeof(size_t));
         lbl_out.write((char *)&lbls[0], sizeof(byte) * lbls.size());
         vtr_out.write((char *)&vtr_sz, sizeof(size_t));
