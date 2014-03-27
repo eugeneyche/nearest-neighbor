@@ -8,13 +8,16 @@ template<class Label, class T>
 class SpillTree : public KDTree<Label, T>
 {
     using KDTree<Label, T>::_root;
+private:
+    static KDTreeNode<Label, T> * build_tree(size_t c, double a,
+            DataSet<Label, T> & st, vector<size_t> domain);
 public:
     SpillTree(DataSet<Label, T> st);    
     SpillTree(size_t c, double a, DataSet<Label, T> st);    
 };
 
 template<class Label, class T>
-static KDTreeNode<Label, T> * build_tree(size_t c, double a,
+KDTreeNode<Label, T> * SpillTree<Label, T>::build_tree(size_t c, double a,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
     if (domain.size() < c)

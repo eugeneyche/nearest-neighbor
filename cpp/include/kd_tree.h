@@ -42,6 +42,9 @@ public:
 template<class Label, class T>
 class KDTree
 {
+private:
+    KDTreeNode<Label, T> * build_tree(size_t c,
+            DataSet<Label, T> & st, vector<size_t> domain);
 protected:
     KDTreeNode<Label, T> * _root;
     DataSet<Label, T> & _st;
@@ -56,25 +59,28 @@ public:
     virtual vector<size_t> subdomain(vector<T> * query);
 };
 
-#define UNDEF (-1)
+#define UNDEF 0
 
 template<class Label, class T>
-static KDTreeNode<Label, T> * build_tree(size_t c,
+KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
+    #ifdef DEBUG
+        cerr << "[DEBUG: Building tree of size " << domain.size() << "]" << endl;
+    #endif
     if (domain.size() < c)
         return new KDTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
-    int mx_var_index = max_variance_index(subst);
+    size_t mx_var_index = max_variance_index(subst);
     vector<T> values;
-    for (int i = 0; i < subst.size(); i++)
+    for (size_t i = 0; i < subst.size(); i++)
     {
         values.push_back((*subst[i])[mx_var_index]);
     }
-    double pivot = selector(values, (T)(values.size() * 0.5));
+    T pivot = selector(values, (size_t)(values.size() * 0.5));
     vector<size_t> subdomain_l;
     vector<size_t> subdomain_r;
-    for (int i = 0; i < domain.size(); i++)
+    for (size_t i = 0; i < domain.size(); i++)
     {
         if (values[i] <= pivot)
             subdomain_l.push_back(domain[i]);
@@ -112,6 +118,10 @@ KDTreeNode<Label, T>::KDTreeNode(ifstream & in)
 {
      in.read((char *)&_index, sizeof(size_t));
      in.read((char *)&_pivot, sizeof(T));
+     #ifdef DEBUG
+     cerr << "[DEBUG: Building node with index " << _index <<
+            " and pivot " << _pivot << "]" << endl;
+     #endif
      size_t sz;
      in.read((char *)&sz, sizeof(size_t));
      while (sz--)
@@ -132,6 +142,10 @@ KDTreeNode<Label, T>::~KDTreeNode()
 template<class Label, class T>
 void KDTreeNode<Label, T>::save(ofstream & out) const
 {
+     #ifdef DEBUG
+     cerr << "[DEBUG: Saving node with index " << _index <<
+            " and pivot " << _pivot << "]" << endl;
+     #endif
     out.write((char *)&_index, sizeof(size_t)); 
     out.write((char *)&_pivot, sizeof(T)); 
     size_t sz = _domain.size();
@@ -156,20 +170,22 @@ template<class Label, class T>
 KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
   _st (st)
 {
-    queue<KDTreeNode<Label, T> *&> to_load;
-    to_load.push(_root);
+    queue<KDTreeNode<Label, T> **> to_load;
+    to_load.push(&_root);
     while (!to_load.empty())
     {
-        KDTreeNode<Label, T> * cur = to_load.front();
+        KDTreeNode<Label, T> ** cur = to_load.front();
+        to_load.pop();
         bool exist;
         in.read((char *)&exist, sizeof(bool));
         if (!exist)
         {
-            cur = NULL; 
+            *cur = NULL; 
+            continue;
         }
         *cur = new KDTreeNode<Label, T>(in);
-        to_load.push(cur->_left);
-        to_load.push(cur->_right);
+        to_load.push(&(*cur)->_left);
+        to_load.push(&(*cur)->_right);
     }
 }
 
@@ -206,7 +222,7 @@ vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query)
     expl.push(_root);
     while (!expl.empty())
     {
-        KDTreeNode<Label, T> * cur = expl.top();
+        KDTreeNode<Label, T> * cur = expl.front();
         expl.pop();
         if (cur->_left && cur->_right)
         {

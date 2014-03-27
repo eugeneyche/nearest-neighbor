@@ -52,4 +52,28 @@ DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T>
     return st.subset(domain);
 }
 
+template<class Label, class T>
+DataSet<Label, T> c_approx_nn(double c, vector<T> * query, DataSet<Label, T> & st, 
+        vector<T> * nn)
+{
+    map<vector<T> * , double> dist_mp;
+    for (size_t i = 0; i < st.size(); i++)
+    {
+        double dist = distance_to(query, st[i]);
+        dist_mp[st[i]] = dist;
+    }
+    double dist = distance_to(query, nn);
+    double c_distance = c * dist;
+    vector<size_t> domain;
+    for (size_t i = 0; i < st.size(); i++)
+    {
+        if (dist_mp[st[i]] <= c_distance)
+        {
+            domain.push_back(i);
+        }
+    }
+    DataSet<Label, T> & c_approx = st.subset(domain);
+    return c_approx;
+}
+
 #endif

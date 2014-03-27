@@ -35,7 +35,7 @@ public:
 template<class Label, class T>
 size_t max_variance_index(DataSet<Label, T> & subset)
 {
-    vector<T> var;
+    vector<double> var;
     vector<T> vtr;
     size_t dimension = subset[0]->size();
     size_t subsize = subset.size();
@@ -46,11 +46,11 @@ size_t max_variance_index(DataSet<Label, T> & subset)
         {
             vtr.push_back((*subset[j])[i]);
         }
-        size_t mean = selector(vtr, subset.size() / 2);
+        T median = selector(vtr, (size_t)(subset.size() * 0.5));
         double variance = 0.0;
         for (size_t j = 0; j < subsize; j++)
         {
-            double dif = (*subset[j])[i] - mean;
+            double dif = (double)(*subset[j])[i] - (double)median;
             variance += dif * dif;
         }
         variance = variance / subsize;
@@ -60,7 +60,9 @@ size_t max_variance_index(DataSet<Label, T> & subset)
     for (size_t i = 1; i < dimension; i++)
     {
         if (var[i] > var[maxIndex])
+        {
             maxIndex = i;
+        }
     }
     return maxIndex;
 }

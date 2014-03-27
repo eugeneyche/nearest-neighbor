@@ -48,13 +48,13 @@ T selector(vector<T> st, size_t k)
     {
 		return selector(left, k);
 	}
-	else if(left.size() + v.size() >= k)
+	else if (left.size() + v.size() >= k)
     {
 		return st[randomIndex];
 	}
 	else
     {
-		return selector(right, (size_t)(k-left.size() - v.size()));
+		return selector(right, (size_t)(k - left.size() - v.size()));
 	}
 }
 
