@@ -175,8 +175,6 @@ vector<size_t> DataSet<Label, T>::get_domain() const
 template<class Label, class T>
 vector<T> * DataSet<Label, T>::operator[](size_t index) const
 {
-    cout << _vectors->size() << endl;
-    cout << _vectors << endl;
     return (*_vectors)[_domain[index]];
 }
 

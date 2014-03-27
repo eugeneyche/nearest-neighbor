@@ -5,7 +5,6 @@
 #include <random>
 using namespace std;
 
-/* gets the squared distance between two vectors */
 template<class T>
 double distance_to(const vector<T> * v1, const vector<T> * v2)
 {
@@ -20,19 +19,17 @@ double distance_to(const vector<T> * v1, const vector<T> * v2)
     return distance;
 }
 
-/* finds the kth smallest */
 template<class T>
 T selector(vector<T> st, size_t k)
 {
-	srand(int(time(NULL))); /* random seed */
+	srand(int(time(NULL)));
 	size_t sz = st.size();
-	double randomIndex = rand() % sz; /* random number between 0 and size-1 */
+	double randomIndex = rand() % sz;
     
-	vector<T> left; /* data that are smaller than v */
-	vector<T> right; /* data that are larger than v */
-	vector<T> v; /* data that are equal to v */
+	vector<T> left;
+	vector<T> right;
+	vector<T> v;
     
-    /* iterate through to push the smaller to left, larger to right, the rest to v */
     typename vector<T>::iterator itr;
 	for (itr = st.begin(); itr != st.end(); itr++)
 	{
@@ -47,17 +44,16 @@ T selector(vector<T> st, size_t k)
 		}
 	}
     
-    /* three conditions */
 	if (left.size() >= k)
-    { /* the kth smallest on the left */
+    {
 		return selector(left, k);
 	}
 	else if(left.size() + v.size() >= k)
-    { /* the kth smallest found */
+    {
 		return st[randomIndex];
 	}
 	else
-    { /* the kth smallest on the right */
+    {
 		return selector(right, (size_t)(k-left.size() - v.size()));
 	}
 }

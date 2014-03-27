@@ -24,12 +24,17 @@ int main()
     ifstream train_lbl_in ("data/mnist/train_labels", ios::binary);
     DataSet<byte, byte> testSet (test_vtr_in);
     DataSet<byte, byte> trainSet (train_vtr_in);
-
     testSet.label(test_lbl_in);
     trainSet.label(train_lbl_in);
-    print_glyph(testSet[0]);
-    nearest_neighbor(trainSet[0], testSet);
-    print_glyph(testSet[0]);
+
+    for (int i = 0; i < 20; i++)
+    {
+        print_glyph(testSet[i]);
+        cout << ">>>" << endl;
+        print_glyph(nearest_neighbor(testSet[i], trainSet));
+        cout << "---" << endl;
+    }
+
     test_vtr_in.close();
     test_lbl_in.close();
     train_vtr_in.close();

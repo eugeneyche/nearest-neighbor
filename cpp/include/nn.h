@@ -7,7 +7,7 @@
 using namespace std;
 
 template<class Label, class T>
-vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> st)
+vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> & st)
 {
     vector<T> * mn_vtr = NULL;
     double mn_dist = 0;
@@ -25,7 +25,7 @@ vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> s
 }
 
 template<class Label, class T>
-DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T> st)
+DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T> & st)
 {
     map<vector<T> *, double> dist_mp; 
     vector<double> dist_vtr;
