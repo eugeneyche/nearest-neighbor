@@ -25,17 +25,21 @@ public:
     KDTreeNode(size_t index, T pivot, vector<size_t> domain);
     KDTreeNode(ifstream & in);
     ~KDTreeNode();
-    virtual void save(ofstream & out) const;
-    virtual size_t get_index() const
+    size_t get_index() const
     { return _index; }
-    virtual T get_pivot() const
+    T get_pivot() const
     { return _pivot; }
-    virtual KDTreeNode * get_left() const
+    KDTreeNode * get_left() const
     { return _left; }
-    virtual KDTreeNode * get_right() const
+    KDTreeNode * get_right() const
     { return _right; }
     vector<size_t> get_domain() const
     { return _domain; }
+    void set_left(KDTreeNode * left)
+    { _left = left; };
+    void set_right(KDTreeNode * right)
+    { _right = right; };
+    virtual void save(ofstream & out) const;
     friend class KDTree<Label, T>;
 };
 
@@ -43,7 +47,7 @@ template<class Label, class T>
 class KDTree
 {
 private:
-    KDTreeNode<Label, T> * build_tree(size_t c,
+    static KDTreeNode<Label, T> * build_tree(size_t c,
             DataSet<Label, T> & st, vector<size_t> domain);
 protected:
     KDTreeNode<Label, T> * _root;
@@ -53,8 +57,12 @@ public:
     KDTree(size_t c, DataSet<Label, T> & st);
     KDTree(ifstream & in, DataSet<Label, T> & st);
     ~KDTree();
-    virtual operator KDTreeNode<Label, T> * () const
+    KDTreeNode<Label, T> * get_root() const
     { return _root; }
+    DataSet<Label, T> & get_st() const
+    { return _st; }
+    void set_root(KDTreeNode<Label, T> * root)
+    { _root = root; }
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query);
 };

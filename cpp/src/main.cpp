@@ -1,6 +1,8 @@
 #include "vector_math.h"
 #include "nn.h"
 #include "kd_tree.h"
+#include "spill_tree.h"
+#include "virtual_spill_tree.h"
 #include "data_set.h"
 #include <iostream>
 #include <cstdio>
@@ -68,13 +70,14 @@ int main()
     testSet.label(test_lbl_in);
     trainSet.label(train_lbl_in);
 
-    KDTree<byte, byte> tree (tree_io, trainSet);
-    print_tree((KDTreeNode<byte, byte> *)tree);
+    VirtualSpillTree<byte, byte> tree (3000, 0.1, trainSet);
+    print_tree(tree.get_root());
     for (int i = 0; i < 10; i++)
     {
         print_glyph(testSet[i]);
         cout << ">>>" << endl;
-        print_glyph(nearest_neighbor(testSet[i], trainSet.subset(tree.subdomain(testSet[i]))));
+        print_glyph(nearest_neighbor(testSet[i], 
+                trainSet.subset(tree.subdomain(testSet[i]))));
         cout << "---" << endl;
     }
 
