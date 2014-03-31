@@ -11,7 +11,7 @@ LIB := -L lib
 INC := -I include
 
 ifdef DEBUG
-CFLAGS += -g -DDEBUG=VERBOSE
+CFLAGS += -g -DDEBUG=$(DEBUG)
 endif
 
 $(TARGET): $(OBJECTS)
@@ -27,11 +27,10 @@ clean:
 new: clean $(TARGET)
 
 directories:
-	mkdir bin
-	mkdir data
-	mkdir data/mnist
-	mkdir data/mnist/in
-	mkdir data/mnist/out
+	if [ ! -d bin ]; then mkdir bin; fi
+	if [ ! -d data ]; then mkdir data; fi
+	make -C data/mnist directories
+	make -C data/cifar10 directories
 
 mnist: $(TARGET)
 	make -C data/mnist
