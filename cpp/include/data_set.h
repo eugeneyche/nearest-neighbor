@@ -85,8 +85,7 @@ DataSet<Label, T>::DataSet() :
   _parent (NULL),
   _labels (new label_space),
   _vectors (new vector_space)
-{
-}
+{ }
 
 template<class Label, class T>
 DataSet<Label, T>::DataSet(ifstream & in) :

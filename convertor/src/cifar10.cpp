@@ -24,8 +24,8 @@ void cifar10_generate()
     cerr << "==> converting cifar10 data" << endl;    
     {
         cerr << "    ==> converting train data" << endl;
-        ofstream vtr_out (base_path + "out/train_vectors", ios::binary);
-        ofstream lbl_out (base_path + "out/train_labels", ios::binary);
+        ofstream vtr_out (base_path + "out/trn_vtr", ios::binary);
+        ofstream lbl_out (base_path + "out/trn_lbl", ios::binary);
         vector<int> lbls;
         vector<vector<double> > vtrs;
         for (int i = 0; i < train_batch_size; i++)
@@ -63,8 +63,8 @@ void cifar10_generate()
     }
     {
         cerr << "    ==> converting test data" << endl;
-        ofstream vtr_out (base_path + "out/test_vectors", ios::binary);
-        ofstream lbl_out (base_path + "out/test_labels", ios::binary);
+        ofstream vtr_out (base_path + "out/tst_vtr", ios::binary);
+        ofstream lbl_out (base_path + "out/tst_lbl", ios::binary);
         vector<int> lbls;
         vector<vector<double> > vtrs;
         for (int i = 0; i < test_batch_size; i++)

@@ -22,8 +22,8 @@ void mnist_generate()
     {
         ifstream vtr_in (base_path + "in/train-images-idx3-ubyte", ios::binary);
         ifstream lbl_in (base_path + "in/train-labels-idx1-ubyte", ios::binary);
-        ofstream vtr_out (base_path + "out/train_vectors", ios::binary);
-        ofstream lbl_out (base_path + "out/train_labels", ios::binary);
+        ofstream vtr_out (base_path + "out/trn_vtr", ios::binary);
+        ofstream lbl_out (base_path + "out/trn_lbl", ios::binary);
         vector<byte> lbls;
         vector<vector<byte> > vtrs;
         int mgk_vtr, mgk_lbl;
@@ -82,8 +82,8 @@ void mnist_generate()
     {
         ifstream vtr_in (base_path + "in/t10k-images-idx3-ubyte", ios::binary);
         ifstream lbl_in (base_path + "in/t10k-labels-idx1-ubyte", ios::binary);
-        ofstream vtr_out (base_path + "out/test_vectors", ios::binary);
-        ofstream lbl_out (base_path + "out/test_labels", ios::binary);
+        ofstream vtr_out (base_path + "out/tst_vtr", ios::binary);
+        ofstream lbl_out (base_path + "out/tst_lbl", ios::binary);
         vector<byte> lbls;
         vector<vector<byte> > vtrs;
         int mgk_vtr, mgk_lbl;

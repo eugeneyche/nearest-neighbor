@@ -7,7 +7,7 @@
 using namespace std;
 
 template<class Label, class T>
-vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> & st)
+vector<T> * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> & st)
 {
     vector<T> * mn_vtr = NULL;
     double mn_dist = 0;
@@ -15,7 +15,7 @@ vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> &
     for (size_t i = 0; i < st.size(); i++)
     {
         l_dist = distance_to(query, st[i]);
-        if (mn_vtr == NULL || l_dist < mn_dist)
+        if (!mn_vtr || l_dist < mn_dist)
         {
             mn_dist = l_dist;
             mn_vtr = st[i];
@@ -25,11 +25,11 @@ vector<T>  * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> &
 }
 
 template<class Label, class T>
-DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T> & st)
+DataSet<Label, T> k_nearest_neighbor(size_t k, vector<T> * query, DataSet<Label, T> & st)
 {
     map<vector<T> *, double> dist_mp; 
     vector<double> dist_vtr;
-    for (int i = 0; i < st.size(); i++)
+    for (size_t i = 0; i < st.size(); i++)
     {
         double dist = distance_to(*query, *st[i]);
         dist_mp[st[i]] = dist;
@@ -37,7 +37,7 @@ DataSet<Label, T> k_nearest_neighbor(int k, vector<T> * query, DataSet<Label, T>
     }
     double k_dist = selector(dist_vtr, k);
     vector<size_t> domain;
-    for (int i = 0; domain.size() < k && i < st.size(); i++)
+    for (size_t i = 0; domain.size() < k && i < st.size(); i++)
     {
         if (dist_mp[st[i]] <= k_dist)
         {

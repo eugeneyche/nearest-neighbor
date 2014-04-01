@@ -67,8 +67,6 @@ public:
     virtual vector<size_t> subdomain(vector<T> * query);
 };
 
-#define UNDEF 0
-
 template<class Label, class T>
 KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
@@ -104,8 +102,8 @@ KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
 
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(const vector<size_t> domain) :
-  _index (UNDEF),
-  _pivot (UNDEF),
+  _index (0),
+  _pivot (0),
   _left (NULL),
   _right (NULL),
   _domain (domain)
