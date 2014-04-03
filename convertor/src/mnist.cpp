@@ -18,7 +18,7 @@ static int read_bytes(ifstream & in, int n_bytes)
 
 void mnist_generate()
 {
-    cerr << "==> converting mnist data" << endl;
+    cerr << "> converting mnist data" << endl;
     {
         ifstream vtr_in (base_path + "in/train-images-idx3-ubyte", ios::binary);
         ifstream lbl_in (base_path + "in/train-labels-idx1-ubyte", ios::binary);
@@ -29,24 +29,24 @@ void mnist_generate()
         int mgk_vtr, mgk_lbl;
         mgk_vtr = read_bytes(vtr_in, 4);
         mgk_lbl = read_bytes(lbl_in, 4);
-        cerr << "    ==> converting train data" << endl;
-        cerr << "        ==> train_vtr magic number: " << mgk_vtr << endl;
-        cerr << "        ==> train_lbl magic number: " << mgk_lbl << endl;
+        cerr << "    > converting train data" << endl;
+        cerr << "        > train_vtr magic number: " << mgk_vtr << endl;
+        cerr << "        > train_lbl magic number: " << mgk_lbl << endl;
         size_t vtr_sz, lbl_sz;
         vtr_sz = read_bytes(vtr_in, 4);
         lbl_sz = read_bytes(lbl_in, 4);
-        cerr << "        ==> train_vtr size: " << vtr_sz << endl;
-        cerr << "        ==> train_lbl size: " << lbl_sz << endl;
+        cerr << "        > train_vtr size: " << vtr_sz << endl;
+        cerr << "        > train_lbl size: " << lbl_sz << endl;
         size_t vtr_r, vtr_c;
         vtr_r = read_bytes(vtr_in, 4);
         vtr_c = read_bytes(vtr_in, 4);
-        cerr << "        ==> train_vtr row: " << vtr_r << endl;
-        cerr << "        ==> train_vtr column: " << vtr_c << endl;
+        cerr << "        > train_vtr row: " << vtr_r << endl;
+        cerr << "        > train_vtr column: " << vtr_c << endl;
         size_t vtr_dim = vtr_r * vtr_c;
-        cerr << "        ==> train_vtr dim: " << vtr_dim << endl;
+        cerr << "        > train_vtr dim: " << vtr_dim << endl;
         if (vtr_sz != lbl_sz)
         {
-            cerr << "        ==> data corrupt !!!" << endl;
+            cerr << "        > data corrupt!!!" << endl;
             vtr_in.close();
             lbl_in.close();
             vtr_out.close();
@@ -77,7 +77,7 @@ void mnist_generate()
         lbl_in.close();
         vtr_out.close();
         lbl_out.close();
-        cerr << "    ==> finished train data" << endl;
+        cerr << "    > finished train data" << endl;
     }
     {
         ifstream vtr_in (base_path + "in/t10k-images-idx3-ubyte", ios::binary);
@@ -89,24 +89,24 @@ void mnist_generate()
         int mgk_vtr, mgk_lbl;
         mgk_vtr = read_bytes(vtr_in, 4);
         mgk_lbl = read_bytes(lbl_in, 4);
-        cerr << "    ==> converting train data" << endl;
-        cerr << "        ==> train_vtr magic number: " << mgk_vtr << endl;
-        cerr << "        ==> train_lbl magic number: " << mgk_lbl << endl;
+        cerr << "    > converting train data" << endl;
+        cerr << "        > train_vtr magic number: " << mgk_vtr << endl;
+        cerr << "        > train_lbl magic number: " << mgk_lbl << endl;
         size_t vtr_sz, lbl_sz;
         vtr_sz = read_bytes(vtr_in, 4);
         lbl_sz = read_bytes(lbl_in, 4);
-        cerr << "        ==> train_vtr size: " << vtr_sz << endl;
-        cerr << "        ==> train_lbl size: " << lbl_sz << endl;
+        cerr << "        > train_vtr size: " << vtr_sz << endl;
+        cerr << "        > train_lbl size: " << lbl_sz << endl;
         size_t vtr_r, vtr_c;
         vtr_r = read_bytes(vtr_in, 4);
         vtr_c = read_bytes(vtr_in, 4);
-        cerr << "        ==> train_vtr row: " << vtr_r << endl;
-        cerr << "        ==> train_vtr column: " << vtr_c << endl;
+        cerr << "        > train_vtr row: " << vtr_r << endl;
+        cerr << "        > train_vtr column: " << vtr_c << endl;
         size_t vtr_dim = vtr_r * vtr_c;
-        cerr << "        ==> train_vtr dim: " << vtr_dim << endl;
+        cerr << "        > train_vtr dim: " << vtr_dim << endl;
         if (vtr_sz != lbl_sz)
         {
-            cerr << "        ==> data corrupt !!!" << endl;
+            cerr << "        > data corrupt!!!" << endl;
             vtr_in.close();
             lbl_in.close();
             vtr_out.close();
@@ -137,8 +137,8 @@ void mnist_generate()
         lbl_in.close();
         vtr_out.close();
         lbl_out.close();
-        cerr << "    ==> finished train data" << endl;
+        cerr << "    > finished train data" << endl;
     }
-    cerr << "==> finished mnist data" << endl;
+    cerr << "> finished mnist data" << endl;
 }
 

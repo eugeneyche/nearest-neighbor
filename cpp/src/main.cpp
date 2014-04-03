@@ -61,29 +61,5 @@ void print_tree(KDTreeNode<Label, T> * m_node, int offset = 0, bool last = false
 
 int main() 
 {
-    ifstream test_vtr_in ("data/mnist/test_vectors", ios::binary);
-    ifstream test_lbl_in ("data/mnist/test_labels", ios::binary);
-    ifstream train_vtr_in ("data/mnist/train_vectors", ios::binary);
-    ifstream train_lbl_in ("data/mnist/train_labels", ios::binary);
-    ifstream tree_io ("tree", ios::binary);
-    DataSet<byte, byte> testSet (test_vtr_in);
-    DataSet<byte, byte> trainSet (train_vtr_in);
-    testSet.label(test_lbl_in);
-    trainSet.label(train_lbl_in);
-
-    VirtualSpillTree<byte, byte> tree (3000, 0.1, trainSet);
-    print_tree(tree.get_root());
-    for (int i = 0; i < 10; i++)
-    {
-        print_glyph(testSet[i]);
-        cout << ">>>" << endl;
-        print_glyph(nearest_neighbor(testSet[i], 
-                trainSet.subset(tree.subdomain(testSet[i]))));
-        cout << "---" << endl;
-    }
-
-    test_vtr_in.close();
-    test_lbl_in.close();
-    train_vtr_in.close();
-    train_lbl_in.close();
+    Test<byte, byte> mTest ("data/mnist");
 }
