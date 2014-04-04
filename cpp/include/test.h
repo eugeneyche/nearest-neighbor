@@ -60,12 +60,13 @@ public:
         }
     }
 
-    void generate_error_data()
+    void generate_error_data(string out_dir = ".")
     {
         #ifdef DEBUG
         cerr << "> generating error data" << endl;
         #endif
         long count = 0;
+        ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             #ifdef DEBUG
             cerr << "    > generating kd-tree data" << endl;
@@ -82,9 +83,51 @@ public:
                     count++;
                 }
             }
-            cout << (count * 1. / (*_tst_st).size()) << endl;
+            kd_out << 0 << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
         }
-
+        kd_out.close();
+        ofstream spill_out (out_dir + "/spill_tree_error.dat");
+        for (size_t i = 0; i < a_len; i++)
+        {
+            #ifdef DEBUG
+            cerr << "    > generating spill-tree " << a[i] << " data" << endl;
+            #endif
+            ifstream tree_in (_base_dir + "/spill_tree_" + to_string(a[i]));
+            KDTree<Label, T> tree (tree_in, *_trn_st);
+            count = 0;
+            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            {
+                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
+                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                if (nn_lbl != (*_tst_st).get_label(i))
+                {
+                    count++;
+                }
+            }
+            spill_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+        }
+        spill_out.close();
+        ofstream v_spill_out (out_dir + "/v_spill_tree_error.dat");
+        for (size_t i = 0; i < a_len; i++)
+        {
+            #ifdef DEBUG
+            cerr << "    > generating v-spill-tree " << a[i] << " data" << endl;
+            #endif
+            ifstream tree_in (_base_dir + "/v_spill_tree_" + to_string(a[i]));
+            KDTree<Label, T> tree (tree_in, *_trn_st);
+            count = 0;
+            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            {
+                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
+                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                if (nn_lbl != (*_tst_st).get_label(i))
+                {
+                    count++;
+                }
+            }
+            spill_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+        }
+        spill_out.close();
     }
 };
 
