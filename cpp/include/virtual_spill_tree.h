@@ -1,11 +1,11 @@
 #ifndef _VIRTUAL_SPILL_TREE_H
 #define _VIRTUAL_SPILL_TREE_H
 
-#include "kd_tree.h"
 #include <map>
 #include <queue>
 #include <set>
 #include <utility>
+#include "kd_tree.h"
 using namespace std;
 
 template<class Label, class T>
@@ -64,7 +64,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in,
 {
     queue<KDTreeNode<Label, T> *> to_update;
     to_update.push((this->get_root()));
-    while (!to_update.empty)
+    while (!to_update.empty())
     {
         KDTreeNode<Label, T> * cur = to_update.front();
         to_update.pop();
@@ -120,8 +120,8 @@ vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
             if (cur->get_left() || cur->get_right())
             {
                 range cur_range = _range_mp.at(cur);
-                if (cur_range.first <= (*query)[cur->get_index()] &&
-                        (*query)[cur->get_index()] < cur_range.second)
+                if (cur_range.first < (*query)[cur->get_index()] &&
+                        (*query)[cur->get_index()] <= cur_range.second)
                 {
                     to_explore.push(cur->get_right());
                     to_explore.push(cur->get_left());

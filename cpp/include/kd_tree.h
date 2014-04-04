@@ -85,10 +85,12 @@ KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
     }
     T pivot = selector(values, (size_t)(values.size() * 0.5));
     vector<size_t> subdomain_l;
+    size_t subdomain_l_lim = (size_t)(values.size() * 0.5);
     vector<size_t> subdomain_r;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (values[i] <= pivot)
+        if (subdomain_l.size() < subdomain_l_lim && 
+                values[i] <= pivot)
             subdomain_l.push_back(domain[i]);
         else
             subdomain_r.push_back(domain[i]);
@@ -124,12 +126,12 @@ KDTreeNode<Label, T>::KDTreeNode(ifstream & in)
 {
      in.read((char *)&_index, sizeof(size_t));
      in.read((char *)&_pivot, sizeof(T));
-     #ifdef DEBUG
-     cerr << "[DEBUG: Building node with index " << _index <<
-            " and pivot " << _pivot << "]" << endl;
-     #endif
      size_t sz;
      in.read((char *)&sz, sizeof(size_t));
+     #ifdef DEBUG
+     cerr << "[DEBUG: Building node with index " << _index <<
+            " and size " << sz << "]" << endl;
+     #endif
      while (sz--)
      {
          size_t v;
@@ -150,7 +152,7 @@ void KDTreeNode<Label, T>::save(ofstream & out) const
 {
      #ifdef DEBUG
      cerr << "[DEBUG: Saving node with index " << _index <<
-            " and pivot " << _pivot << "]" << endl;
+            " and size " << _domain.size() << "]" << endl;
      #endif
     out.write((char *)&_index, sizeof(size_t)); 
     out.write((char *)&_pivot, sizeof(T)); 

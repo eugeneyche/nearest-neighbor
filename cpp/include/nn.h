@@ -1,9 +1,9 @@
 #ifndef _NN_H
 #define _NN_H
 
-#include "data_set.h"
 #include <map>
 #include <vector>
+#include "data_set.h"
 using namespace std;
 
 template<class Label, class T>

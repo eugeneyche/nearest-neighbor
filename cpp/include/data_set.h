@@ -1,10 +1,10 @@
 #ifndef _DATA_SET_H
 #define _DATA_SET_H
 
-#include "vector_math.h"
 #include <iostream>
 #include <fstream>
 #include <map>
+#include "vector_math.h"
 using namespace std;
 
 template<class Label, class T>
