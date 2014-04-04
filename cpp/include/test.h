@@ -11,8 +11,8 @@
 #include "spill_tree.h"
 #include "virtual_spill_tree.h"
 
-static double a [] = {0.05, 0.75, 0.1, 0.15};
-static size_t a_len = 4;
+static double a [] = {0.05, 0.1, 0.15};
+static size_t a_len = 3;
 static double l [] = {0.02, 0.05, 0.1};
 static size_t l_len = 3;
 
@@ -37,7 +37,7 @@ public:
             stringstream dir; 
             dir << _base_dir << "/kd_tree_" << setprecision(2) << l[j];
             #ifdef DEBUG
-            cerr << "[DEBUG: generating kd-tree " << l[j] << "]" << endl;
+            cerr << "[DEBUG: Generating kd-tree " << l[j] << "]" << endl;
             #endif
             KDTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), *_trn_st);
             ofstream tree_out (dir.str());
@@ -51,7 +51,7 @@ public:
                 stringstream dir; 
                 dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 #ifdef DEBUG
-                cerr << "[DEBUG: generating spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << "]" << endl;
                 #endif
                 SpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
                 ofstream tree_out (dir.str());
@@ -66,7 +66,7 @@ public:
                 stringstream dir; 
                 dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 #ifdef DEBUG
-                cerr << "[DEBUG: generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                cerr << "[DEBUG: Generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
                 #endif
                 VirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
                 ofstream tree_out (dir.str());
@@ -79,13 +79,13 @@ public:
     void generate_error_data(string out_dir = ".")
     {
         #ifdef DEBUG
-        cerr << "[DEBUG: generating error data]" << endl;
+        cerr << "[DEBUG: Generating error data]" << endl;
         #endif
         long count = 0;
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             #ifdef DEBUG
-            cerr << "[DEBUG: generating kd-tree data]" << endl;
+            cerr << "[DEBUG: Generating kd-tree data]" << endl;
             #endif
             ifstream tree_in (_base_dir + "/kd_tree");
             KDTree<Label, T> tree (tree_in, *_trn_st);
@@ -106,7 +106,7 @@ public:
         for (size_t i = 0; i < a_len; i++)
         {
             #ifdef DEBUG
-            cerr << "[DEBUG: generating spill-tree " << a[i] << " data]" << endl;
+            cerr << "[DEBUG: Generating spill-tree " << a[i] << " data]" << endl;
             #endif
             ifstream tree_in (_base_dir + "/spill_tree_" + to_string(a[i]));
             SpillTree<Label, T> tree (tree_in, *_trn_st);
@@ -127,7 +127,7 @@ public:
         for (size_t i = 0; i < a_len; i++)
         {
             #ifdef DEBUG
-            cerr << "[DEBUG: generating v_spill-tree " << a[i] << " data]" << endl;
+            cerr << "[DEBUG: Generating v_spill-tree " << a[i] << " data]" << endl;
             #endif
             ifstream tree_in (_base_dir + "/v_spill_tree_" + to_string(a[i]));
             VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
@@ -153,8 +153,8 @@ Test<Label, T>::Test(string base_dir) :
   _base_dir (base_dir)
 {
     #ifdef DEBUG
-    cerr << "[DEBUG: loading datasets]" << endl;
-    cerr << "[DEBUG: loading vectors]" << endl;
+    cerr << "[DEBUG: Loading datasets]" << endl;
+    cerr << "[DEBUG: Loading vectors]" << endl;
     #endif
     ifstream trn_vtr_in (base_dir + "/trn_vtr");
     ifstream tst_vtr_in (base_dir + "/tst_vtr");
@@ -163,7 +163,7 @@ Test<Label, T>::Test(string base_dir) :
     trn_vtr_in.close();
     tst_vtr_in.close();
     #ifdef DEBUG
-    cerr << "[DEBUG: labeling dataset]" << endl;
+    cerr << "[DEBUG: Labeling dataset]" << endl;
     #endif
     ifstream trn_lbl_in (base_dir + "/trn_lbl");
     ifstream tst_lbl_in (base_dir + "/tst_lbl");
@@ -173,7 +173,7 @@ Test<Label, T>::Test(string base_dir) :
     tst_lbl_in.close();
     #ifdef DEBUG
     cerr << "[DEBUG: SUCCESS]" << endl;
-    cerr << "[DEBUG: looking for k_true_nn]" << endl;
+    cerr << "[DEBUG: Looking for k_true_nn]" << endl;
     #endif
     ifstream nn_dat_in (base_dir + "/k_true_nn", ios::binary);
     if (nn_dat_in.good())
@@ -182,7 +182,7 @@ Test<Label, T>::Test(string base_dir) :
         nn_dat_in.read((char *)&k, sizeof(size_t));
         #ifdef DEBUG
         cerr << "[DEBUG: k_true_nn found!!!]" << endl;
-        cerr << "[DEBUG: parsing k_true_nn with k = " << k << "]" << endl;
+        cerr << "[DEBUG: Parsing k_true_nn with k = " << k << "]" << endl;
         #endif
         for (size_t i = 0; i < _tst_st->size(); i++)
         {
@@ -215,7 +215,7 @@ Test<Label, T>::Test(string base_dir) :
         size_t k = 10;
         nn_dat_in.close();
         #ifdef DEBUG
-        cerr << "[DEBUG: generating k_true_nn with k = " << k << "]" << endl;
+        cerr << "[DEBUG: Generating k_true_nn with k = " << k << "]" << endl;
         #endif
         ofstream nn_dat_out (base_dir + "/k_true_nn", ios::binary);
         nn_dat_out.write((char *)&k, sizeof(size_t));
