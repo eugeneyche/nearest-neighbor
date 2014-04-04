@@ -4,14 +4,17 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include "data_set.h"
 #include "kd_tree.h"
 #include "spill_tree.h"
 #include "virtual_spill_tree.h"
 
-static double a [] = {0.05, 0.075, 0.1, 0.15, 0.2, 0.25};
-static size_t a_len = 6;
+static double a [] = {0.05, 0.75, 0.1, 0.15};
+static size_t a_len = 4;
+static double l [] = {0.02, 0.05, 0.1};
+static size_t l_len = 3;
 
 template<class Label, class T>
 class Test
@@ -29,34 +32,47 @@ public:
         #ifdef DEBUG
         cerr << "[DEBUG: generating trees]" << endl;
         #endif
+        for (size_t j = 0; j < l_len; j++)
         {
+            stringstream dir; 
+            dir << _base_dir << "/kd_tree_" << setprecision(2) << l[j];
             #ifdef DEBUG
-            cerr << "[DEBUG: generating kd-tree]" << endl;
+            cerr << "[DEBUG: generating kd-tree " << l[j] << "]" << endl;
             #endif
-            KDTree<Label, T> tree ((size_t)(0.05 * (*_trn_st).size()), *_trn_st);
-            ofstream tree_out (_base_dir + "/kd_tree");
+            KDTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), *_trn_st);
+            ofstream tree_out (dir.str());
             tree.save(tree_out);
             tree_out.close();
         }
         for (size_t i = 0; i < a_len; i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: generating spill-tree " << a[i] << "]" << endl;
-            #endif
-            SpillTree<Label, T> tree ((size_t)(0.05 * (*_trn_st).size()), a[i], *_trn_st);
-            ofstream tree_out (_base_dir + "/spill_tree_" + to_string(a[i]));
-            tree.save(tree_out);
-            tree_out.close();
+            for (size_t j = 0; j < l_len; j++)
+            {
+                stringstream dir; 
+                dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                #ifdef DEBUG
+                cerr << "[DEBUG: generating spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                #endif
+                SpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
+                ofstream tree_out (dir.str());
+                tree.save(tree_out);
+                tree_out.close();
+            }
         }
         for (size_t i = 0; i < a_len; i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: generating virual-spill-tree " << a[i] << "]" << endl;
-            #endif
-            VirtualSpillTree<Label, T> tree ((size_t)(0.05 * (*_trn_st).size()), a[i], *_trn_st);
-            ofstream tree_out (_base_dir + "/v_spill_tree_" + to_string(a[i]));
-            tree.save(tree_out);
-            tree_out.close();
+            for (size_t j = 0; j < l_len; j++)
+            {
+                stringstream dir; 
+                dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                #ifdef DEBUG
+                cerr << "[DEBUG: generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                #endif
+                VirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
+                ofstream tree_out (dir.str());
+                tree.save(tree_out);
+                tree_out.close();
+            }
         }
     }
 
