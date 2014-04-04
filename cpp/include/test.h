@@ -8,6 +8,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 static double a [] = {0.05, 0.075, 0.1, 0.15, 0.2, 0.25};
 static size_t a_len = 6;
@@ -49,12 +50,41 @@ public:
         }
         for (size_t i = 0; i < a_len; i++)
         {
+            #ifdef DEBUG
             cerr << "    > generating virual-spill-tree " << a[i] << endl;
+            #endif
             VirtualSpillTree<Label, T> tree ((size_t)(0.05 * (*_trn_st).size()), a[i], *_trn_st);
             ofstream tree_out (_base_dir + "/v_spill_tree_" + to_string(a[i]));
             tree.save(tree_out);
             tree_out.close();
         }
+    }
+
+    void generate_error_data()
+    {
+        #ifdef DEBUG
+        cerr << "> generating error data" << endl;
+        #endif
+        long count = 0;
+        {
+            #ifdef DEBUG
+            cerr << "    > generating kd-tree data" << endl;
+            #endif
+            ifstream tree_in (_base_dir + "/kd_tree");
+            KDTree<Label, T> tree (tree_in, *_trn_st);
+            count = 0;
+            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            {
+                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
+                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                if (nn_lbl != (*_tst_st).get_label(i))
+                {
+                    count++;
+                }
+            }
+            cout << (count * 1. / (*_tst_st).size()) << endl;
+        }
+
     }
 };
 

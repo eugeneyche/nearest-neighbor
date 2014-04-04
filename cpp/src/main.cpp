@@ -52,5 +52,5 @@ void print_tree(KDTreeNode<Label, T> * m_node, int offset = 0, bool last = false
 int main() 
 {
     Test<byte, byte> mTest ("data/mnist");
-    mTest.generate_trees();
+    mTest.generate_error_data();
 }
