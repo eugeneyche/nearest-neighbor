@@ -11,16 +11,6 @@ using namespace std;
 
 typedef unsigned char byte;
 
-char gradient [] = {' ', '.',':',';','+','=','x','X','$','@'};
-
-void print_glyph(vector<byte> * to_print)
-{
-    for (int i = 0; i < 28 * 28; i++) {
-        printf("%c", gradient[(int)((double)(*to_print)[i] / 255 * 10)]);
-        if (i % 28 == 27) printf("\n");
-    }
-}
-
 template<class Label, class T>
 void print_tree(KDTreeNode<Label, T> * m_node, int offset = 0, bool last = false)
 {
@@ -62,4 +52,5 @@ void print_tree(KDTreeNode<Label, T> * m_node, int offset = 0, bool last = false
 int main() 
 {
     Test<byte, byte> mTest ("data/mnist");
+    mTest.generate_trees();
 }

@@ -31,7 +31,7 @@ DataSet<Label, T> k_nearest_neighbor(size_t k, vector<T> * query, DataSet<Label,
     vector<double> dist_vtr;
     for (size_t i = 0; i < st.size(); i++)
     {
-        double dist = distance_to(*query, *st[i]);
+        double dist = distance_to(query, st[i]);
         dist_mp[st[i]] = dist;
         dist_vtr.push_back(dist);
     }
