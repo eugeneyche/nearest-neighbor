@@ -42,7 +42,7 @@ KDTreeNode<Label, T> * SpillTree<Label, T>::build_tree(size_t c, double a,
     vector<size_t> subdomain_r;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (pivot_l < values[i] && values[i] <= pivot_r)
+        if (pivot_l <= values[i] && values[i] <= pivot_r)
         {
             if (subdomain_l.size() < subdomain_l_lim)
                 subdomain_l.push_back(domain[i]);
