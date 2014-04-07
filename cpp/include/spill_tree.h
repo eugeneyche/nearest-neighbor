@@ -46,7 +46,8 @@ KDTreeNode<Label, T> * SpillTree<Label, T>::build_tree(size_t c, double a,
         {
             if (subdomain_l.size() < subdomain_l_lim)
                 subdomain_l.push_back(domain[i]);
-            subdomain_r.push_back(domain[i]);
+            else
+                subdomain_r.push_back(domain[i]);
             continue;
         }
         if (subdomain_l.size() < subdomain_l_lim && 
