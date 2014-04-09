@@ -78,70 +78,79 @@ public:
 
     void generate_error_data(string out_dir = ".")
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         cerr << "[DEBUG: Generating error data]" << endl;
-        #endif
+#endif
         long count = 0;
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: Generating kd-tree data]" << endl;
-            #endif
-            ifstream tree_in (_base_dir + "/kd_tree");
-            KDTree<Label, T> tree (tree_in, *_trn_st);
-            count = 0;
-            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            for (size_t i = 0; i < a_len; i++)
             {
-                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
-                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                if (nn_lbl != (*_tst_st).get_label(i))
+#ifdef DEBUG
+                cerr << "[DEBUG: Generating kd-tree " << a[i] << " data]" << endl;
+#endif
+                ifstream tree_in (_base_dir + "/kd_tree_" + to_string(a[i]));
+                KDTree<Label, T> tree (tree_in, *_trn_st);
+                count = 0;
+                for (size_t i = 0; i < (*_tst_st).size(); i++)
                 {
-                    count++;
+                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
+                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                    if (nn_lbl != (*_tst_st).get_label(i))
+                    {
+                        count++;
+                    }
                 }
+                kd_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
-            kd_out << 0 << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
         }
         kd_out.close();
         ofstream spill_out (out_dir + "/spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: Generating spill-tree " << a[i] << " data]" << endl;
-            #endif
-            ifstream tree_in (_base_dir + "/spill_tree_" + to_string(a[i]));
-            SpillTree<Label, T> tree (tree_in, *_trn_st);
-            count = 0;
-            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            for (size_t j = 0; j < l_len; j++)
             {
-                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
-                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                if (nn_lbl != (*_tst_st).get_label(i))
+#ifdef DEBUG
+                cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << " data]" << endl;
+#endif
+                ifstream tree_in (_base_dir + "/spill_tree_" + to_string(a[i]) + "_" + to_string(l[j]));
+                SpillTree<Label, T> tree (tree_in, *_trn_st);
+                count = 0;
+                for (size_t i = 0; i < (*_tst_st).size(); i++)
                 {
-                    count++;
+                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
+                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                    if (nn_lbl != (*_tst_st).get_label(i))
+                    {
+                        count++;
+                    }
                 }
+                spill_out << a[i] << "\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
-            spill_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
         }
         spill_out.close();
         ofstream v_spill_out (out_dir + "/v_spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: Generating v_spill-tree " << a[i] << " data]" << endl;
-            #endif
-            ifstream tree_in (_base_dir + "/v_spill_tree_" + to_string(a[i]));
-            VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
-            count = 0;
-            for (size_t i = 0; i < (*_tst_st).size(); i++)
+            for (size_t j = 0; j < l_len; j++)
             {
-                Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i], 
-                        (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                if (nn_lbl != (*_tst_st).get_label(i))
+#ifdef DEBUG
+                cerr << "[DEBUG: Generating v_spill-tree " << a[i] << " " << l[j] << " data]" << endl;
+#endif
+                ifstream tree_in (_base_dir + "/v_spill_tree_" + to_string(a[i]) + "_" + to_string(l[j]));
+                VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
+                count = 0;
+                for (size_t i = 0; i < (*_tst_st).size(); i++)
                 {
-                    count++;
+                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
+                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
+                    if (nn_lbl != (*_tst_st).get_label(i))
+                    {
+                        count++;
+                    }
                 }
+                spill_out << a[i] << "\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
-            spill_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
         }
         v_spill_out.close();
     }
