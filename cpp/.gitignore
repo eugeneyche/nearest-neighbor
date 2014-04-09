@@ -3,5 +3,5 @@ lib/*
 bin/*
 build/*
 data/*
-output/;*
+output/*
 

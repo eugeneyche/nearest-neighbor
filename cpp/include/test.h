@@ -80,6 +80,7 @@ public:
     {
         #ifdef DEBUG
         cerr << "[DEBUG: Generating error data]" << endl;
+        cerr << "[DEBUG: Writing to directory " << out_dir << "]" << endl;
         #endif
         size_t count = 0;
         ofstream kd_out (out_dir + "/kd_tree_error.dat");

@@ -28,6 +28,7 @@ new: clean $(TARGET)
 
 directories:
 	mkdir bin
+	mkdir output
 
 .PHONY: 
 	clean
