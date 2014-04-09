@@ -78,18 +78,20 @@ public:
 
     void generate_error_data(string out_dir = ".")
     {
-#ifdef DEBUG
+        #ifdef DEBUG
         cerr << "[DEBUG: Generating error data]" << endl;
-#endif
-        long count = 0;
+        #endif
+        size_t count = 0;
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             for (size_t i = 0; i < a_len; i++)
             {
-#ifdef DEBUG
+                #ifdef DEBUG
                 cerr << "[DEBUG: Generating kd-tree " << a[i] << " data]" << endl;
-#endif
-                ifstream tree_in (_base_dir + "/kd_tree_" + to_string(a[i]));
+                #endif
+                stringstream dir; 
+                dir << _base_dir << "/kd_tree_" << setprecision(2) << l[i];
+                ifstream tree_in (dir.str());
                 KDTree<Label, T> tree (tree_in, *_trn_st);
                 count = 0;
                 for (size_t i = 0; i < (*_tst_st).size(); i++)
@@ -110,10 +112,12 @@ public:
         {
             for (size_t j = 0; j < l_len; j++)
             {
-#ifdef DEBUG
+                #ifdef DEBUG
                 cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << " data]" << endl;
-#endif
-                ifstream tree_in (_base_dir + "/spill_tree_" + to_string(a[i]) + "_" + to_string(l[j]));
+                #endif
+                stringstream dir; 
+                dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                ifstream tree_in (dir.str());
                 SpillTree<Label, T> tree (tree_in, *_trn_st);
                 count = 0;
                 for (size_t i = 0; i < (*_tst_st).size(); i++)
@@ -125,7 +129,7 @@ public:
                         count++;
                     }
                 }
-                spill_out << a[i] << "\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
         }
         spill_out.close();
@@ -134,10 +138,12 @@ public:
         {
             for (size_t j = 0; j < l_len; j++)
             {
-#ifdef DEBUG
+                #ifdef DEBUG
                 cerr << "[DEBUG: Generating v_spill-tree " << a[i] << " " << l[j] << " data]" << endl;
-#endif
-                ifstream tree_in (_base_dir + "/v_spill_tree_" + to_string(a[i]) + "_" + to_string(l[j]));
+                #endif
+                stringstream dir; 
+                dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                ifstream tree_in (dir.str());
                 VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
                 count = 0;
                 for (size_t i = 0; i < (*_tst_st).size(); i++)
@@ -149,7 +155,7 @@ public:
                         count++;
                     }
                 }
-                spill_out << a[i] << "\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
         }
         v_spill_out.close();
