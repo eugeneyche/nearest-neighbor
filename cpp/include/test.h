@@ -83,6 +83,7 @@ public:
         cerr << "[DEBUG: Writing to directory " << out_dir << "]" << endl;
         #endif
         size_t count = 0;
+        /*
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             for (size_t i = 0; i < a_len; i++)
@@ -134,6 +135,7 @@ public:
             }
         }
         spill_out.close();
+        */
         ofstream v_spill_out (out_dir + "/v_spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {
@@ -156,7 +158,7 @@ public:
                         count++;
                     }
                 }
-                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                v_spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
             }
         }
         v_spill_out.close();
