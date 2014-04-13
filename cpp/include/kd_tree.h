@@ -87,13 +87,32 @@ KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
     vector<size_t> subdomain_l;
     size_t subdomain_l_lim = (size_t)(values.size() * 0.5);
     vector<size_t> subdomain_r;
+    vector<size_t> pivot_pool;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (subdomain_l.size() < subdomain_l_lim && 
-                values[i] <= pivot)
-            subdomain_l.push_back(domain[i]);
+        if (pivot == values[i])
+        {
+            pivot_pool.push_back(domain[i]);
+        }
         else
-            subdomain_r.push_back(domain[i]);
+        {
+            if (values[i] <= pivot)
+                subdomain_l.push_back(domain[i]);
+            else
+                subdomain_r.push_back(domain[i]);
+        }
+    }
+    while (subdomain_l_lim > subdomain_l.size())
+    {
+        size_t curr = pivot_pool.back();
+        pivot_pool.pop_back();
+        subdomain_l.push_back(curr);
+    }
+    while (!pivot_pool.empty())
+    {
+        size_t curr = pivot_pool.back();
+        pivot_pool.pop_back();
+        subdomain_r.push_back(curr);
     }
     KDTreeNode<Label, T> * result = new KDTreeNode<Label, T>
             (mx_var_index, pivot, domain);

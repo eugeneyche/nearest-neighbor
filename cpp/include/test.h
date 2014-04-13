@@ -76,6 +76,14 @@ public:
         }
     }
 
+    void generate_true_nn_data(string out_dir = ".")
+    {
+        #ifdef DEBUG
+        cerr << "[DEBUG: Generate true nn data]" << endl;
+        cerr << "[DEBUG: Writing to directory " << out_dir << "]" << endl;
+        #endif
+    }
+
     void generate_error_data(string out_dir = ".")
     {
         #ifdef DEBUG
@@ -83,7 +91,6 @@ public:
         cerr << "[DEBUG: Writing to directory " << out_dir << "]" << endl;
         #endif
         size_t count = 0;
-        /*
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             for (size_t i = 0; i < a_len; i++)
@@ -135,7 +142,6 @@ public:
             }
         }
         spill_out.close();
-        */
         ofstream v_spill_out (out_dir + "/v_spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {

@@ -3,6 +3,8 @@
 
 #include "kd_tree.h"
 
+#define MIN(x, y) (x) < (y) ? (x) : (y)
+
 template<class Label, class T>
 class SpillTree;
 
@@ -38,23 +40,84 @@ KDTreeNode<Label, T> * SpillTree<Label, T>::build_tree(size_t c, double a,
     T pivot_l = selector(values, (size_t)(values.size() * (0.5 - a)));
     T pivot_r = selector(values, (size_t)(values.size() * (0.5 + a)));
     vector<size_t> subdomain_l;
-    size_t subdomain_l_lim = (size_t)(values.size() * (0.5 + a));
+    size_t subdomain_lim = (size_t)(values.size() * (0.5 + a));
     vector<size_t> subdomain_r;
+    vector<size_t> pivot_pool;
+    vector<size_t> pivot_e_pool;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (pivot_l <= values[i] && values[i] <= pivot_r)
+        if (pivot == values[i])
         {
-            if (subdomain_l.size() < subdomain_l_lim)
-                subdomain_l.push_back(domain[i]);
-            else
-                subdomain_r.push_back(domain[i]);
-            continue;
+            pivot_pool.push_back(domain[i]);
         }
-        if (subdomain_l.size() < subdomain_l_lim && 
-                values[i] <= pivot)
-            subdomain_l.push_back(domain[i]);
+        else if (pivot_l == values[i] || pivot_r == values[i])
+        {
+            pivot_e_pool.push_back(domain[i]);
+        }
         else
-            subdomain_r.push_back(domain[i]);
+        {
+            if (pivot_l < values[i] && values[i] < pivot_r)
+            {
+                subdomain_l.push_back(domain[i]);
+                subdomain_r.push_back(domain[i]);
+            }
+            else
+            {
+                if (values[i] < pivot)
+                    subdomain_l.push_back(domain[i]);
+                else
+                    subdomain_r.push_back(domain[i]);
+            }
+        }
+    }
+    size_t d_l = MIN(subdomain_lim - subdomain_l.size(), pivot_pool.size() + pivot_e_pool.size());
+    size_t d_r = MIN(subdomain_lim - subdomain_r.size(), pivot_pool.size() + pivot_e_pool.size());
+    size_t spill = d_l + d_r - (pivot_pool.size() + pivot_e_pool.size());
+    for (size_t i = 0; i < spill; i++)
+    {
+        size_t curr;
+        if (!pivot_pool.empty())
+        {
+             curr = pivot_pool.back();
+             pivot_pool.pop_back();
+        }
+        else
+        {
+             curr = pivot_e_pool.back();
+             pivot_e_pool.pop_back();
+        }
+        subdomain_l.push_back(curr);
+        subdomain_r.push_back(curr);
+    }
+    for (size_t i = 0; i < d_l - spill; i++)
+    {
+        size_t curr;
+        if (!pivot_pool.empty())
+        {
+             curr = pivot_pool.back();
+             pivot_pool.pop_back();
+        }
+        else
+        {
+             curr = pivot_e_pool.back();
+             pivot_e_pool.pop_back();
+        }
+        subdomain_l.push_back(curr);
+    }
+    for (size_t i = 0; i < d_r - spill; i++)
+    {
+        size_t curr;
+        if (!pivot_pool.empty())
+        {
+             curr = pivot_pool.back();
+             pivot_pool.pop_back();
+        }
+        else
+        {
+             curr = pivot_e_pool.back();
+             pivot_e_pool.pop_back();
+        }
+        subdomain_r.push_back(curr);
     }
     KDTreeNode<Label, T> * result = new KDTreeNode<Label, T>
             (mx_var_index, pivot, domain);
