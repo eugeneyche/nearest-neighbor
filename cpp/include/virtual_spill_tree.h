@@ -13,7 +13,7 @@ class VirtualSpillTree : public KDTree<Label, T>
 {
     typedef pair<T, T> range;
 protected:
-    map<KDTreeNode<Label, T> *, range> _range_mp;
+    map<KDTreeNode<Label, T> *, range> range_mp_;
 public:
     VirtualSpillTree(DataSet<Label, T> & st);
     VirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
@@ -50,7 +50,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a,
             }
             T pivot_l = selector(values, (size_t)(values.size() * (0.5 - a)));
             T pivot_r = selector(values, (size_t)(values.size() * (0.5 + a)));
-            _range_mp[cur] = range(pivot_l, pivot_r);
+            range_mp_[cur] = range(pivot_l, pivot_r);
             to_update.push(cur->get_left());
             to_update.push(cur->get_right());
         }
@@ -74,7 +74,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in,
             T pivot_l, pivot_r;
             in.read((char *)&pivot_l, sizeof(T));
             in.read((char *)&pivot_r, sizeof(T));
-            _range_mp[cur] = range(pivot_l, pivot_r);
+            range_mp_[cur] = range(pivot_l, pivot_r);
             to_update.push(cur->get_left());
             to_update.push(cur->get_right());
         }
@@ -94,7 +94,7 @@ void VirtualSpillTree<Label, T>::save(ofstream & out) const
         bool exists = cur != NULL;
         if (exists)
         {
-            range cur_range = _range_mp.at(cur);
+            range cur_range = range_mp_.at(cur);
             out.write((char *)&cur_range.first, sizeof(T));
             out.write((char *)&cur_range.second, sizeof(T));
             to_save.push(cur->get_left());
@@ -119,7 +119,7 @@ vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
         {
             if (cur->get_left() || cur->get_right())
             {
-                range cur_range = _range_mp.at(cur);
+                range cur_range = range_mp_.at(cur);
                 if (cur_range.first < (*query)[cur->get_index()] &&
                         (*query)[cur->get_index()] <= cur_range.second)
                 {
