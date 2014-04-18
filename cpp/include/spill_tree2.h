@@ -44,7 +44,7 @@ KDTree2Node<Label, T> * SpillTree2<Label, T>::build_tree(size_t c, double a,
     vector<size_t> pivot_e_pool;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (pivot == dot(st[i], mx_var_dir))
+        if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
         else if (pivot_l == dot(st[i], mx_var_dir) || pivot_r == dot(st[i], mx_var_dir))
             pivot_e_pool.push_back(domain[i]);

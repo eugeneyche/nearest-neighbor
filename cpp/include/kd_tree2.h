@@ -89,7 +89,7 @@ KDTree2Node<Label, T> * KDTree2<Label, T>::build_tree(size_t c,
     vector<size_t> pivot_pool;
     for (size_t i = 0; i < domain.size(); i++)
     {
-        if (pivot == dot(st[i], mx_var_dir))
+        if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
         else
             if (dot(st[i], mx_var_dir) <= pivot)
