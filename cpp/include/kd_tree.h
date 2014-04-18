@@ -138,7 +138,7 @@ KDTreeNode<Label, T>::KDTreeNode(size_t index,
   left_ (NULL), 
   right_ (NULL),
   domain_ (domain)
-https://piazza.com/class/hr49laub6bk3d2?cid=149{ }
+{ }
 
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(ifstream & in)

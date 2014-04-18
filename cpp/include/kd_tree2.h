@@ -1,5 +1,5 @@
-#ifndef _KD_TREE_H
-#define _KD_TREE_H
+#ifndef _KD_TREE2_H
+#define _KD_TREE2_H
 
 #include <queue>
 #include <map>
@@ -79,12 +79,10 @@ KDTree2Node<Label, T> * KDTree2<Label, T>::build_tree(size_t c,
         return new KDTree2Node<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
     vector<double> mx_var_dir; /* TODO: determine vtr */
-    vector<T> values;
+    vector<double> values;
     for (size_t i = 0; i < subst.size(); i++)
-    {
         values.push_back(dot(*subst[i], mx_var_dir));
-    }
-    T pivot = selector(values, (size_t)(values.size() * 0.5));
+    double pivot = selector(values, (size_t)(values.size() * 0.5));
     vector<size_t> subdomain_l;
     size_t subdomain_l_lim = (size_t)(values.size() * 0.5);
     vector<size_t> subdomain_r;
