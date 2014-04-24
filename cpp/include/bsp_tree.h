@@ -1,5 +1,5 @@
-#ifndef _KD_TREE2_H
-#define _KD_TREE2_H
+#ifndef _BSP_TREE_H
+#define _BSP_TREE_H
 
 #include <queue>
 #include <map>
@@ -8,75 +8,75 @@
 using namespace std;
 
 template<class Label, class T>
-class KDTree2Node;
+class BSPTreeNode;
 
 template<class Label, class T>
-class KDTree2;
+class BSPTree;
 
 template<class Label, class T>
-class KDTree2Node
+class BSPTreeNode
 {
 protected:
     vector<double> dir_;
     double pivot_;
-    KDTree2Node * left_, * right_;
+    BSPTreeNode * left_, * right_;
     vector<size_t> domain_;
 public:
-    KDTree2Node(const vector<size_t> domain);
-    KDTree2Node(vector<double> dir, double pivot, vector<size_t> domain);
-    KDTree2Node(ifstream & in);
-    ~KDTree2Node();
+    BSPTreeNode(const vector<size_t> domain);
+    BSPTreeNode(vector<double> dir, double pivot, vector<size_t> domain);
+    BSPTreeNode(ifstream & in);
+    ~BSPTreeNode();
     vector<double> get_direction() const
     { return dir_; }
     double get_pivot() const
     { return pivot_; }
-    KDTree2Node * get_left() const
+    BSPTreeNode * get_left() const
     { return left_; }
-    KDTree2Node * get_right() const
+    BSPTreeNode * get_right() const
     { return right_; }
     vector<size_t> get_domain() const
     { return domain_; }
-    void set_left(KDTree2Node * left)
+    void set_left(BSPTreeNode * left)
     { left_ = left; };
-    void set_right(KDTree2Node * right)
+    void set_right(BSPTreeNode * right)
     { right_ = right; };
     virtual void save(ofstream & out) const;
-    friend class KDTree2<Label, T>;
+    friend class BSPTree<Label, T>;
 };
 
 template<class Label, class T>
-class KDTree2
+class BSPTree
 {
 private:
-    static KDTree2Node<Label, T> * build_tree(size_t c,
+    static BSPTreeNode<Label, T> * build_tree(size_t c,
             DataSet<Label, T> & st, vector<size_t> domain);
 protected:
-    KDTree2Node<Label, T> * root_;
+    BSPTreeNode<Label, T> * root_;
     DataSet<Label, T> & st_;
 public:
-    KDTree2(DataSet<Label, T> & st);
-    KDTree2(size_t c, DataSet<Label, T> & st);
-    KDTree2(ifstream & in, DataSet<Label, T> & st);
-    ~KDTree2();
-    KDTree2Node<Label, T> * get_root() const
+    BSPTree(DataSet<Label, T> & st);
+    BSPTree(size_t c, DataSet<Label, T> & st);
+    BSPTree(ifstream & in, DataSet<Label, T> & st);
+    ~BSPTree();
+    BSPTreeNode<Label, T> * get_root() const
     { return root_; }
     DataSet<Label, T> & get_st() const
     { return st_; }
-    void set_root(KDTree2Node<Label, T> * root)
+    void set_root(BSPTreeNode<Label, T> * root)
     { root_ = root; }
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query);
 };
 
 template<class Label, class T>
-KDTree2Node<Label, T> * KDTree2<Label, T>::build_tree(size_t c,
+BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
     #ifdef DEBUG
         cerr << "[DEBUG: Building tree of size " << domain.size() << "]" << endl;
     #endif
     if (domain.size() < c)
-        return new KDTree2Node<Label, T>(domain);
+        return new BSPTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
     vector<double> mx_var_dir; /* TODO: determine vtr */
     vector<double> values;
@@ -109,7 +109,7 @@ KDTree2Node<Label, T> * KDTree2<Label, T>::build_tree(size_t c,
         pivot_pool.pop_back();
         subdomain_r.push_back(curr);
     }
-    KDTree2Node<Label, T> * result = new KDTree2Node<Label, T>
+    BSPTreeNode<Label, T> * result = new BSPTreeNode<Label, T>
             (mx_var_dir, pivot, domain);
     result->left_ = build_tree(c, st, subdomain_l);
     result->right_ = build_tree(c, st, subdomain_r);
@@ -117,7 +117,7 @@ KDTree2Node<Label, T> * KDTree2<Label, T>::build_tree(size_t c,
 }
 
 template<class Label, class T>
-KDTree2Node<Label, T>::KDTree2Node(const vector<size_t> domain) :
+BSPTreeNode<Label, T>::BSPTreeNode(const vector<size_t> domain) :
   dir_ (),
   pivot_ (0),
   left_ (NULL),
@@ -126,7 +126,7 @@ KDTree2Node<Label, T>::KDTree2Node(const vector<size_t> domain) :
 { }
 
 template<class Label, class T>
-KDTree2Node<Label, T>::KDTree2Node(vector<double> dir, 
+BSPTreeNode<Label, T>::BSPTreeNode(vector<double> dir, 
         double pivot, vector<size_t> domain) :
   dir_ (dir),
   pivot_ (pivot),
@@ -136,7 +136,7 @@ KDTree2Node<Label, T>::KDTree2Node(vector<double> dir,
 { }
 
 template<class Label, class T>
-KDTree2Node<Label, T>::KDTree2Node(ifstream & in)
+BSPTreeNode<Label, T>::BSPTreeNode(ifstream & in)
 {
      size_t dim;
      in.read((char *)&dim, sizeof(size_t));
@@ -158,14 +158,14 @@ KDTree2Node<Label, T>::KDTree2Node(ifstream & in)
 }
 
 template<class Label, class T>
-KDTree2Node<Label, T>::~KDTree2Node()
+BSPTreeNode<Label, T>::~BSPTreeNode()
 {
     if (left_) delete left_;
     if (right_) delete right_;
 }
 
 template<class Label, class T>
-void KDTree2Node<Label, T>::save(ofstream & out) const
+void BSPTreeNode<Label, T>::save(ofstream & out) const
 {
     size_t dim = dir_.size();
     out.write((char *)&dim, sizeof(size_t)); 
@@ -179,26 +179,26 @@ void KDTree2Node<Label, T>::save(ofstream & out) const
 }
 
 template<class Label, class T>
-KDTree2<Label, T>::KDTree2(DataSet<Label, T> & st) :
+BSPTree<Label, T>::BSPTree(DataSet<Label, T> & st) :
   root_ (NULL),
   st_ (st)
 { }
 
 template<class Label, class T>
-KDTree2<Label, T>::KDTree2(size_t c, DataSet<Label, T> & st) :
+BSPTree<Label, T>::BSPTree(size_t c, DataSet<Label, T> & st) :
   root_ (build_tree(c, st, st.get_domain())),
   st_ (st)
 { }
 
 template<class Label, class T>
-KDTree2<Label, T>::KDTree2(ifstream & in, DataSet<Label, T> & st) :
+BSPTree<Label, T>::BSPTree(ifstream & in, DataSet<Label, T> & st) :
   st_ (st)
 {
-    queue<KDTree2Node<Label, T> **> to_load;
+    queue<BSPTreeNode<Label, T> **> to_load;
     to_load.push(&root_);
     while (!to_load.empty())
     {
-        KDTree2Node<Label, T> ** cur = to_load.front();
+        BSPTreeNode<Label, T> ** cur = to_load.front();
         to_load.pop();
         bool exist;
         in.read((char *)&exist, sizeof(bool));
@@ -207,26 +207,26 @@ KDTree2<Label, T>::KDTree2(ifstream & in, DataSet<Label, T> & st) :
             *cur = NULL; 
             continue;
         }
-        *cur = new KDTree2Node<Label, T>(in);
+        *cur = new BSPTreeNode<Label, T>(in);
         to_load.push(&(*cur)->left_);
         to_load.push(&(*cur)->right_);
     }
 }
 
 template<class Label, class T>
-KDTree2<Label, T>::~KDTree2()
+BSPTree<Label, T>::~BSPTree()
 {
     if (root_) delete root_;
 }
 
 template<class Label, class T>
-void KDTree2<Label, T>::save(ofstream & out) const
+void BSPTree<Label, T>::save(ofstream & out) const
 {
-    queue<KDTree2Node<Label, T> *> to_save;
+    queue<BSPTreeNode<Label, T> *> to_save;
     to_save.push(root_);
     while (!to_save.empty())
     {
-        KDTree2Node<Label, T> * cur = to_save.front();
+        BSPTreeNode<Label, T> * cur = to_save.front();
         to_save.pop();
         bool exists = cur != NULL;
         out.write((char *)&exists, sizeof(bool)); 
@@ -240,13 +240,13 @@ void KDTree2<Label, T>::save(ofstream & out) const
 }
 
 template<class Label, class T>
-vector<size_t> KDTree2<Label, T>::subdomain(vector<T> * query)
+vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query)
 {
-    queue<KDTree2Node<Label, T> *> expl;
+    queue<BSPTreeNode<Label, T> *> expl;
     expl.push(root_);
     while (!expl.empty())
     {
-        KDTree2Node<Label, T> * cur = expl.front();
+        BSPTreeNode<Label, T> * cur = expl.front();
         expl.pop();
         if (cur->left_ && cur->right_)
         {

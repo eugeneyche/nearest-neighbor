@@ -3,8 +3,8 @@
 #include "vector_math.h"
 #include "nn.h"
 #include "kd_tree.h"
-#include "spill_tree.h"
-#include "virtual_spill_tree.h"
+#include "kd_spill_tree.h"
+#include "kd_virtual_spill_tree.h"
 #include "data_set.h"
 #include "test.h"
 using namespace std;

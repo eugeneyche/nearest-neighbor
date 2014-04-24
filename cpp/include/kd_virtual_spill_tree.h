@@ -1,5 +1,5 @@
-#ifndef _VIRTUAL_SPILL_TREE_H
-#define _VIRTUAL_SPILL_TREE_H
+#ifndef _KD_VIRTUAL_SPILL_TREE_H
+#define _KD_VIRTUAL_SPILL_TREE_H
 
 #include <map>
 #include <queue>
@@ -9,26 +9,26 @@
 using namespace std;
 
 template<class Label, class T>
-class VirtualSpillTree : public KDTree<Label, T>
+class KDVirtualSpillTree : public KDTree<Label, T>
 {
     typedef pair<T, T> range;
 protected:
     map<KDTreeNode<Label, T> *, range> range_mp_;
 public:
-    VirtualSpillTree(DataSet<Label, T> & st);
-    VirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
-    VirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
+    KDVirtualSpillTree(DataSet<Label, T> & st);
+    KDVirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
+    KDVirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query);
 };
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(DataSet<Label, T> & st) :
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(DataSet<Label, T> & st) :
   KDTree<Label, T>(st)
 { }
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a, 
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(size_t c, double a, 
         DataSet<Label, T> & st) :
   KDTree<Label, T>(c, st)
 {
@@ -58,7 +58,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a,
 }
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in, 
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(ifstream & in, 
         DataSet<Label, T> & st) :
   KDTree<Label, T>(in, st)
 {
@@ -82,7 +82,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in,
 }
 
 template<class Label, class T>
-void VirtualSpillTree<Label, T>::save(ofstream & out) const
+void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 {
     this->KDTree<Label, T>::save(out);
     queue<KDTreeNode<Label, T> *> to_save;
@@ -105,7 +105,7 @@ void VirtualSpillTree<Label, T>::save(ofstream & out) const
 
 
 template<class Label, class T>
-vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
+vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query)
 {
     queue<KDTreeNode<Label, T> *> to_explore;
     set<size_t> domain_st;

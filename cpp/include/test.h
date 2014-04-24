@@ -8,8 +8,8 @@
 #include <algorithm>
 #include "data_set.h"
 #include "kd_tree.h"
-#include "spill_tree.h"
-#include "virtual_spill_tree.h"
+#include "kd_spill_tree.h"
+#include "kd_virtual_spill_tree.h"
 
 static double a [] = {0.05, 0.1, 0.15};
 static size_t a_len = 3;
@@ -53,7 +53,7 @@ public:
                 #ifdef DEBUG
                 cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << "]" << endl;
                 #endif
-                SpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
+                KDSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
                 ofstream tree_out (dir.str());
                 tree.save(tree_out);
                 tree_out.close();
@@ -68,7 +68,7 @@ public:
                 #ifdef DEBUG
                 cerr << "[DEBUG: Generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
                 #endif
-                VirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
+                KDVirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
                 ofstream tree_out (dir.str());
                 tree.save(tree_out);
                 tree_out.close();
@@ -127,7 +127,7 @@ public:
                 stringstream dir; 
                 dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 ifstream tree_in (dir.str());
-                SpillTree<Label, T> tree (tree_in, *_trn_st);
+                KDSpillTree<Label, T> tree (tree_in, *_trn_st);
                 count = 0;
                 for (size_t i = 0; i < (*_tst_st).size(); i++)
                 {
@@ -153,7 +153,7 @@ public:
                 stringstream dir; 
                 dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 ifstream tree_in (dir.str());
-                VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
+                KDVirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
                 count = 0;
                 for (size_t i = 0; i < (*_tst_st).size(); i++)
                 {
