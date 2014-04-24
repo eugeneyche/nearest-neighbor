@@ -1,3 +1,0 @@
-rename kd_tree2 to bsp_tree
-rename spill_tree to kd_spill_tree
-rename spill_tree2 to bsp_spill_tree
