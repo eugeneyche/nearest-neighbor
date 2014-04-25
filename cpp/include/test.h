@@ -66,7 +66,7 @@ public:
         }
     }
 
-    void generate_kd_v_spill_tree()
+    void generate_kd_v_spill_trees()
     {
         for (size_t i = 0; i < a_len; i++)
         {
