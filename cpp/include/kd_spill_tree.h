@@ -88,6 +88,46 @@ KDTreeNode<Label, T> * KDSpillTree<Label, T>::build_tree(size_t c, double a,
         cerr << "[DEBUG: dr - " << d_r << "]" << endl;
         cerr << "[DEBUG: spill - " << spill << "]" << endl;
     #endif
+    for (size_t i = 0; i < d_l - spill; i++)
+    {
+        size_t curr;
+        if (!pivot_l_pool.empty())
+        {
+             curr = pivot_l_pool.back();
+             pivot_l_pool.pop_back();
+        }
+        else if (!pivot_pool.empty())
+        {
+             curr = pivot_pool.back();
+             pivot_pool.pop_back();
+        }
+        else
+        {
+             curr = pivot_r_pool.back();
+             pivot_r_pool.pop_back();
+        }
+        subdomain_l.push_back(curr);
+    }
+    for (size_t i = 0; i < d_r - spill; i++)
+    {
+        size_t curr;
+        if (!pivot_r_pool.empty())
+        {
+             curr = pivot_r_pool.back();
+             pivot_r_pool.pop_back();
+        }
+        else if (!pivot_pool.empty())
+        {
+             curr = pivot_pool.back();
+             pivot_pool.pop_back();
+        }
+        else
+        {
+             curr = pivot_l_pool.back();
+             pivot_l_pool.pop_back();
+        }
+        subdomain_r.push_back(curr);
+    }
     for (size_t i = 0; i < spill; i++)
     {
         size_t curr;
@@ -107,46 +147,6 @@ KDTreeNode<Label, T> * KDSpillTree<Label, T>::build_tree(size_t c, double a,
              pivot_r_pool.pop_back();
         }
         subdomain_l.push_back(curr);
-        subdomain_r.push_back(curr);
-    }
-    for (size_t i = 0; i < d_l - spill; i++)
-    {
-        size_t curr;
-        if (!pivot_pool.empty())
-        {
-             curr = pivot_pool.back();
-             pivot_pool.pop_back();
-        }
-        else if (!pivot_l_pool.empty())
-        {
-             curr = pivot_l_pool.back();
-             pivot_l_pool.pop_back();
-        }
-        else
-        {
-             curr = pivot_r_pool.back();
-             pivot_r_pool.pop_back();
-        }
-        subdomain_l.push_back(curr);
-    }
-    for (size_t i = 0; i < d_r - spill; i++)
-    {
-        size_t curr;
-        if (!pivot_pool.empty())
-        {
-             curr = pivot_pool.back();
-             pivot_pool.pop_back();
-        }
-        else if (!pivot_r_pool.empty())
-        {
-             curr = pivot_r_pool.back();
-             pivot_r_pool.pop_back();
-        }
-        else
-        {
-             curr = pivot_l_pool.back();
-             pivot_l_pool.pop_back();
-        }
         subdomain_r.push_back(curr);
     }
     KDTreeNode<Label, T> * result = new KDTreeNode<Label, T>
