@@ -31,8 +31,6 @@ int main()
     
     gsl_eigen_symmv_free (w); //free space
     
-    gsl_eigen_symmv_sort (eval, evec, GSL_EIGEN_SORT_ABS_ASC); //sort
-    
     //print here
     {
         int i;
@@ -40,4 +38,17 @@ int main()
         for (i = 0; i < 4; i++)
         {
             double eval_i = gsl_vector_get (eval, i);
+            gsl_vector_view evec_i = gsl_matrix_column (evec, i);
+            
+            printf ("eigenvalue = %g\n", eval_i);
+            printf ("eigenvector = \n");
+            gsl_vector_fprintf (stdout, &evec_i.vector, "%g");
+        }
+    }
+    
+    //free space here
+    gsl_vector_free (eval);
+    gsl_matrix_free (evec);
+    
+    return 0;   gsl_eigen_symmv_sort (eval, evec, GSL_EIGEN_SORT_ABS_ASC); //sort
 }
