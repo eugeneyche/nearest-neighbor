@@ -11,8 +11,8 @@
 #include "kd_spill_tree.h"
 #include "kd_virtual_spill_tree.h"
 
-static double a [] = {0.05, 0.1, 0.15};
-static size_t a_len = 3;
+static double a [] = {0, 0.05, 0.1, 0.15};
+static size_t a_len = 4;
 static double l [] = {0.02, 0.05, 0.1};
 static size_t l_len = 3;
 
