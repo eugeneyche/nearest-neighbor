@@ -3,8 +3,8 @@
 #include "vector_math.h"
 #include "nn.h"
 #include "kd_tree.h"
-#include "spill_tree.h"
-#include "virtual_spill_tree.h"
+#include "kd_spill_tree.h"
+#include "kd_virtual_spill_tree.h"
 #include "data_set.h"
 #include "test.h"
 #include <gsl/gsl_math.h>
@@ -18,6 +18,9 @@ int main()
     //Test<byte, byte> mTest ("/Users/janetzhai/Desktop/nn-xcode/nn-xcode");
     //mTest.generate_error_data("Users/janetzhai/Desktop/nn-xcode/nn-xcode/output");
 
+    //Test<byte, byte> mTest ("data/mnist");
+    //mTest.generate_kd_trees();
+    
     double data[] = { 1.0  , 1/2.0, 1/3.0, 1/4.0,
         1/2.0, 1/3.0, 1/4.0, 1/5.0,
         1/3.0, 1/4.0, 1/5.0, 1/6.0,

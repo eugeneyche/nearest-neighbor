@@ -8,8 +8,8 @@
 #include <algorithm>
 #include "data_set.h"
 #include "kd_tree.h"
-#include "spill_tree.h"
-#include "virtual_spill_tree.h"
+#include "kd_spill_tree.h"
+#include "kd_virtual_spill_tree.h"
 
 static double a [] = {0.05, 0.1, 0.15};
 static size_t a_len = 3;
@@ -20,14 +20,15 @@ template<class Label, class T>
 class Test
 {
 protected:
-    const string _base_dir;
-    DataSet<Label, T> * _trn_st;
-    DataSet<Label, T> * _tst_st;
-    map<vector<T> *, vector<size_t>> _nn_mp;
+    const string base_dir_;
+    DataSet<Label, T> * trn_st_;
+    DataSet<Label, T> * tst_st_;
+    map<vector<T> *, vector<size_t>> nn_mp_;
 public:
     Test(string base_dir);
     ~Test();
-    void generate_trees()
+
+    void generate_kd_trees()
     {
         #ifdef DEBUG
         cerr << "[DEBUG: generating trees]" << endl;
@@ -35,40 +36,29 @@ public:
         for (size_t j = 0; j < l_len; j++)
         {
             stringstream dir; 
-            dir << _base_dir << "/kd_tree_" << setprecision(2) << l[j];
+            dir << base_dir_ << "/kd_tree_" << setprecision(2) << l[j];
             #ifdef DEBUG
             cerr << "[DEBUG: Generating kd-tree " << l[j] << "]" << endl;
             #endif
-            KDTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), *_trn_st);
+            KDTree<Label, T> tree ((size_t)(l[j] * (*trn_st_).size()), *trn_st_);
             ofstream tree_out (dir.str());
             tree.save(tree_out);
             tree_out.close();
         }
+    }
+
+    void generate_kd_spill_trees()
+    {
         for (size_t i = 0; i < a_len; i++)
         {
             for (size_t j = 0; j < l_len; j++)
             {
                 stringstream dir; 
-                dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 #ifdef DEBUG
-                cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                cerr << "[DEBUG: Generating kd-spill-tree " << a[i] << " " << l[j] << "]" << endl;
                 #endif
-                SpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
-                ofstream tree_out (dir.str());
-                tree.save(tree_out);
-                tree_out.close();
-            }
-        }
-        for (size_t i = 0; i < a_len; i++)
-        {
-            for (size_t j = 0; j < l_len; j++)
-            {
-                stringstream dir; 
-                dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
-                #ifdef DEBUG
-                cerr << "[DEBUG: Generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
-                #endif
-                VirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*_trn_st).size()), a[i], *_trn_st);
+                KDSpillTree<Label, T> tree ((size_t)(l[j] * (*trn_st_).size()), a[i], *trn_st_);
                 ofstream tree_out (dir.str());
                 tree.save(tree_out);
                 tree_out.close();
@@ -76,89 +66,179 @@ public:
         }
     }
 
-    void generate_error_data(string out_dir = ".")
+    void generate_kd_v_spill_tree()
     {
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating error data]" << endl;
-        cerr << "[DEBUG: Writing to directory " << out_dir << "]" << endl;
-        #endif
-        size_t count = 0;
-        /*
+        for (size_t i = 0; i < a_len; i++)
+        {
+            for (size_t j = 0; j < l_len; j++)
+            {
+                stringstream dir; 
+                dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                #ifdef DEBUG
+                cerr << "[DEBUG: Generating virtual-spill-tree " << a[i] << " " << l[j] << "]" << endl;
+                #endif
+                KDVirtualSpillTree<Label, T> tree ((size_t)(l[j] * (*trn_st_).size()), a[i], *trn_st_);
+                ofstream tree_out (dir.str());
+                tree.save(tree_out);
+                tree_out.close();
+            }
+        }
+    }
+
+    void generate_kd_tree_error_data(string out_dir = ".")
+    {
         ofstream kd_out (out_dir + "/kd_tree_error.dat");
         {
             for (size_t i = 0; i < a_len; i++)
             {
-                #ifdef DEBUG
-                cerr << "[DEBUG: Generating kd-tree " << a[i] << " data]" << endl;
-                #endif
                 stringstream dir; 
-                dir << _base_dir << "/kd_tree_" << setprecision(2) << l[i];
+                dir << base_dir_ << "/kd_tree_" << setprecision(2) << l[i];
                 ifstream tree_in (dir.str());
-                KDTree<Label, T> tree (tree_in, *_trn_st);
-                count = 0;
-                for (size_t i = 0; i < (*_tst_st).size(); i++)
+                KDTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
                 {
-                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
-                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                    if (nn_lbl != (*_tst_st).get_label(i))
+                    Label nn_lbl = (*trn_st_).get_label(nearest_neighbor((*tst_st_)[i],
+                                   (*trn_st_).subset(tree.subdomain((*tst_st_)[i]))));
+                    if (nn_lbl != (*tst_st_).get_label(i))
                     {
                         count++;
                     }
                 }
-                kd_out << a[i] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                kd_out << a[i] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
             }
         }
         kd_out.close();
-        ofstream spill_out (out_dir + "/spill_tree_error.dat");
+    }
+
+    void generate_kd_spill_tree_error_data(string out_dir = ".")
+    {
+        ofstream spill_out (out_dir + "/kd_spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {
             for (size_t j = 0; j < l_len; j++)
             {
-                #ifdef DEBUG
-                cerr << "[DEBUG: Generating spill-tree " << a[i] << " " << l[j] << " data]" << endl;
-                #endif
                 stringstream dir; 
-                dir << _base_dir << "/spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 ifstream tree_in (dir.str());
-                SpillTree<Label, T> tree (tree_in, *_trn_st);
-                count = 0;
-                for (size_t i = 0; i < (*_tst_st).size(); i++)
+                KDSpillTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
                 {
-                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
-                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                    if (nn_lbl != (*_tst_st).get_label(i))
+                    Label nn_lbl = (*trn_st_).get_label(nearest_neighbor((*tst_st_)[i],
+                                   (*trn_st_).subset(tree.subdomain((*tst_st_)[i]))));
+                    if (nn_lbl != (*tst_st_).get_label(i))
                     {
                         count++;
                     }
                 }
-                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
             }
         }
         spill_out.close();
-        */
-        ofstream v_spill_out (out_dir + "/v_spill_tree_error.dat");
+    }
+
+    void generate_kd_v_spill_tree_error_data(string out_dir = ".")
+    {
+        ofstream v_spill_out (out_dir + "/kd_v_spill_tree_error.dat");
         for (size_t i = 0; i < a_len; i++)
         {
             for (size_t j = 0; j < l_len; j++)
             {
-                #ifdef DEBUG
-                cerr << "[DEBUG: Generating v_spill-tree " << a[i] << " " << l[j] << " data]" << endl;
-                #endif
                 stringstream dir; 
-                dir << _base_dir << "/v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 ifstream tree_in (dir.str());
-                VirtualSpillTree<Label, T> tree (tree_in, *_trn_st);
-                count = 0;
-                for (size_t i = 0; i < (*_tst_st).size(); i++)
+                KDVirtualSpillTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
                 {
-                    Label nn_lbl = (*_trn_st).get_label(nearest_neighbor((*_tst_st)[i],
-                                                                         (*_trn_st).subset(tree.subdomain((*_tst_st)[i]))));
-                    if (nn_lbl != (*_tst_st).get_label(i))
+                    Label nn_lbl = (*trn_st_).get_label(nearest_neighbor((*tst_st_)[i],
+                                   (*trn_st_).subset(tree.subdomain((*tst_st_)[i]))));
+                    if (nn_lbl != (*tst_st_).get_label(i))
                     {
                         count++;
                     }
                 }
-                v_spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*_tst_st).size()) << endl;
+                v_spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
+            }
+        }
+        v_spill_out.close();
+    }
+
+    void generate_kd_tree_true_nn_data(string out_dir = ".")
+    {
+        ofstream kd_out (out_dir + "/kd_tree_true_nn.dat");
+        {
+            for (size_t i = 0; i < a_len; i++)
+            {
+                stringstream dir; 
+                dir << base_dir_ << "/kd_tree" << setprecision(2) << l[i];
+                ifstream tree_in (dir.str());
+                KDTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
+                {
+                    vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
+                                        (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
+                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                    {
+                        count++;
+                    }
+                }
+                kd_out << a[i] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
+            }
+        }
+    }
+
+    void generate_kd_spill_tree_true_nn_data(string out_dir = ".")
+    {
+        ofstream spill_out (out_dir + "/kd_spill_tree_true_nn.dat");
+        for (size_t i = 0; i < a_len; i++)
+        {
+            for (size_t j = 0; j < l_len; j++)
+            {
+                stringstream dir; 
+                dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                ifstream tree_in (dir.str());
+                KDSpillTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
+                {
+                    vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
+                                        (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
+                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                    {
+                        count++;
+                    }
+                }
+                spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
+            }
+        }
+        spill_out.close();
+    }
+
+    void generate_kd_v_spill_tree_true_nn_data(string out_dir = ".")
+    {
+        ofstream v_spill_out (out_dir + "/kd_v_spill_tree_true_nn.dat");
+        for (size_t i = 0; i < a_len; i++)
+        {
+            for (size_t j = 0; j < l_len; j++)
+            {
+                stringstream dir; 
+                dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
+                ifstream tree_in (dir.str());
+                KDVirtualSpillTree<Label, T> tree (tree_in, *trn_st_);
+                size_t count = 0;
+                for (size_t i = 0; i < (*tst_st_).size(); i++)
+                {
+                    vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
+                                        (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
+                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                    {
+                        count++;
+                    }
+                }
+                v_spill_out << a[i] << "\t\t" << l[j] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
             }
         }
         v_spill_out.close();
@@ -168,7 +248,7 @@ public:
 
 template<class Label, class T>
 Test<Label, T>::Test(string base_dir) :
-  _base_dir (base_dir)
+  base_dir_ (base_dir)
 {
     #ifdef DEBUG
     cerr << "[DEBUG: Loading datasets]" << endl;
@@ -176,8 +256,8 @@ Test<Label, T>::Test(string base_dir) :
     #endif
     ifstream trn_vtr_in (base_dir + "/trn_vtr");
     ifstream tst_vtr_in (base_dir + "/tst_vtr");
-    _trn_st = new DataSet<Label, T>(trn_vtr_in);
-    _tst_st = new DataSet<Label, T>(tst_vtr_in);
+    trn_st_ = new DataSet<Label, T>(trn_vtr_in);
+    tst_st_ = new DataSet<Label, T>(tst_vtr_in);
     trn_vtr_in.close();
     tst_vtr_in.close();
     #ifdef DEBUG
@@ -185,8 +265,8 @@ Test<Label, T>::Test(string base_dir) :
     #endif
     ifstream trn_lbl_in (base_dir + "/trn_lbl");
     ifstream tst_lbl_in (base_dir + "/tst_lbl");
-    _trn_st->label(trn_lbl_in);
-    _tst_st->label(tst_lbl_in);
+    trn_st_->label(trn_lbl_in);
+    tst_st_->label(tst_lbl_in);
     trn_lbl_in.close();
     tst_lbl_in.close();
     #ifdef DEBUG
@@ -202,7 +282,7 @@ Test<Label, T>::Test(string base_dir) :
         cerr << "[DEBUG: k_true_nn found!!!]" << endl;
         cerr << "[DEBUG: Parsing k_true_nn with k = " << k << "]" << endl;
         #endif
-        for (size_t i = 0; i < _tst_st->size(); i++)
+        for (size_t i = 0; i < tst_st_->size(); i++)
         {
             #ifdef DEBUG
             cerr << "[DEBUG: " << i  << " |";
@@ -211,7 +291,7 @@ Test<Label, T>::Test(string base_dir) :
             {
                 size_t nn; 
                 nn_dat_in.read((char *)&nn, sizeof(size_t));
-                _nn_mp[(*_tst_st)[i]].push_back(nn);
+                nn_mp_[(*tst_st_)[i]].push_back(nn);
                 #ifdef DEBUG
                 cerr << " " << nn;
                 #endif
@@ -237,17 +317,17 @@ Test<Label, T>::Test(string base_dir) :
         #endif
         ofstream nn_dat_out (base_dir + "/k_true_nn", ios::binary);
         nn_dat_out.write((char *)&k, sizeof(size_t));
-        for (size_t i = 0; i < _tst_st->size(); i++)
+        for (size_t i = 0; i < tst_st_->size(); i++)
         {
             #ifdef DEBUG
             cerr << "[DEBUG: " << i  << " |";
             #endif
-            DataSet<Label, T> l_st = k_nearest_neighbor(k, (*_tst_st)[i], *_trn_st);
+            DataSet<Label, T> l_st = k_nearest_neighbor(k, (*tst_st_)[i], *trn_st_);
             for (size_t j = 0; j < k; j++)
             {
 
                 nn_dat_out.write((char *)&(l_st.get_domain()[j]), sizeof(size_t));
-                _nn_mp[(*_tst_st)[i]].push_back(l_st.get_domain()[j]);
+                nn_mp_[(*tst_st_)[i]].push_back(l_st.get_domain()[j]);
                 #ifdef DEBUG
                 cerr << " " << l_st.get_domain()[j];
                 #endif
@@ -266,8 +346,8 @@ Test<Label, T>::Test(string base_dir) :
 template<class Label, class T>
 Test<Label, T>::~Test()
 {
-    delete _trn_st;
-    delete _tst_st;
+    delete trn_st_;
+    delete tst_st_;
 }
 
 #endif

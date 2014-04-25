@@ -10,13 +10,22 @@ double distance_to(const vector<T> * v1, const vector<T> * v2)
 {
     if (v1->size() != v2->size())
         return -1;
-    long double distance = 0;
+    double distance = 0;
     for (size_t i = 0; i < v1->size(); i++)
     {
-        long double d = (long double)(*v2)[i] - (long double)(*v1)[i];
+        double d = (double)(*v2)[i] - (double)(*v1)[i];
         distance += d * d;
     }
     return distance;
+}
+
+template<class T>
+double dot(vector<T> v, vector<double> vd)
+{
+    long double factor = 0;;
+    for (int i = 0; i < v.size() && i < vd.size(); i++)
+        factor += (double)v[i] * vd[i];
+    return factor;
 }
 
 template<class T>
@@ -33,29 +42,20 @@ T selector(vector<T> st, size_t k)
     typename vector<T>::iterator itr;
 	for (itr = st.begin(); itr != st.end(); itr++)
 	{
-		if(*itr == st[randomIndex]){
+		if(*itr == st[randomIndex])
 			v.push_back(*itr);
-		}
-		else if(*itr < st[randomIndex]){
+		else if(*itr < st[randomIndex])
 			left.push_back(*itr);
-		}
-		else{
+		else
 			right.push_back(*itr);
-		}
 	}
     
 	if (left.size() >= k)
-    {
 		return selector(left, k);
-	}
 	else if (left.size() + v.size() >= k)
-    {
 		return st[randomIndex];
-	}
 	else
-    {
 		return selector(right, (size_t)(k - left.size() - v.size()));
-	}
 }
 
 #endif

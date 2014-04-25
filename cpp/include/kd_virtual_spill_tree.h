@@ -1,5 +1,5 @@
-#ifndef _VIRTUAL_SPILL_TREE_H
-#define _VIRTUAL_SPILL_TREE_H
+#ifndef _KD_VIRTUAL_SPILL_TREE_H
+#define _KD_VIRTUAL_SPILL_TREE_H
 
 #include <map>
 #include <queue>
@@ -9,26 +9,26 @@
 using namespace std;
 
 template<class Label, class T>
-class VirtualSpillTree : public KDTree<Label, T>
+class KDVirtualSpillTree : public KDTree<Label, T>
 {
     typedef pair<T, T> range;
 protected:
-    map<KDTreeNode<Label, T> *, range> _range_mp;
+    map<KDTreeNode<Label, T> *, range> range_mp_;
 public:
-    VirtualSpillTree(DataSet<Label, T> & st);
-    VirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
-    VirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
+    KDVirtualSpillTree(DataSet<Label, T> & st);
+    KDVirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
+    KDVirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query);
 };
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(DataSet<Label, T> & st) :
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(DataSet<Label, T> & st) :
   KDTree<Label, T>(st)
 { }
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a, 
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(size_t c, double a, 
         DataSet<Label, T> & st) :
   KDTree<Label, T>(c, st)
 {
@@ -50,7 +50,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a,
             }
             T pivot_l = selector(values, (size_t)(values.size() * (0.5 - a)));
             T pivot_r = selector(values, (size_t)(values.size() * (0.5 + a)));
-            _range_mp[cur] = range(pivot_l, pivot_r);
+            range_mp_[cur] = range(pivot_l, pivot_r);
             to_update.push(cur->get_left());
             to_update.push(cur->get_right());
         }
@@ -58,7 +58,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(size_t c, double a,
 }
 
 template<class Label, class T>
-VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in, 
+KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(ifstream & in, 
         DataSet<Label, T> & st) :
   KDTree<Label, T>(in, st)
 {
@@ -74,7 +74,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in,
             T pivot_l, pivot_r;
             in.read((char *)&pivot_l, sizeof(T));
             in.read((char *)&pivot_r, sizeof(T));
-            _range_mp[cur] = range(pivot_l, pivot_r);
+            range_mp_[cur] = range(pivot_l, pivot_r);
             to_update.push(cur->get_left());
             to_update.push(cur->get_right());
         }
@@ -82,7 +82,7 @@ VirtualSpillTree<Label, T>::VirtualSpillTree(ifstream & in,
 }
 
 template<class Label, class T>
-void VirtualSpillTree<Label, T>::save(ofstream & out) const
+void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 {
     this->KDTree<Label, T>::save(out);
     queue<KDTreeNode<Label, T> *> to_save;
@@ -94,7 +94,7 @@ void VirtualSpillTree<Label, T>::save(ofstream & out) const
         bool exists = cur != NULL;
         if (exists)
         {
-            range cur_range = _range_mp.at(cur);
+            range cur_range = range_mp_.at(cur);
             out.write((char *)&cur_range.first, sizeof(T));
             out.write((char *)&cur_range.second, sizeof(T));
             to_save.push(cur->get_left());
@@ -105,7 +105,7 @@ void VirtualSpillTree<Label, T>::save(ofstream & out) const
 
 
 template<class Label, class T>
-vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
+vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query)
 {
     queue<KDTreeNode<Label, T> *> to_explore;
     set<size_t> domain_st;
@@ -119,7 +119,7 @@ vector<size_t> VirtualSpillTree<Label, T>::subdomain(vector<T> * query)
         {
             if (cur->get_left() || cur->get_right())
             {
-                range cur_range = _range_mp.at(cur);
+                range cur_range = range_mp_.at(cur);
                 if (cur_range.first < (*query)[cur->get_index()] &&
                         (*query)[cur->get_index()] <= cur_range.second)
                 {
