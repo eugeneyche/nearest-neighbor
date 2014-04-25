@@ -14,5 +14,7 @@ typedef unsigned char byte;
 int main() 
 {
     Test<byte, byte> mTest ("data/mnist");
-    mTest.generate_kd_tree_error_data("output");
+    mTest.generate_kd_tree_true_nn_data("output/true_nn");
+    mTest.generate_kd_spill_tree_true_nn_data("output/true_nn");
+    mTest.generate_kd_v_spill_tree_true_nn_data("output/true_nn");
 }

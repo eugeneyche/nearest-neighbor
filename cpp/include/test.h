@@ -122,7 +122,7 @@ public:
                 dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
                 ifstream tree_in (dir.str());
                 KDSpillTree<Label, T> tree (tree_in, *trn_st_);
-                size_t count = 0;
+                size_t count = 0;                    
                 for (size_t i = 0; i < (*tst_st_).size(); i++)
                 {
                     Label nn_lbl = (*trn_st_).get_label(nearest_neighbor((*tst_st_)[i],
@@ -172,15 +172,15 @@ public:
             for (size_t i = 0; i < a_len; i++)
             {
                 stringstream dir; 
-                dir << base_dir_ << "/kd_tree" << setprecision(2) << l[i];
+                dir << base_dir_ << "/kd_tree_" << setprecision(2) << l[i];
                 ifstream tree_in (dir.str());
                 KDTree<Label, T> tree (tree_in, *trn_st_);
                 size_t count = 0;
                 for (size_t i = 0; i < (*tst_st_).size(); i++)
                 {
                     vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
-                                        (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
-                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                                         (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
+                    if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                     {
                         count++;
                     }
@@ -188,6 +188,7 @@ public:
                 kd_out << a[i] << "\t\t" << (count * 1. / (*tst_st_).size()) << endl;
             }
         }
+        kd_out.close();
     }
 
     void generate_kd_spill_tree_true_nn_data(string out_dir = ".")
@@ -206,7 +207,7 @@ public:
                 {
                     vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                         (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
-                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                    if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                     {
                         count++;
                     }
@@ -233,7 +234,7 @@ public:
                 {
                     vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                         (*trn_st_).subset(tree.subdomain((*tst_st_)[i])));
-                    if (nn_vtr != nn_mp_[(*tst_st_)[i]][0])
+                    if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                     {
                         count++;
                     }
