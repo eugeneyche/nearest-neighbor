@@ -18,10 +18,10 @@
 #define LEAF_LOOKUPS    (0x0004)
 #endif
 
-static double a [] = {0, 0.05, 0.1, 0.15};
-static size_t a_len = 3;
 static double l [] = {0.02, 0.05, 0.1};
 static size_t l_len = 2;
+static double a [] = {0, 0.05, 0.1, 0.15};
+static size_t a_len = 3;
 
 template<class Label, class T>
 class Test
@@ -56,9 +56,9 @@ public:
 
     void generate_kd_spill_trees()
     {
-        for (size_t i = 0; i < a_len; i++)
+        for (size_t j = 0; j < l_len; j++)
         {
-            for (size_t j = 0; j < l_len; j++)
+            for (size_t i = 0; i < a_len; i++)
             {
                 stringstream dir; 
                 dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
@@ -75,9 +75,9 @@ public:
 
     void generate_kd_v_spill_trees()
     {
-        for (size_t i = 0; i < a_len; i++)
+        for (size_t j = 0; j < l_len; j++)
         {
-            for (size_t j = 0; j < l_len; j++)
+            for (size_t i = 0; i < a_len; i++)
             {
                 stringstream dir; 
                 dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
@@ -150,9 +150,9 @@ public:
         if (type & TRUE_NN)
             kd_true_nn_out = new ofstream(out_dir + "/kd_spill_tree_true_nn.dat");
         {
-            for (size_t i = 0; i < a_len; i++)
+            for (size_t j = 0; j < l_len; j++)
             {
-                for (size_t j = 0; j < l_len; j++)
+                for (size_t i = 0; i < a_len; i++)
                 {
                     stringstream dir; 
                     dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
@@ -171,9 +171,9 @@ public:
                             true_nn_count++;
                     }
                     if (kd_error_out)
-                        (*kd_error_out) << l[i] << "\t\t" << a[i] << "\t\t" << (error_count * 1. / (*tst_st_).size()) << endl;
+                        (*kd_error_out) << l[j] << "\t\t" << a[i] << "\t\t" << (error_count * 1. / (*tst_st_).size()) << endl;
                     if (kd_true_nn_out)
-                        (*kd_true_nn_out) << l[i] << "\t\t" << a[i] << "\t\t" << (true_nn_count * 1. / (*tst_st_).size()) << endl;
+                        (*kd_true_nn_out) << l[j] << "\t\t" << a[i] << "\t\t" << (true_nn_count * 1. / (*tst_st_).size()) << endl;
                 }
             }
         }
@@ -203,9 +203,9 @@ public:
         if (type & LEAF_LOOKUPS)
             kd_leaf_lkup_out = new ofstream(out_dir + "/kd_v_spill_tree_leaf_lkup.dat");
         {
-            for (size_t i = 0; i < a_len; i++)
+            for (size_t j = 0; j < l_len; j++)
             {
-                for (size_t j = 0; j < l_len; j++)
+                for (size_t i = 0; i < a_len; i++)
                 {
                     stringstream dir; 
                     dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << a[i] << "_" << l[j];
@@ -227,11 +227,11 @@ public:
                             leaf_lkup_count += tree.get_leaf_lookups();
                     }
                     if (kd_error_out)
-                        (*kd_error_out) << l[i] << "\t\t" << a[i] << "\t\t" << (error_count * 1. / (*tst_st_).size()) << endl;
+                        (*kd_error_out) << l[j] << "\t\t" << a[i] << "\t\t" << (error_count * 1. / (*tst_st_).size()) << endl;
                     if (kd_true_nn_out)
-                        (*kd_true_nn_out) << l[i] << "\t\t" << a[i] << "\t\t" << (true_nn_count * 1. / (*tst_st_).size()) << endl;
+                        (*kd_true_nn_out) << l[j] << "\t\t" << a[i] << "\t\t" << (true_nn_count * 1. / (*tst_st_).size()) << endl;
                     if (kd_leaf_lkup_out)
-                        (*kd_leaf_lkup_out) << l[i] << "\t\t" << a[i] << "\t\t" << (leaf_lkup_count * 1. / (*tst_st_).size()) << endl;
+                        (*kd_leaf_lkup_out) << l[j] << "\t\t" << a[i] << "\t\t" << (leaf_lkup_count * 1. / (*tst_st_).size()) << endl;
                 }
             }
         }
