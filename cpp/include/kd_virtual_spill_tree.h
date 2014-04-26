@@ -13,6 +13,7 @@ class KDVirtualSpillTree : public KDTree<Label, T>
 {
     typedef pair<T, T> range;
 protected:
+    size_t leaf_lkup_;
     map<KDTreeNode<Label, T> *, range> range_mp_;
 public:
     KDVirtualSpillTree(DataSet<Label, T> & st);
@@ -20,6 +21,8 @@ public:
     KDVirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query);
+    size_t get_leaf_lookups()
+    { return leaf_lkup_; }
 };
 
 template<class Label, class T>
@@ -107,6 +110,7 @@ void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 template<class Label, class T>
 vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query)
 {
+    leaf_lkup_ = 0;
     queue<KDTreeNode<Label, T> *> to_explore;
     set<size_t> domain_st;
     to_explore.push(this->get_root());
@@ -120,8 +124,8 @@ vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query)
             if (cur->get_left() || cur->get_right())
             {
                 range cur_range = range_mp_.at(cur);
-                if (cur_range.first < (*query)[cur->get_index()] &&
-                        (*query)[cur->get_index()] <= cur_range.second)
+                if (cur_range.first <= (*query)[cur->get_index()] &&
+                        (*query)[cur->get_index()] < cur_range.second)
                 {
                     to_explore.push(cur->get_right());
                     to_explore.push(cur->get_left());
@@ -133,6 +137,7 @@ vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query)
             }
             else
             {
+                leaf_lkup_++;
                 vector<size_t> l_domain = cur->get_domain();
                 for (size_t i = 0; i < l_domain.size(); i++)
                 {
