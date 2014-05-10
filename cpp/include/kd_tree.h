@@ -1,5 +1,5 @@
-#ifndef _KD_TREE_H
-#define _KD_TREE_H
+#ifndef KD_TREE_H_
+#define KD_TREE_H_
 
 #include <queue>
 #include <map>

@@ -1,5 +1,5 @@
-#ifndef _BSP_TREE_H
-#define _BSP_TREE_H
+#ifndef BSP_TREE_H_
+#define BSP_TREE_H_
 
 #include <queue>
 #include <map>

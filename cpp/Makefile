@@ -6,9 +6,9 @@ TARGET := bin/main
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -std=c++11
+CFLAGS := -std=c++11 -pthread
 LIB := -L lib -lgsl -lgslcblas
-INC := -I include
+INC := -I include 
 
 ifdef DEBUG
 CFLAGS += -g -DDEBUG=$(DEBUG)

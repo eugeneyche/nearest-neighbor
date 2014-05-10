@@ -1,5 +1,5 @@
-#ifndef _VECTOR_MATH_H
-#define _VECTOR_MATH_H
+#ifndef VECTOR_MATH_H_
+#define VECTOR_MATH_H_
 
 #include <vector>
 #include <random>

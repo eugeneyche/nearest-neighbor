@@ -1,5 +1,5 @@
-#ifndef _NN_H
-#define _NN_H
+#ifndef NN_H_
+#define NN_H_
 
 #include <map>
 #include <vector>

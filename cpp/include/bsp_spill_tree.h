@@ -1,5 +1,5 @@
-#ifndef _BSP_SPILL_TREE_H
-#define _BSP_SPILL_TREE_H
+#ifndef BSP_SPILL_TREE_H_
+#define BSP_SPILL_TREE_H_
 
 #include "bsp_tree.h"
 

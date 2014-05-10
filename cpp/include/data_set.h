@@ -1,5 +1,5 @@
-#ifndef _DATA_SET_H
-#define _DATA_SET_H
+#ifndef DATA_SET_H_
+#define DATA_SET_H_
 
 #include <iostream>
 #include <fstream>

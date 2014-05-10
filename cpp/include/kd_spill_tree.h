@@ -1,5 +1,5 @@
-#ifndef _KD_SPILL_TREE_H
-#define _KD_SPILL_TREE_H
+#ifndef KD_SPILL_TREE_H_
+#define KD_SPILL_TREE_H_
 
 #include "kd_tree.h"
 
