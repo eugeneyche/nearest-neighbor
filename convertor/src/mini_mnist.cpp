@@ -18,7 +18,7 @@ static int read_bytes(ifstream & in, int n_bytes)
 
 void mini_mnist_generate()
 {
-    cerr << "> converting mnist data" << endl;
+    cerr << "> converting mini mnist data" << endl;
     {
         ifstream vtr_in (base_path + "in/train-images-idx3-ubyte", ios::binary);
         ifstream lbl_in (base_path + "in/train-labels-idx1-ubyte", ios::binary);
@@ -65,8 +65,8 @@ void mini_mnist_generate()
             lbls.push_back(l_lbl);
             vtrs.push_back(l_vtr);
         }
-        vtr_sz = 100;
-        lbl_sz = 100;
+        vtr_sz = 600;
+        lbl_sz = 600;
         cerr << "        > train_vtr size reduced to: " << vtr_sz << endl;
         cerr << "        > train_lbl size reduced to: " << lbl_sz << endl;
         lbl_out.write((char *)&lbl_sz, sizeof(size_t));
@@ -129,8 +129,8 @@ void mini_mnist_generate()
             lbls.push_back(l_lbl);
             vtrs.push_back(l_vtr);
         }
-        vtr_sz = 60;
-        lbl_sz = 60;
+        vtr_sz = 100;
+        lbl_sz = 100;
         cerr << "        > train_vtr size reduced to: " << vtr_sz << endl;
         cerr << "        > train_lbl size reduced to: " << lbl_sz << endl;
         lbl_out.write((char *)&lbl_sz, sizeof(size_t));
@@ -147,6 +147,6 @@ void mini_mnist_generate()
         lbl_out.close();
         cerr << "    > finished train data" << endl;
     }
-    cerr << "> finished mnist data" << endl;
+    cerr << "> finished mini mnist data" << endl;
 }
 

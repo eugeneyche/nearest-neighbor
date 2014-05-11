@@ -11,6 +11,7 @@
 #include "kd_tree.h"
 #include "kd_spill_tree.h"
 #include "kd_virtual_spill_tree.h"
+using namespace std;
 
 #ifndef NN_DATA_TYPES_
 #define NN_DATA_TYPES_
@@ -20,10 +21,10 @@
 #define SUBDOMAIN       (0x0004)
 #endif
 
-static double l [] = {0.02, 0.05, 0.1};
-static size_t l_len = 2;
-static double a [] = {0, 0.05, 0.1, 0.15};
-static size_t a_len = 3;
+static double l [] = {0.02, 0.03, 0.04, 0.05, 0.1};
+static size_t l_len = 5;
+static double a [] = {0.05, 0.1};
+static size_t a_len = 2;
 
 template<class Label, class T>
 class Test
@@ -52,18 +53,14 @@ public:
 
     void generate_kd_trees()
     {
-        for (size_t i = 0; i < l_len; i++)
-        {
-            s_kd_tree(l[i]);
-        }
-    }
-
-    void t_generate_kd_trees()
-    {
         thread t [l_len];
         for (size_t i = 0; i < l_len; i++)
         {
-            t[i] = thread(s_kd_tree, l[i]);
+            t[i] = thread(&Test<T, Label>::s_kd_tree, this, l[i]);
+        }
+        for (size_t i = 0; i < l_len; i++)
+        {
+            t[i].join();
         }
     }
 
@@ -82,23 +79,12 @@ public:
 
     void generate_kd_spill_trees()
     {
-        for (size_t i = 0; i < l_len; i++)
-        {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                s_kd_spill_tree(l[i], a[j]);
-            }
-        }
-    }
-
-    void t_generate_kd_spill_trees()
-    {
         thread t [l_len][a_len];
         for (size_t i = 0; i < l_len; i++)
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(s_kd_spill_tree, l[i], a[j]);
+                t[i][j] = thread(&Test<T, Label>::s_kd_spill_tree, this, l[i], a[j]);
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -125,23 +111,12 @@ public:
 
     void generate_kd_v_spill_trees()
     {
-        for (size_t i = 0; i < l_len; i++)
-        {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                s_kd_v_spill_tree(l[i], a[j]);
-            }
-        }
-    }
-
-    void t_generate_kd_v_spill_trees()
-    {
         thread t [l_len][a_len];
         for (size_t i = 0; i < l_len; i++)
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(s_kd_v_spill_tree, l[i], a[j]);
+                t[i][j] = thread(&Test<T, Label>::s_kd_v_spill_tree, this, l[i], a[j]);
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -153,10 +128,7 @@ public:
         }
     }
 
-    void s_kd_tree_data(double ll,
-            ofstream * kd_error_out, 
-            ofstream * kd_true_nn_out,
-            ofstream * kd_subdomain_out)
+    void s_kd_tree_data(double ll, string * result)
     {
         stringstream dir; 
         dir << base_dir_ << "/kd_tree_" << setprecision(2) << ll;
@@ -168,105 +140,46 @@ public:
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
             DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i]));
-            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
-                                 subSet);
+            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
-            if (kd_error_out && nn_lbl != (*tst_st_).get_label(i))
+            if (nn_lbl != (*tst_st_).get_label(i))
                 error_count++;
-            if (kd_true_nn_out && nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
+            if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                 true_nn_count++;
-            if (kd_subdomain_out)
-                subdomain_count += subSet.size();
+            subdomain_count += subSet.size();
         }
-        if (kd_error_out)
-            (*kd_error_out) << setw(COL_W) << ll << setw(COL_W) << (error_count * 1. / (*tst_st_).size()) 
-                            << endl;
-        if (kd_true_nn_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) 
-                              << (true_nn_count * 1. / (*tst_st_).size()) << endl;
-        if (kd_subdomain_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) 
-                              << (subdomain_count * 1. / (*tst_st_).size()) << endl;
-        
+        stringstream data;
+        data <<  setw(COL_W) <<  ll;
+        data <<  setw(COL_W) << (error_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (true_nn_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (subdomain_count * 1. / (*tst_st_).size());
+        data << endl;
+        *result = data.str();
     }
 
-    void generate_kd_tree_data(int type, string out_dir = ".")
+    void generate_kd_tree_data(string out_dir = ".")
     {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_tree_subdomain.dat");
-        for (size_t i = 0; i < l_len; i++)
-        {
-            s_kd_tree_data(l[i], kd_error_out, kd_true_nn_out, kd_subdomain_out);
-        }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
-    }
-
-    void t_generate_kd_tree_data(int type, string out_dir = ".")
-    {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_tree_subdomain.dat");
+        ofstream kd_out (out_dir + "/kd_tree.dat");
+        kd_out <<  setw(COL_W) << "leaf";
+        kd_out <<  setw(COL_W) << "error rate";
+        kd_out <<  setw(COL_W) << "true nn";
+        kd_out <<  setw(COL_W) << "subdomain";
+        kd_out << endl;
         thread t [l_len];
+        string r [l_len];
         for (size_t i = 0; i < l_len; i++)
         {
-            t[i] = thread(s_kd_tree_data, l[i], kd_error_out, kd_true_nn_out, kd_subdomain_out);
+            t[i] = thread(&Test::s_kd_tree_data, this, l[i], &(r[i]));
         }
         for (size_t i = 0; i < l_len; i++)
         {
             t[i].join();
+            kd_out << r[i];
         }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
+        kd_out.close();
     }
 
-    void s_kd_spill_tree_data(double ll, double la,
-            ofstream * kd_error_out, 
-            ofstream * kd_true_nn_out,
-            ofstream * kd_subdomain_out)
+    void s_kd_spill_tree_data(double ll, double la, string * result)
     {
         stringstream dir; 
         dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << la << "_" << ll;
@@ -281,80 +194,37 @@ public:
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                  subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
-            if (kd_error_out && nn_lbl != (*tst_st_).get_label(i))
+            if (nn_lbl != (*tst_st_).get_label(i))
                 error_count++;
-            if (kd_true_nn_out && nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
+            if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                 true_nn_count++;
-            if (kd_subdomain_out)
-                subdomain_count += subSet.size();
+            subdomain_count += subSet.size();
         }
-        if (kd_error_out)
-            (*kd_error_out) << setw(COL_W) << ll << setw(COL_W) << la << setw(COL_W) 
-                            << (error_count * 1. / (*tst_st_).size()) << endl;
-        if (kd_true_nn_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) << la << setw(COL_W) 
-                              << (true_nn_count * 1. / (*tst_st_).size()) << endl;
-        if (kd_subdomain_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) 
-                              << (subdomain_count * 1. / (*tst_st_).size()) << endl;
+        stringstream data;
+        data <<  setw(COL_W) <<  ll;
+        data <<  setw(COL_W) <<  la;
+        data <<  setw(COL_W) << (error_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (true_nn_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (subdomain_count * 1. / (*tst_st_).size());
+        data << endl;
+        *result = data.str();
     }
-
-    void generate_kd_spill_tree_data(int type, string out_dir = ".")
+    void generate_kd_spill_tree_data(string out_dir = ".")
     {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_spill_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_spill_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_spill_tree_subdomain.dat");
-        for (size_t i = 0; i < l_len; i++)
-        {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                s_kd_spill_tree_data(l[i], a[i], kd_error_out, kd_true_nn_out, kd_subdomain_out);
-            }
-        }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
-    }
-
-    void t_generate_kd_spill_tree_data(int type, string out_dir = ".")
-    {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_spill_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_spill_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_spill_tree_subdomain.dat");
+        ofstream kd_out (out_dir + "/kd_spill_tree.dat");
+        kd_out <<  setw(COL_W) << "leaf";
+        kd_out <<  setw(COL_W) << "alpha";
+        kd_out <<  setw(COL_W) << "error rate";
+        kd_out <<  setw(COL_W) << "true nn";
+        kd_out <<  setw(COL_W) << "subdomain";
+        kd_out << endl;
         thread t [l_len][a_len];
+        string r [l_len][a_len];
         for (size_t i = 0; i < l_len; i++)
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(s_kd_spill_tree_data, l[i], a[i], kd_error_out, kd_true_nn_out, kd_subdomain_out);
+                t[i][j] = thread(&Test<T, Label>::s_kd_spill_tree_data, this, l[i], a[j], &(r[i][j]));
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -362,29 +232,13 @@ public:
             for (size_t j = 0; j < a_len; j++)
             {
                 t[i][j].join();
+                kd_out << r[i][j];
             }
         }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
+        kd_out.close();
     }
 
-    void s_kd_v_spill_tree_data(double ll, double la,
-            ofstream * kd_error_out, 
-            ofstream * kd_true_nn_out,
-            ofstream * kd_subdomain_out)
+    void s_kd_v_spill_tree_data(double ll, double la, string * result)
     {
         stringstream dir; 
         dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << la << "_" << ll;
@@ -400,80 +254,38 @@ public:
                                  subSet);
             DataSet<T, Label> l_subdomain = tree.subdomain((*tst_st_)[i]);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
-            if (kd_error_out && nn_lbl != (*tst_st_).get_label(i))
+            if (nn_lbl != (*tst_st_).get_label(i))
                 error_count++;
-            if (kd_true_nn_out && nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
+            if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
                 true_nn_count++;
-            if (kd_subdomain_out)
-                subdomain_count += subSet.size();
+            subdomain_count += subSet.size();
         }
-        if (kd_error_out)
-            (*kd_error_out) << setw(COL_W) << ll << setw(COL_W) << la << setw(COL_W) 
-                            << (error_count * 1. / (*tst_st_).size()) << endl;
-        if (kd_true_nn_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) << la << setw(COL_W) 
-                              << (true_nn_count * 1. / (*tst_st_).size()) << endl;
-        if (kd_subdomain_out)
-            (*kd_true_nn_out) << setw(COL_W) << ll << setw(COL_W) 
-                              << (subdomain_count * 1. / (*tst_st_).size()) << endl;
+        stringstream data;
+        data <<  setw(COL_W) <<  ll;
+        data <<  setw(COL_W) <<  la;
+        data <<  setw(COL_W) << (error_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (true_nn_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (subdomain_count * 1. / (*tst_st_).size());
+        data << endl;
+        *result = data.str();
     }
 
-    void generate_kd_v_spill_tree_data(int type, string out_dir = ".")
+    void generate_kd_v_spill_tree_data(string out_dir = ".")
     {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_v_spill_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_v_spill_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_subdomain_out = new ofstream(out_dir + "/kd_v_spill_tree_subdomain.dat");
-        for (size_t i = 0; i < l_len; i++)
-        {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                s_kd_v_spill_tree_data(l[i], a[j], kd_error_out, kd_true_nn_out, kd_subdomain_out);
-            }
-        }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
-    }
-
-    void t_generate_kd_v_spill_tree_data(int type, string out_dir = ".")
-    {
-        if (!type)
-            return;
-        ofstream * kd_error_out = NULL;
-        ofstream * kd_true_nn_out = NULL;
-        ofstream * kd_subdomain_out = NULL;
-        if (type & ERROR_RATE)
-            kd_error_out = new ofstream(out_dir + "/kd_v_spill_tree_error.dat");
-        if (type & TRUE_NN)
-            kd_true_nn_out = new ofstream(out_dir + "/kd_v_spill_tree_true_nn.dat");
-        if (type & SUBDOMAIN)
-            kd_subdomain_out = new ofstream(out_dir + "/kd_v_spill_tree_subdomain.dat");
+        ofstream kd_out (out_dir + "/kd_v_spill_tree_subdomain.dat");
+        kd_out <<  setw(COL_W) << "leaf";
+        kd_out <<  setw(COL_W) << "alpha";
+        kd_out <<  setw(COL_W) << "error rate";
+        kd_out <<  setw(COL_W) << "true nn";
+        kd_out <<  setw(COL_W) << "subdomain";
+        kd_out << endl;
         thread t [l_len][a_len];
+        string r [l_len][a_len];
         for (size_t i = 0; i < l_len; i++)
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(s_kd_v_spill_tree_data, l[i], a[j], kd_error_out, kd_true_nn_out, kd_subdomain_out);
+                t[i][j] = thread(&Test<T, Label>::s_kd_v_spill_tree_data, this, l[i], a[j], &(r[i][j]));
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -481,23 +293,10 @@ public:
             for (size_t j = 0; j < a_len; j++)
             {
                 t[i][j].join();
+                kd_out << r[i][j];
             }
         }
-        if (kd_error_out)
-        {
-            kd_error_out->close();
-            delete kd_error_out;
-        }
-        if (kd_true_nn_out)
-        {
-            kd_true_nn_out->close();
-            delete kd_true_nn_out;
-        }
-        if (kd_subdomain_out)
-        {
-            kd_subdomain_out->close();
-            delete kd_subdomain_out;
-        }
+        kd_out.close();
     }
 };
 

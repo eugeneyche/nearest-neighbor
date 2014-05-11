@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
         }
         if (target == "mini_mnist")
         {
-            mnist_generate();
+            mini_mnist_generate();
         }
         if (target == "cifar10")
         {

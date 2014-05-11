@@ -36,6 +36,10 @@ mnist: $(TARGET)
 	make -C data/mnist
 	$(TARGET) mnist
 
+mini_mnist: $(TARGET)
+	make -C data/mini_mnist
+	$(TARGET) mini_mnist
+
 cifar10: $(TARGET)
 	make -C data/cifar10
 	$(TARGET) cifar10
