@@ -21,8 +21,8 @@ using namespace std;
 #define SUBDOMAIN       (0x0004)
 #endif
 
-static double l [] = {0.02, 0.03, 0.04, 0.05, 0.1};
-static size_t l_len = 5;
+static double l [] = {0.025, 0.05, 0.075, 0.1};
+static size_t l_len = 4;
 static double a [] = {0.05, 0.1};
 static size_t a_len = 2;
 
@@ -209,6 +209,7 @@ public:
         data << endl;
         *result = data.str();
     }
+
     void generate_kd_spill_tree_data(string out_dir = ".")
     {
         ofstream kd_out (out_dir + "/kd_spill_tree.dat");
@@ -250,9 +251,7 @@ public:
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
             DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i]));
-            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
-                                 subSet);
-            DataSet<T, Label> l_subdomain = tree.subdomain((*tst_st_)[i]);
+            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
                 error_count++;
@@ -272,7 +271,7 @@ public:
 
     void generate_kd_v_spill_tree_data(string out_dir = ".")
     {
-        ofstream kd_out (out_dir + "/kd_v_spill_tree_subdomain.dat");
+        ofstream kd_out (out_dir + "/kd_v_spill_treedat");
         kd_out <<  setw(COL_W) << "leaf";
         kd_out <<  setw(COL_W) << "alpha";
         kd_out <<  setw(COL_W) << "error rate";
