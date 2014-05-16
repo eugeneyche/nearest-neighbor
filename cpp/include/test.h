@@ -22,9 +22,9 @@ using namespace std;
 #endif
 
 static double l [] = {0.025, 0.05, 0.075, 0.1};
-static size_t l_len = 4;
+const size_t l_len = 4;
 static double a [] = {0.05, 0.1};
-static size_t a_len = 2;
+const size_t a_len = 2;
 
 template<class Label, class T>
 class Test
