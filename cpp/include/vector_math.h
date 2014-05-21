@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <random>
+
 using namespace std;
 
 template<class T>
@@ -56,6 +57,56 @@ T selector(vector<T> st, size_t k)
 		return st[randomIndex];
 	else
 		return selector(right, (size_t)(k - left.size() - v.size()));
+}
+
+template<class T>
+vector<double> eigen_vector(vector<T> &data_set)
+{
+    /*calculate mean*/
+    vector<double> mean;
+    vector<double> sum = data_set[0];
+    for (size_t i = 0; i < data_set.size(); i++)
+    {
+        vector<double> v = data_set[i];
+        for (size_t j = 0; j < v.size(); j++)
+        {
+            sum[j] += data_set[i][j];
+        }
+    }
+    size_t size = data_set.size();
+    for (size_t i = 0; i < data_set.size(); i++)
+    {
+        mean.push_back(sum[i]/size);
+    }
+    
+    /*calculate dominant eigenvector*/
+    vector<double> eigen; // need to initialize here
+    for (size_t i = 0; i < data_set.size(); i++)
+    {
+        double gamma = 1/i;
+        /*calculate X transpose dot V*/
+        double X_transpo_dot_V = 0.0;
+        vector<double> X = *data_set[i];
+        for (size_t j = 0; j < X.size(); j++)
+        {
+            X[j] = X[j] - mean[j]; //centralize X
+            X_transpo_dot_V = X_transpo_dot_V + (X[j] * eigen[j]);
+        }
+        /*update dominant eigenvector*/
+        double vector_size = 0.0;
+        for (size_t k = 0; k < X.size(); k++)
+        {
+            eigen[k] = eigen[k] + (gamma * X[k] * X_transpo_dot_V);
+            vector_size = vector_size + eigen[k]*eigen[k];
+        }
+        vector_size = sqrt(vector_size);
+        /*normalize eigenvector*/
+        for (size_t k = 0; k < X.size(); k++)
+        {
+            eigen[k] = eigen[k]/vector_size;
+        }
+    }
+    return eigen;
 }
 
 #endif

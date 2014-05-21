@@ -78,7 +78,7 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     if (domain.size() < c)
         return new BSPTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
-    vector<double> mx_var_dir; /* TODO: determine vtr */
+    vector<double> mx_var_dir = eigen_vector(subst); /* TODO: determine vtr */
     vector<double> values;
     for (size_t i = 0; i < subst.size(); i++)
         values.push_back(dot(*subst[i], mx_var_dir));
