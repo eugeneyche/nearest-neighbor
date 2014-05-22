@@ -79,8 +79,25 @@ vector<double> eigen_vector(vector<T> &data_set)
         mean.push_back(sum[i]/size);
     }
     
+    /* initialize eigen here */
+    vector<double> eigen;
+    double eigen_size = 0.0;
+    srand(int(time(NULL)));
+    for (size_t i = 0; i < 10; i++)
+    {
+        double x = (double)((rand() % 201) - 100) / 100;
+        eigen.push_back(x);
+        eigen_size += x*x;
+    }
+    eigen_size = sqrt(eigen_size);
+    
+    /* normalize eigen here */
+    for (size_t i = 0; i < eigen.size(); i++)
+    {
+        eigen[i] = eigen[i]/eigen_size;
+    }
+    
     /*calculate dominant eigenvector*/
-    vector<double> eigen; // need to initialize here
     for (size_t i = 0; i < data_set.size(); i++)
     {
         double gamma = 1/i;
@@ -90,14 +107,14 @@ vector<double> eigen_vector(vector<T> &data_set)
         for (size_t j = 0; j < X.size(); j++)
         {
             X[j] = X[j] - mean[j]; //centralize X
-            X_transpo_dot_V = X_transpo_dot_V + (X[j] * eigen[j]);
+            X_transpo_dot_V += (X[j] * eigen[j]);
         }
         /*update dominant eigenvector*/
         double vector_size = 0.0;
         for (size_t k = 0; k < X.size(); k++)
         {
-            eigen[k] = eigen[k] + (gamma * X[k] * X_transpo_dot_V);
-            vector_size = vector_size + eigen[k]*eigen[k];
+            eigen[k] += (gamma * X[k] * X_transpo_dot_V);
+            vector_size += eigen[k]*eigen[k];
         }
         vector_size = sqrt(vector_size);
         /*normalize eigenvector*/
