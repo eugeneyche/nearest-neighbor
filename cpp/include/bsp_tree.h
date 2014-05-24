@@ -65,7 +65,7 @@ public:
     void set_root(BSPTreeNode<Label, T> * root)
     { root_ = root; }
     virtual void save(ofstream & out) const;
-    virtual vector<size_t> subdomain(vector<T> * query);
+    virtual vector<size_t> subdomain(vector<T> * query, size_t l_c = 0);
 };
 
 template<class Label, class T>
@@ -240,7 +240,7 @@ void BSPTree<Label, T>::save(ofstream & out) const
 }
 
 template<class Label, class T>
-vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query)
+vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
     queue<BSPTreeNode<Label, T> *> expl;
     expl.push(root_);
@@ -248,7 +248,8 @@ vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query)
     {
         BSPTreeNode<Label, T> * cur = expl.front();
         expl.pop();
-        if (cur->left_ && cur->right_)
+        if (cur->left_ && cur->right_ &&
+            cur->domain_.size() >= l_c)
         {
             if (dot(*query, cur->dir_) <= cur->pivot_)
                 expl.push(cur->left_);
