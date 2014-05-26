@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
         string target (argv[i]);
         if (target == "mnist")
         {
-           mini_mnist_generate();
+           mnist_generate();
         }
         if (target == "mini_mnist")
         {
