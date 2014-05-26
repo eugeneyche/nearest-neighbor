@@ -7,8 +7,6 @@
 #include "kd_virtual_spill_tree.h"
 #include "data_set.h"
 #include "test.h"
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_eigen.h>
 using namespace std;
 
 typedef unsigned char byte;
