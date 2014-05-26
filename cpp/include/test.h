@@ -21,10 +21,11 @@ using namespace std;
 #define SUBDOMAIN       (0x0004)
 #endif
 
-static double l [] = {0.025, 0.05, 0.075, 0.1};
-const size_t l_len = 4;
-static double a [] = {0.05, 0.1};
-const size_t a_len = 2;
+static double min_leaf  = 0.005;
+static double l []      = {0.025, 0.05, 0.075, 0.1};
+const size_t l_len      = 4;
+static double a []      = {0.05, 0.1};
+const size_t a_len      = 2;
 
 template<class Label, class T>
 class Test
@@ -51,17 +52,9 @@ public:
         tree_out.close();
     }
 
-    void generate_kd_trees()
+    void generate_kd_tree()
     {
-        thread t [l_len];
-        for (size_t i = 0; i < l_len; i++)
-        {
-            t[i] = thread(&Test<T, Label>::s_kd_tree, this, l[i]);
-        }
-        for (size_t i = 0; i < l_len; i++)
-        {
-            t[i].join();
-        }
+        s_kd_tree(min_leaf);
     }
 
     void s_kd_spill_tree(double ll, double la)
@@ -79,20 +72,14 @@ public:
 
     void generate_kd_spill_trees()
     {
-        thread t [l_len][a_len];
-        for (size_t i = 0; i < l_len; i++)
+        thread t [a_len];
+        for (size_t i = 0; i < a_len; i++)
         {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                t[i][j] = thread(&Test<T, Label>::s_kd_spill_tree, this, l[i], a[j]);
-            }
+            t[i] = thread(&Test<T, Label>::s_kd_spill_tree, this, min_leaf, a[i]);
         }
-        for (size_t i = 0; i < l_len; i++)
+        for (size_t i = 0; i < a_len; i++)
         {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                t[i][j].join();
-            }
+            t[i].join();
         }
     }
 
@@ -111,27 +98,21 @@ public:
 
     void generate_kd_v_spill_trees()
     {
-        thread t [l_len][a_len];
-        for (size_t i = 0; i < l_len; i++)
+        thread t [a_len];
+        for (size_t i = 0; i < a_len; i++)
         {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                t[i][j] = thread(&Test<T, Label>::s_kd_v_spill_tree, this, l[i], a[j]);
-            }
+            t[i] = thread(&Test<T, Label>::s_kd_v_spill_tree, this, min_leaf, a[i]);
         }
-        for (size_t i = 0; i < l_len; i++)
+        for (size_t i = 0; i < a_len; i++)
         {
-            for (size_t j = 0; j < a_len; j++)
-            {
-                t[i][j].join();
-            }
+            t[i].join();
         }
     }
 
     void s_kd_tree_data(double ll, string * result)
     {
         stringstream dir; 
-        dir << base_dir_ << "/kd_tree_" << setprecision(2) << ll;
+        dir << base_dir_ << "/kd_tree_" << setprecision(2) << min_leaf;
         ifstream tree_in (dir.str());
         KDTree<Label, T> tree (tree_in, *trn_st_);
         size_t error_count = 0;
@@ -139,7 +120,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i]));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -182,7 +163,7 @@ public:
     void s_kd_spill_tree_data(double ll, double la, string * result)
     {
         stringstream dir; 
-        dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << la << "_" << ll;
+        dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
         ifstream tree_in (dir.str());
         KDSpillTree<Label, T> tree (tree_in, *trn_st_);
         size_t error_count = 0;
@@ -190,7 +171,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i]));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                  subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
@@ -242,7 +223,7 @@ public:
     void s_kd_v_spill_tree_data(double ll, double la, string * result)
     {
         stringstream dir; 
-        dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << la << "_" << ll;
+        dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
         ifstream tree_in (dir.str());
         KDVirtualSpillTree<Label, T> tree (tree_in, *trn_st_);
         size_t error_count = 0;
@@ -250,7 +231,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i]));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
