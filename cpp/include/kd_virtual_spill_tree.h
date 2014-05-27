@@ -19,7 +19,7 @@ public:
     KDVirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
     KDVirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
     virtual void save(ofstream & out) const;
-    virtual vector<size_t> subdomain(vector<T> * query, size_t l_c = 0);
+    virtual vector<size_t> subdomain(vector<T> * query, double l_c = 0);
 };
 
 template<class Label, class T>
@@ -105,7 +105,7 @@ void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 
 
 template<class Label, class T>
-vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
+vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, double l_c)
 {
     queue<KDTreeNode<Label, T> *> to_explore;
     set<size_t> domain_st;
@@ -117,8 +117,8 @@ vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t
         bool exists = cur != NULL;
         if (exists)
         {
-            if (cur->get_left() || cur->get_right() &&
-                cur->get_domain().size() >= l_c)
+            if ((cur->get_left() || cur->get_right()) &&
+                cur->get_domain().size() >= l_c * this->get_root()->get_domain().size())
             {
                 range cur_range = range_mp_.at(cur);
                 if (cur_range.first <= (*query)[cur->get_index()] &&

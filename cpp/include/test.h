@@ -52,7 +52,7 @@ public:
         tree_out.close();
     }
 
-    void generate_kd_tree()
+    void generate_kd_trees()
     {
         s_kd_tree(min_leaf);
     }
@@ -102,6 +102,19 @@ public:
         for (size_t i = 0; i < a_len; i++)
         {
             t[i] = thread(&Test<T, Label>::s_kd_v_spill_tree, this, min_leaf, a[i]);
+        }
+        for (size_t i = 0; i < a_len; i++)
+        {
+            t[i].join();
+        }
+    }
+
+    void generate_kd_spill_trees()
+    {
+        thread t [a_len];
+        for (size_t i = 0; i < a_len; i++)
+        {
+            t[i] = thread(&Test<T, Label>::s_kd_spill_tree, this, min_leaf, a[i]);
         }
         for (size_t i = 0; i < a_len; i++)
         {
@@ -252,7 +265,7 @@ public:
 
     void generate_kd_v_spill_tree_data(string out_dir = ".")
     {
-        ofstream kd_out (out_dir + "/kd_v_spill_treedat");
+        ofstream kd_out (out_dir + "/kd_v_spill_tree.dat");
         kd_out <<  setw(COL_W) << "leaf";
         kd_out <<  setw(COL_W) << "alpha";
         kd_out <<  setw(COL_W) << "error rate";
@@ -278,6 +291,7 @@ public:
         }
         kd_out.close();
     }
+
 };
 
 
