@@ -91,10 +91,13 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     {
         if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
-        else if (dot(*st[i], mx_var_dir) <= pivot)
-            subdomain_l.push_back(domain[i]);
         else
-            subdomain_r.push_back(domain[i]);
+        {
+            if (values[i] <= pivot)
+                subdomain_l.push_back(domain[i]);
+            else
+                subdomain_r.push_back(domain[i]);
+        }
     }
     while (subdomain_l_lim > subdomain_l.size())
     {

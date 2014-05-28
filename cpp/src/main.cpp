@@ -14,6 +14,6 @@ typedef unsigned char byte;
 int main() 
 {
     Test<byte, byte> mTest ("data/mnist");
+    mTest.generate_bsp_trees();
     mTest.generate_bsp_tree_data();
-    mTest.generate_bsp_spill_tree_data();
 }

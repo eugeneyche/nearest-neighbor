@@ -70,7 +70,7 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 template<class Label, class T>
 vector<double> max_eigen_vector(DataSet<Label, T> & subset)
 {
-    /*calculate mean*/
+    /* calculate mean */
     vector<double> mean;
     vector<double> sum;
 
@@ -84,52 +84,54 @@ vector<double> max_eigen_vector(DataSet<Label, T> & subset)
     }
     for (size_t i = 0; i < subset.size(); i++)
     {
-        mean.push_back(sum[i]/subset.size());
+        mean.push_back(sum[i] / subset.size());
     }
     
     /* initialize eigen here */
     vector<double> eigen;
     double eigen_size = 0.0;
     srand((int)time(NULL));
-    for (size_t i = 0; i < 10; i++)
+
+    /* WARNING: Potentially dangerous if subset has size 0 */
+    for (size_t i = 0; i < (*subset[0]).size(); i++)
     {
         double x = (double)((rand() % 201) - 100) / 100;
         eigen.push_back(x);
-        eigen_size += x*x;
+        eigen_size += x * x;
     }
     eigen_size = sqrt(eigen_size);
     
     /* normalize eigen here */
     for (size_t i = 0; i < eigen.size(); i++)
     {
-        eigen[i] = eigen[i]/eigen_size;
+        eigen[i] = eigen[i] / eigen_size;
     }
     
-    /*calculate dominant eigenvector*/
+    /* calculate dominant eigenvector*/
     for (size_t i = 0; i < subset.size(); i++)
     {
-        double gamma = 1/(i + 1);
-        /*calculate X transpose dot V*/
+        double gamma = 1/(i + 1); // learning rate
+
+        /* calculate X transpose dot V*/
         double X_transpo_dot_V = 0.0;
         vector<double> X;
         for (size_t j = 0; j < X.size(); j++)
         {
-            X.push_back((double)(*subset[i])[j]);
-            X[j] = X[j] - mean[j]; //centralize X
+            X.push_back((double)(*subset[i])[j] - mean[j]); //centralize X
             X_transpo_dot_V += (X[j] * eigen[j]);
         }
-        /*update dominant eigenvector*/
+
+        /* normalize eigenvector */
         double vector_size = 0.0;
-        for (size_t k = 0; k < X.size(); k++)
+        for (size_t j = 0; j < X.size(); j++)
         {
-            eigen[k] += (gamma * X[k] * X_transpo_dot_V);
-            vector_size += eigen[k]*eigen[k];
+            eigen[j] += (gamma * X[j] * X_transpo_dot_V);
+            vector_size += eigen[j] * eigen[j];
         }
         vector_size = sqrt(vector_size);
-        /*normalize eigenvector*/
-        for (size_t k = 0; k < X.size(); k++)
+        for (size_t j = 0; j < X.size(); j++)
         {
-            eigen[k] = eigen[k]/vector_size;
+            eigen[j] = eigen[j]/vector_size;
         }
     }
     return eigen;
