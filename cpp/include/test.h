@@ -11,6 +11,8 @@
 #include "kd_tree.h"
 #include "kd_spill_tree.h"
 #include "kd_virtual_spill_tree.h"
+#include "bsp_tree.h"
+#include "bsp_spill_tree.h"
 using namespace std;
 
 #ifndef NN_DATA_TYPES_
@@ -109,7 +111,38 @@ public:
         }
     }
 
-    void generate_kd_spill_trees()
+    void s_bsp_tree(double ll)
+    {
+        stringstream dir; 
+        dir << base_dir_ << "/bsp_tree_" << setprecision(2) << ll;
+        #ifdef DEBUG
+        cerr << "[DEBUG: Generating bsp-tree " << ll << "]" << endl;
+        #endif
+        BSPTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), *trn_st_);
+        ofstream tree_out (dir.str());
+        tree.save(tree_out);
+        tree_out.close();
+    }
+
+    void generate_bsp_trees()
+    {
+        s_bsp_tree(min_leaf);
+    }
+
+    void s_bsp_spill_tree(double ll, double la)
+    {
+        stringstream dir; 
+        dir << base_dir_ << "/bsp_spill_tree_" << setprecision(2) << la << "_" << ll;
+        #ifdef DEBUG
+        cerr << "[DEBUG: Generating bsp-spill-tree " << la << " " << ll << "]" << endl;
+        #endif
+        BSPSpillTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), la, *trn_st_);
+        ofstream tree_out (dir.str());
+        tree.save(tree_out);
+        tree_out.close();
+    }
+
+    void generate_bsp_spill_trees()
     {
         thread t [a_len];
         for (size_t i = 0; i < a_len; i++)
@@ -133,7 +166,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -184,7 +217,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                  subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
@@ -244,7 +277,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], ll));
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -293,7 +326,6 @@ public:
     }
 
 };
-
 
 template<class Label, class T>
 Test<Label, T>::Test(string base_dir) :

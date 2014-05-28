@@ -60,7 +60,7 @@ T selector(vector<T> st, size_t k)
 }
 
 template<class T>
-vector<double> eigen_vector(vector<T> &data_set)
+vector<double> eigen_vector(vector<T> & data_set)
 {
     /*calculate mean*/
     vector<double> mean;

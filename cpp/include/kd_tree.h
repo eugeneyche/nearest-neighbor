@@ -64,7 +64,7 @@ public:
     void set_root(KDTreeNode<Label, T> * root)
     { root_ = root; }
     virtual void save(ofstream & out) const;
-    virtual vector<size_t> subdomain(vector<T> * query, double l_c = 0);
+    virtual vector<size_t> subdomain(vector<T> * query, size_t l_c = 0);
 };
 
 template<class Label, class T>
@@ -243,7 +243,7 @@ void KDTree<Label, T>::save(ofstream & out) const
 }
 
 template<class Label, class T>
-vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, double l_c)
+vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
     queue<KDTreeNode<Label, T> *> expl;
     expl.push(root_);
@@ -252,7 +252,7 @@ vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, double l_c)
         KDTreeNode<Label, T> * cur = expl.front();
         expl.pop();
         if (cur->left_ && cur->right_ &&
-            cur->domain_.size() >= l_c * root_->domain_.size())
+            cur->domain_.size() >= l_c)
         {
             if ((*query)[cur->index_] <= cur->pivot_)
                 expl.push(cur->left_);
