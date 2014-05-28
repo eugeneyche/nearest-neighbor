@@ -147,7 +147,7 @@ public:
         thread t [a_len];
         for (size_t i = 0; i < a_len; i++)
         {
-            t[i] = thread(&Test<T, Label>::s_kd_spill_tree, this, min_leaf, a[i]);
+            t[i] = thread(&Test<T, Label>::s_bsp_spill_tree, this, min_leaf, a[i]);
         }
         for (size_t i = 0; i < a_len; i++)
         {
@@ -325,6 +325,116 @@ public:
         kd_out.close();
     }
 
+    void s_bsp_tree_data(double ll, string * result)
+    {
+        stringstream dir; 
+        dir << base_dir_ << "/bsp_tree_" << setprecision(2) << min_leaf;
+        ifstream tree_in (dir.str());
+        BSPTree<Label, T> tree (tree_in, *trn_st_);
+        size_t error_count = 0;
+        size_t true_nn_count = 0;
+        unsigned long long subdomain_count = 0;
+        for (size_t i = 0; i < (*tst_st_).size(); i++)
+        {
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
+            Label nn_lbl = (*trn_st_).get_label(nn_vtr);
+            if (nn_lbl != (*tst_st_).get_label(i))
+                error_count++;
+            if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
+                true_nn_count++;
+            subdomain_count += subSet.size();
+        }
+        stringstream data;
+        data <<  setw(COL_W) <<  ll;
+        data <<  setw(COL_W) << (error_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (true_nn_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (subdomain_count * 1. / (*tst_st_).size());
+        data << endl;
+        *result = data.str();
+    }
+
+    void generate_bsp_tree_data(string out_dir = ".")
+    {
+        ofstream kd_out (out_dir + "/bsp_tree.dat");
+        kd_out <<  setw(COL_W) << "leaf";
+        kd_out <<  setw(COL_W) << "error rate";
+        kd_out <<  setw(COL_W) << "true nn";
+        kd_out <<  setw(COL_W) << "subdomain";
+        kd_out << endl;
+        thread t [l_len];
+        string r [l_len];
+        for (size_t i = 0; i < l_len; i++)
+        {
+            t[i] = thread(&Test::s_bsp_tree_data, this, l[i], &(r[i]));
+        }
+        for (size_t i = 0; i < l_len; i++)
+        {
+            t[i].join();
+            kd_out << r[i];
+        }
+        kd_out.close();
+    }
+
+    void s_bsp_spill_tree_data(double ll, double la, string * result)
+    {
+        stringstream dir; 
+        dir << base_dir_ << "/bsp_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
+        ifstream tree_in (dir.str());
+        BSPSpillTree<Label, T> tree (tree_in, *trn_st_);
+        size_t error_count = 0;
+        size_t true_nn_count = 0;
+        unsigned long long subdomain_count = 0;
+        for (size_t i = 0; i < (*tst_st_).size(); i++)
+        {
+            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
+                                 subSet);
+            Label nn_lbl = (*trn_st_).get_label(nn_vtr);
+            if (nn_lbl != (*tst_st_).get_label(i))
+                error_count++;
+            if (nn_vtr == (*trn_st_)[nn_mp_[(*tst_st_)[i]][0]])
+                true_nn_count++;
+            subdomain_count += subSet.size();
+        }
+        stringstream data;
+        data <<  setw(COL_W) <<  ll;
+        data <<  setw(COL_W) <<  la;
+        data <<  setw(COL_W) << (error_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (true_nn_count * 1. / (*tst_st_).size());
+        data <<  setw(COL_W) << (subdomain_count * 1. / (*tst_st_).size());
+        data << endl;
+        *result = data.str();
+    }
+
+    void generate_bsp_spill_tree_data(string out_dir = ".")
+    {
+        ofstream kd_out (out_dir + "/bsp_spill_tree.dat");
+        kd_out <<  setw(COL_W) << "leaf";
+        kd_out <<  setw(COL_W) << "alpha";
+        kd_out <<  setw(COL_W) << "error rate";
+        kd_out <<  setw(COL_W) << "true nn";
+        kd_out <<  setw(COL_W) << "subdomain";
+        kd_out << endl;
+        thread t [l_len][a_len];
+        string r [l_len][a_len];
+        for (size_t i = 0; i < l_len; i++)
+        {
+            for (size_t j = 0; j < a_len; j++)
+            {
+                t[i][j] = thread(&Test<T, Label>::s_bsp_spill_tree_data, this, l[i], a[j], &(r[i][j]));
+            }
+        }
+        for (size_t i = 0; i < l_len; i++)
+        {
+            for (size_t j = 0; j < a_len; j++)
+            {
+                t[i][j].join();
+                kd_out << r[i][j];
+            }
+        }
+        kd_out.close();
+    }
 };
 
 template<class Label, class T>

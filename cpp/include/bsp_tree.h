@@ -78,7 +78,7 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     if (domain.size() < c)
         return new BSPTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
-    vector<double> mx_var_dir = eigen_vector(subst); /* TODO: determine vtr */
+    vector<double> mx_var_dir = max_eigen_vector(subst); /* TODO: determine vtr */
     vector<double> values;
     for (size_t i = 0; i < subst.size(); i++)
         values.push_back(dot(*subst[i], mx_var_dir));
@@ -91,11 +91,10 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     {
         if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
+        else if (dot(*st[i], mx_var_dir) <= pivot)
+            subdomain_l.push_back(domain[i]);
         else
-            if (dot(st[i], mx_var_dir) <= pivot)
-                subdomain_l.push_back(domain[i]);
-            else
-                subdomain_r.push_back(domain[i]);
+            subdomain_r.push_back(domain[i]);
     }
     while (subdomain_l_lim > subdomain_l.size())
     {
@@ -170,7 +169,7 @@ void BSPTreeNode<Label, T>::save(ofstream & out) const
     size_t dim = dir_.size();
     out.write((char *)&dim, sizeof(size_t)); 
     out.write((char *)&dir_[0], 
-            sizeof(size_t) * dir_.size());
+            sizeof(double) * dir_.size());
     out.write((char *)&pivot_, sizeof(double)); 
     size_t sz = domain_.size();
     out.write((char *)&sz, sizeof(size_t)); 

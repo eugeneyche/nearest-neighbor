@@ -13,10 +13,10 @@ class DataSet
     typedef map<vector<T> *, Label> label_space;
     typedef vector<vector<T> *> vector_space;
 private:
-    DataSet<Label, T> * _parent;
-    label_space * _labels;
-    vector_space * _vectors;
-    vector<size_t> _domain;
+    DataSet<Label, T> * parent_;
+    label_space * labels_;
+    vector_space * vectors_;
+    vector<size_t> domain_;
     DataSet(DataSet<Label, T> & parent, vector<size_t> domain);
     DataSet(vector_space vectors);
 public:
@@ -68,30 +68,98 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 }
 
 template<class Label, class T>
+vector<double> max_eigen_vector(DataSet<Label, T> & subset)
+{
+    /*calculate mean*/
+    vector<double> mean;
+    vector<double> sum;
+
+    for (size_t i = 0; i < subset[0]->size(); i++)
+    {
+        sum.push_back(0);
+        for (size_t j = 0; j < subset.size();j++)
+        {
+            sum[i] += (*subset[j])[i];
+        }
+    }
+    for (size_t i = 0; i < subset.size(); i++)
+    {
+        mean.push_back(sum[i]/subset.size());
+    }
+    
+    /* initialize eigen here */
+    vector<double> eigen;
+    double eigen_size = 0.0;
+    srand((int)time(NULL));
+    for (size_t i = 0; i < 10; i++)
+    {
+        double x = (double)((rand() % 201) - 100) / 100;
+        eigen.push_back(x);
+        eigen_size += x*x;
+    }
+    eigen_size = sqrt(eigen_size);
+    
+    /* normalize eigen here */
+    for (size_t i = 0; i < eigen.size(); i++)
+    {
+        eigen[i] = eigen[i]/eigen_size;
+    }
+    
+    /*calculate dominant eigenvector*/
+    for (size_t i = 0; i < subset.size(); i++)
+    {
+        double gamma = 1/(i + 1);
+        /*calculate X transpose dot V*/
+        double X_transpo_dot_V = 0.0;
+        vector<double> X;
+        for (size_t j = 0; j < X.size(); j++)
+        {
+            X.push_back((double)(*subset[i])[j]);
+            X[j] = X[j] - mean[j]; //centralize X
+            X_transpo_dot_V += (X[j] * eigen[j]);
+        }
+        /*update dominant eigenvector*/
+        double vector_size = 0.0;
+        for (size_t k = 0; k < X.size(); k++)
+        {
+            eigen[k] += (gamma * X[k] * X_transpo_dot_V);
+            vector_size += eigen[k]*eigen[k];
+        }
+        vector_size = sqrt(vector_size);
+        /*normalize eigenvector*/
+        for (size_t k = 0; k < X.size(); k++)
+        {
+            eigen[k] = eigen[k]/vector_size;
+        }
+    }
+    return eigen;
+}
+
+template<class Label, class T>
 DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain) :
-  _parent (&parent),
-  _labels (parent._labels),
-  _vectors (parent._vectors)
+  parent_ (&parent),
+  labels_ (parent.labels_),
+  vectors_ (parent.vectors_)
 {
     vector<size_t>::iterator itr;
     for (itr = domain.begin(); itr != domain.end(); itr++)
     {
-        _domain.push_back(parent._domain[*itr]);
+        domain_.push_back(parent.domain_[*itr]);
     }
 }
 
 template<class Label, class T>
 DataSet<Label, T>::DataSet() :
-  _parent (NULL),
-  _labels (new label_space),
-  _vectors (new vector_space)
+  parent_ (NULL),
+  labels_ (new label_space),
+  vectors_ (new vector_space)
 { }
 
 template<class Label, class T>
 DataSet<Label, T>::DataSet(ifstream & in) :
-  _parent (NULL),
-  _labels (new label_space),
-  _vectors (new vector_space)
+  parent_ (NULL),
+  labels_ (new label_space),
+  vectors_ (new vector_space)
 {
     size_t n, m;
     in.read((char *)&n, sizeof(size_t));
@@ -102,44 +170,44 @@ DataSet<Label, T>::DataSet(ifstream & in) :
         T buffer [m];
         in.read((char *)buffer, sizeof(T) * m);
         vtr->assign(buffer, buffer + m);
-        _domain.push_back(_domain.size());
-        _vectors->push_back(vtr);
+        domain_.push_back(domain_.size());
+        vectors_->push_back(vtr);
     }
 }
 
 template<class Label, class T>
 DataSet<Label, T>::DataSet(vector_space vectors) :
-  _parent (NULL),
-  _labels (new label_space),
-  _vectors (new vector_space)
+  parent_ (NULL),
+  labels_ (new label_space),
+  vectors_ (new vector_space)
 {
     typename vector_space::iterator itr;
     for (itr = vectors.begin(); itr != vectors.end(); itr++)
     {
-        _domain.push_back((size_t)_domain.size());
-        _vectors->push_back(*itr);
+        domain_.push_back((size_t)domain_.size());
+        vectors_->push_back(*itr);
     }
 }
 
 template<class Label, class T>
 DataSet<Label, T>::~DataSet()
 {
-    if (_parent == NULL)
+    if (parent_ == NULL)
     {
-        while (_vectors->size() > 0)
+        while (vectors_->size() > 0)
         {
-            delete _vectors->back();
-            _vectors->pop_back();
+            delete vectors_->back();
+            vectors_->pop_back();
         }
-        delete _labels;
-        delete _vectors;
+        delete labels_;
+        delete vectors_;
     }
 }
 
 template<class Label, class T>
 size_t DataSet<Label, T>::size() const
 {
-    return _domain.size();
+    return domain_.size();
 }
 
 template<class Label, class T>
@@ -151,7 +219,7 @@ void DataSet<Label, T>::label(ifstream & in)
     in.read((char *)buffer, sizeof(Label) * n);
     for (size_t i = 0; i < n; i++)
     {
-        (*_labels)[(*this)[i]] = buffer[i];
+        (*labels_)[(*this)[i]] = buffer[i];
     }
 }
 
@@ -164,19 +232,19 @@ int DataSet<Label, T>::get_label(size_t index) const
 template<class Label, class T>
 int DataSet<Label, T>::get_label(vector<T> * vtr) const
 {
-    return (*_labels)[vtr];
+    return (*labels_)[vtr];
 }
 
 template<class Label, class T>
 vector<size_t> DataSet<Label, T>::get_domain() const
 {
-    return _domain;
+    return domain_;
 }
 
 template<class Label, class T>
 vector<T> * DataSet<Label, T>::operator[](size_t index) const
 {
-    return (*_vectors)[_domain[index]];
+    return (*vectors_)[domain_[index]];
 }
 
 template<class Label, class T>
