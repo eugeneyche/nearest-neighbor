@@ -117,7 +117,7 @@ vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t
         bool exists = cur != NULL;
         if (exists)
         {
-            if (cur->get_left() || cur->get_right() &&
+            if ((cur->get_left() || cur->get_right()) &&
                 cur->get_domain().size() >= l_c)
             {
                 range cur_range = range_mp_.at(cur);

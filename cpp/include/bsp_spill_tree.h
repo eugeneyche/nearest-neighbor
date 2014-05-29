@@ -30,7 +30,7 @@ BSPTreeNode<Label, T> * BSPSpillTree<Label, T>::build_tree(size_t c, double a,
     if (domain.size() < c)
         return new BSPTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
-    vector<double> mx_var_dir = eigen_vector(subst); /* TODO: determine vtr */
+    vector<double> mx_var_dir = max_eigen_vector(subst); /* TODO: determine vtr */
     vector<double> values;
     for (size_t i = 0; i < subst.size(); i++)
         values.push_back(dot(*subst[i], mx_var_dir));
@@ -46,18 +46,18 @@ BSPTreeNode<Label, T> * BSPSpillTree<Label, T>::build_tree(size_t c, double a,
     {
         if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
-        else if (pivot_l == dot(st[i], mx_var_dir) || pivot_r == dot(st[i], mx_var_dir))
+        else if (pivot_l == dot(*st[i], mx_var_dir) || pivot_r == dot(*st[i], mx_var_dir))
             pivot_e_pool.push_back(domain[i]);
         else
         {
-            if (pivot_l < dot(st[i], mx_var_dir) && dot(st[i], mx_var_dir) < pivot_r)
+            if (pivot_l < dot(*st[i], mx_var_dir) && dot(*st[i], mx_var_dir) < pivot_r)
             {
                 subdomain_l.push_back(domain[i]);
                 subdomain_r.push_back(domain[i]);
             }
             else
             {
-                if (dot(st[i], mx_var_dir) < pivot)
+                if (dot(*st[i], mx_var_dir) < pivot)
                     subdomain_l.push_back(domain[i]);
                 else
                     subdomain_r.push_back(domain[i]);
