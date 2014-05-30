@@ -1,3 +1,8 @@
+/* 
+ * File             : test.h
+ * Date             : 2014-5-29
+ * Summary          : Provides the testing interface for the data structures
+ */
 #ifndef TEST_H_
 #define TEST_H_
 
@@ -7,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include "logging.h"
 #include "data_set.h"
 #include "kd_tree.h"
 #include "kd_spill_tree.h"
@@ -43,11 +49,9 @@ public:
 
     void s_kd_tree(double ll)
     {
+        LOG_INFO("Generating KDTree %lf\n", ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_tree_" << setprecision(2) << ll;
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating kd-tree " << ll << "]" << endl;
-        #endif
         KDTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), *trn_st_);
         ofstream tree_out (dir.str());
         tree.save(tree_out);
@@ -61,11 +65,9 @@ public:
 
     void s_kd_spill_tree(double ll, double la)
     {
+        LOG_INFO("Generating KDSpillTree %lf %lf\n", la, ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << la << "_" << ll;
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating kd-spill-tree " << la << " " << ll << "]" << endl;
-        #endif
         KDSpillTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), la, *trn_st_);
         ofstream tree_out (dir.str());
         tree.save(tree_out);
@@ -87,11 +89,9 @@ public:
 
     void s_kd_v_spill_tree(double ll, double la)
     {
+        LOG_INFO("Generating KDVirtualSpillTree %lf %lf\n", la, ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << la << "_" << ll;
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating virtual-spill-tree " << la << " " << ll << "]" << endl;
-        #endif
         KDVirtualSpillTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), la, *trn_st_);
         ofstream tree_out (dir.str());
         tree.save(tree_out);
@@ -113,11 +113,9 @@ public:
 
     void s_bsp_tree(double ll)
     {
+        LOG_INFO("Generating BSPTree %lf\n", ll);
         stringstream dir; 
         dir << base_dir_ << "/bsp_tree_" << setprecision(2) << ll;
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating bsp-tree " << ll << "]" << endl;
-        #endif
         BSPTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), *trn_st_);
         ofstream tree_out (dir.str());
         tree.save(tree_out);
@@ -131,11 +129,9 @@ public:
 
     void s_bsp_spill_tree(double ll, double la)
     {
+        LOG_INFO("Generating BSPSpillTree %lf %lf\n", la,  ll);
         stringstream dir; 
         dir << base_dir_ << "/bsp_spill_tree_" << setprecision(2) << la << "_" << ll;
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating bsp-spill-tree " << la << " " << ll << "]" << endl;
-        #endif
         BSPSpillTree<Label, T> tree ((size_t)(ll * (*trn_st_).size()), la, *trn_st_);
         ofstream tree_out (dir.str());
         tree.save(tree_out);
@@ -157,6 +153,7 @@ public:
 
     void s_kd_tree_data(double ll, string * result)
     {
+        LOG_INFO("Generating KDTree %lf data\n", ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_tree_" << setprecision(2) << min_leaf;
         ifstream tree_in (dir.str());
@@ -208,6 +205,7 @@ public:
 
     void s_kd_spill_tree_data(double ll, double la, string * result)
     {
+        LOG_INFO("Generating KDSpillTree %lf %lf data\n", la, ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
         ifstream tree_in (dir.str());
@@ -268,6 +266,7 @@ public:
 
     void s_kd_v_spill_tree_data(double ll, double la, string * result)
     {
+        LOG_INFO("Generating KDVirtualSpillTree %lf %lf data\n", la, ll);
         stringstream dir; 
         dir << base_dir_ << "/kd_v_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
         ifstream tree_in (dir.str());
@@ -327,6 +326,7 @@ public:
 
     void s_bsp_tree_data(double ll, string * result)
     {
+        LOG_INFO("Generating BSPTree %lf data\n", ll);
         stringstream dir; 
         dir << base_dir_ << "/bsp_tree_" << setprecision(2) << min_leaf;
         ifstream tree_in (dir.str());
@@ -378,6 +378,7 @@ public:
 
     void s_bsp_spill_tree_data(double ll, double la, string * result)
     {
+        LOG_INFO("Generating BSPSpillTree %lf %lf data\n", la, ll);
         stringstream dir; 
         dir << base_dir_ << "/bsp_spill_tree_" << setprecision(2) << la << "_" << min_leaf;
         ifstream tree_in (dir.str());
@@ -441,96 +442,60 @@ template<class Label, class T>
 Test<Label, T>::Test(string base_dir) :
   base_dir_ (base_dir)
 {
-    #ifdef DEBUG
-    cerr << "[DEBUG: Loading datasets]" << endl;
-    cerr << "[DEBUG: Loading vectors]" << endl;
-    #endif
+    LOG_INFO("Loading data sets\n");
     ifstream trn_vtr_in (base_dir + "/trn_vtr");
     ifstream tst_vtr_in (base_dir + "/tst_vtr");
     trn_st_ = new DataSet<Label, T>(trn_vtr_in);
     tst_st_ = new DataSet<Label, T>(tst_vtr_in);
     trn_vtr_in.close();
     tst_vtr_in.close();
-    #ifdef DEBUG
-    cerr << "[DEBUG: Labeling dataset]" << endl;
-    #endif
+    LOG_INFO("Labeling data sets\n");
     ifstream trn_lbl_in (base_dir + "/trn_lbl");
     ifstream tst_lbl_in (base_dir + "/tst_lbl");
     trn_st_->label(trn_lbl_in);
     tst_st_->label(tst_lbl_in);
     trn_lbl_in.close();
     tst_lbl_in.close();
-    #ifdef DEBUG
-    cerr << "[DEBUG: SUCCESS]" << endl;
-    cerr << "[DEBUG: Looking for k_true_nn]" << endl;
-    #endif
+    LOG_INFO("Success!\n");
     ifstream nn_dat_in (base_dir + "/k_true_nn", ios::binary);
     if (nn_dat_in.good())
     {
         size_t k;
         nn_dat_in.read((char *)&k, sizeof(size_t));
-        #ifdef DEBUG
-        cerr << "[DEBUG: k_true_nn found!!!]" << endl;
-        cerr << "[DEBUG: Parsing k_true_nn with k = " << k << "]" << endl;
-        #endif
+        LOG_INFO("File \"k_true_nn\" found!!!\n");
+        LOG_INFO("Parsing file with k = %ld\n", k);
         for (size_t i = 0; i < tst_st_->size(); i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: " << i  << " |";
-            #endif
             for (int j = 0; j < k; j++)
             {
                 size_t nn; 
                 nn_dat_in.read((char *)&nn, sizeof(size_t));
                 nn_mp_[(*tst_st_)[i]].push_back(nn);
-                #ifdef DEBUG
-                cerr << " " << nn;
-                #endif
             }
-            #ifdef DEBUG
-            cerr << "]" << endl;
-            #endif
         }
         nn_dat_in.close();
-        #ifdef DEBUG
-        cerr << "[DEBUG: SUCCESS]" << endl;
-        #endif
+        LOG_INFO("Success!\n");
     }
     else
     {
-        #ifdef DEBUG
-        cerr << "[DEBUG: k_true_nn not found!!!]" << endl;
-        #endif
+        LOG_WARNING("File \"k_true_nn\" not found!!!\n");
         size_t k = 10;
         nn_dat_in.close();
-        #ifdef DEBUG
-        cerr << "[DEBUG: Generating k_true_nn with k = " << k << "]" << endl;
-        #endif
+        LOG_WARNING("Generating \"k_true_nn\" with k = %ld\n", k);
         ofstream nn_dat_out (base_dir + "/k_true_nn", ios::binary);
         nn_dat_out.write((char *)&k, sizeof(size_t));
         for (size_t i = 0; i < tst_st_->size(); i++)
         {
-            #ifdef DEBUG
-            cerr << "[DEBUG: " << i  << " |";
-            #endif
             DataSet<Label, T> l_st = k_nearest_neighbor(k, (*tst_st_)[i], *trn_st_);
             for (size_t j = 0; j < k; j++)
             {
 
                 nn_dat_out.write((char *)&(l_st.get_domain()[j]), sizeof(size_t));
                 nn_mp_[(*tst_st_)[i]].push_back(l_st.get_domain()[j]);
-                #ifdef DEBUG
-                cerr << " " << l_st.get_domain()[j];
-                #endif
             }
-            #ifdef DEBUG
-            cerr << "]" << endl;
-            #endif
         }
         nn_dat_out.close();
-        #ifdef DEBUG
-        cerr << "[DEBUG: SUCCESS]" << endl;
-        #endif
+        LOG_INFO("Success!\n");
     }
 }
 

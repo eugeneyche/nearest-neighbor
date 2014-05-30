@@ -1,3 +1,8 @@
+/* 
+ * File     : data_set.h
+ * Date     : 2014-5-29
+ * Summary  : Infrastructure to hold the data set.
+ */
 #ifndef DATA_SET_H_
 #define DATA_SET_H_
 
@@ -7,6 +12,19 @@
 #include "vector_math.h"
 using namespace std;
 
+/* 
+ * Name             : DataSet
+ * Description      : Data structure to hold the data set.
+ * Data Field(s)    : parent_   - parent data set that this is spawned form
+ *                    labels_   - map of labels for each of the vectors
+ *                    vectors_  - all vectors in data set
+ *                    domain_   - vectors out of vector space in data set
+ * Functions(s)     : DataSet() - Default constructor
+ *                    DataSet(ifstream & in)
+ *                              - De-serialization constructor
+ *                    ~DataSet() 
+ *                              - Deconstructor 
+ */
 template<class Label, class T>
 class DataSet
 {
@@ -25,13 +43,22 @@ public:
     ~DataSet();
     size_t size() const;
     void label(ifstream & in);
-    int get_label(size_t index) const;
-    int get_label(vector<T> * vtr) const;
+    Label get_label(size_t index) const;
+    Label get_label(vector<T> * vtr) const;
     vector<size_t> get_domain() const;
     vector<T> * operator[](size_t index) const;
     DataSet<Label, T> subset(vector<size_t> domain);
 };
 
+/*
+ * Name             : max_variance_index
+ * Prototype        : size_t max_variance_index(DataSet<Label, T> &)
+ * Description      : Gets the index that produces the greatest variance
+ *                    out of all the vectors
+ * Parameter(s)     : subset - The data set to find the max varianced
+ *                             index
+ * Return Value     : The index that produces the max variance
+ */
 template<class Label, class T>
 size_t max_variance_index(DataSet<Label, T> & subset)
 {
@@ -67,10 +94,17 @@ size_t max_variance_index(DataSet<Label, T> & subset)
     return maxIndex;
 }
 
+/*
+ * Name             : max_eigen_vector
+ * Prototype        : vector<double> max_eigen_vector(DataSet<Label, T> &)
+ * Description      : Gets the eigen vector of the data set.
+ * Parameter(s)     : subset - The data set to find the eigen vector of
+ * Return Value     : The (max) eigen vector of the data set
+ */
 template<class Label, class T>
 vector<double> max_eigen_vector(DataSet<Label, T> & subset)
 {
-    /* calculate mean */
+    /* Calculate mean */
     vector<double> mean;
     vector<double> sum;
 
@@ -137,6 +171,8 @@ vector<double> max_eigen_vector(DataSet<Label, T> & subset)
     return eigen;
 }
 
+/* Private Functions */
+
 template<class Label, class T>
 DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain) :
   parent_ (&parent),
@@ -151,12 +187,42 @@ DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain) :
 }
 
 template<class Label, class T>
+DataSet<Label, T>::DataSet(vector_space vectors) :
+  parent_ (NULL),
+  labels_ (new label_space),
+  vectors_ (new vector_space)
+{
+    typename vector_space::iterator itr;
+    for (itr = vectors.begin(); itr != vectors.end(); itr++)
+    {
+        domain_.push_back((size_t)domain_.size());
+        vectors_->push_back(*itr);
+    }
+}
+
+/* Public Functions */
+
+/*
+ * Name             : DataSet
+ * Prototype        : DataSet<Label, T>::DataSet()
+ * Description      : The default constructor.
+ * Parameter(s)     : None
+ * Return Value     : Creates an empty data set
+ */
+template<class Label, class T>
 DataSet<Label, T>::DataSet() :
   parent_ (NULL),
   labels_ (new label_space),
   vectors_ (new vector_space)
 { }
 
+/*
+ * Name             : DataSet
+ * Prototype        : DataSet<Label, T>::DataSet(ifstream &)
+ * Description      : De-serialization constructor.
+ * Parameter(s)     : None
+ * Return Value     : Creates a de-serialized data set
+ */
 template<class Label, class T>
 DataSet<Label, T>::DataSet(ifstream & in) :
   parent_ (NULL),
@@ -177,20 +243,13 @@ DataSet<Label, T>::DataSet(ifstream & in) :
     }
 }
 
-template<class Label, class T>
-DataSet<Label, T>::DataSet(vector_space vectors) :
-  parent_ (NULL),
-  labels_ (new label_space),
-  vectors_ (new vector_space)
-{
-    typename vector_space::iterator itr;
-    for (itr = vectors.begin(); itr != vectors.end(); itr++)
-    {
-        domain_.push_back((size_t)domain_.size());
-        vectors_->push_back(*itr);
-    }
-}
-
+/*
+ * Name             : ~DataSet
+ * Prototype        : DataSet<Label, T>::~DataSet()
+ * Description      : The deconstructor.
+ * Parameter(s)     : None
+ * Return Value     : None
+ */
 template<class Label, class T>
 DataSet<Label, T>::~DataSet()
 {
@@ -206,12 +265,26 @@ DataSet<Label, T>::~DataSet()
     }
 }
 
+/*
+ * Name             : size
+ * Prototype        : size_t DataSet<Label, T>::size() const
+ * Description      : Returns the size of the data set.
+ * Parameter(s)     : None
+ * Return Value     : The size of the data set
+ */
 template<class Label, class T>
 size_t DataSet<Label, T>::size() const
 {
     return domain_.size();
 }
 
+/*
+ * Name             : label
+ * Prototype        : void DataSet<Label, T>::label(ifstream & in)
+ * Description      : Labels data set through label file
+ * Parameter(s)     : in    - The file to get the label data from
+ * Return Value     : None
+ */
 template<class Label, class T>
 void DataSet<Label, T>::label(ifstream & in)
 {
@@ -225,33 +298,69 @@ void DataSet<Label, T>::label(ifstream & in)
     }
 }
 
+/*
+ * Name             : get_label
+ * Prototype        : Label DataSet<Label, T>::get_label(size_t) const
+ * Description      : Gets the label of a given vector.
+ * Parameter(s)     : index - The index of vector to get label from
+ * Return Value     : Label value of the given vector
+ */
 template<class Label, class T>
-int DataSet<Label, T>::get_label(size_t index) const
+Label DataSet<Label, T>::get_label(size_t index) const
 {
     return get_label((*this)[index]);
 }
 
+/*
+ * Name             : get_label
+ * Prototype        : Label DataSet<Label, T>::get_label(vector<T> *) const
+ * Description      : Gets the label of a given vector.
+ * Parameter(s)     : vtr - The vector to get label from
+ * Return Value     : Label value of the given vector
+ */
 template<class Label, class T>
-int DataSet<Label, T>::get_label(vector<T> * vtr) const
+Label DataSet<Label, T>::get_label(vector<T> * vtr) const
 {
     return (*labels_)[vtr];
 }
 
+/*
+ * Name             : get_domain() const
+ * Prototype        : vector<size_t> DataSet<Label, T>::get_domain() const
+ * Description      : Gets the domain of the data set.
+ * Parameter(s)     : None
+ * Return Value     : A vector containing indices in vector space
+ */
 template<class Label, class T>
 vector<size_t> DataSet<Label, T>::get_domain() const
 {
     return domain_;
 }
 
+/*
+ * Name             : operator []
+ * Prototype        : vector<T> * operator[](size_t)
+ * Description      : Gets the vector at given index
+ * Parameter(s)     : index - The index of the vector
+ * Return Value     : The vector pointer of the wanted vector
+ */
 template<class Label, class T>
 vector<T> * DataSet<Label, T>::operator[](size_t index) const
 {
     return (*vectors_)[domain_[index]];
 }
 
+/*
+ * Name             : subset
+ * Prototype        : DataSet<Label, T> DataSet<Label, T>::subset(vector<size_t>)
+ * Description      : Creates a subset of the data set.
+ * Parameter(s)     : domain - The subdomain of given data set
+ * Return Value     : The sub set of the given subdomain
+ */
 template<class Label, class T>
 DataSet<Label, T> DataSet<Label, T>::subset(vector<size_t> domain)
 {
     return DataSet<Label, T>(*this, domain);
 }
+
 #endif

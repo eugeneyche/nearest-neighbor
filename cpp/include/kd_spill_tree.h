@@ -1,3 +1,8 @@
+/* 
+ * File             : kd_spill_tree.h
+ * Date             : 2014-5-29
+ * Summary          : Infrastructure to hold a kd spill tree.
+ */
 #ifndef KD_SPILL_TREE_H_
 #define KD_SPILL_TREE_H_
 
@@ -5,17 +10,33 @@
 
 #define MIN(x, y) (x) < (y) ? (x) : (y)
 
+/* Class Prototypes */
+
 template<class Label, class T>
 class KDSpillTree;
 
+/* Class Definitions */
+
+/* 
+ * Name             : KDSpillTree
+ * Description      : Encapsulates the KDTreeNodes into a spill tree.
+ *                    Effectively acts as identically to KDTree with spillage in
+ *                    terms of its nodes.
+ * Data Field(s)    : None
+ * Functions(s)     : KDSpillTree(size_t, double, DataSet<Label, T> &)
+ *                          - Creates a spill tree with given min leaf size
+ *                            and the spill factor
+ *                    KDSpillTree(ifStream & in, DataSet<Label, T> & st)
+ *                          - De-serializes a spill tree
+ */
 template<class Label, class T>
 class KDSpillTree : public KDTree<Label, T>
 {
 private:
     static KDTreeNode<Label, T> * build_tree(size_t c, double a,
             DataSet<Label, T> & st, vector<size_t> domain);
-public:
     KDSpillTree(DataSet<Label, T> & st);
+public:
     KDSpillTree(size_t c, double a, DataSet<Label, T> & st);
     KDSpillTree(ifstream & in, DataSet<Label, T> & st);
 };
@@ -24,18 +45,14 @@ template<class Label, class T>
 KDTreeNode<Label, T> * KDSpillTree<Label, T>::build_tree(size_t c, double a,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
-    #ifdef DEBUG
-        cerr << "[DEBUG: Building tree of size " << domain.size() << "]" << endl;
-    #endif
+    LOG_FINE("Building KDSpillTree of c = %ld and domain of size %ld\n", c, domain.size());
     if (domain.size() < c)
         return new KDTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
     size_t mx_var_index = max_variance_index(subst);
     vector<T> values;
     for (size_t i = 0; i < subst.size(); i++)
-    {
         values.push_back((*subst[i])[mx_var_index]);
-    }
     T pivot = selector(values, (size_t)(values.size() * 0.5));
     T pivot_l = selector(values, (size_t)(values.size() * (0.5 - a)));
     T pivot_r = selector(values, (size_t)(values.size() * (0.5 + a)));
@@ -83,11 +100,7 @@ KDTreeNode<Label, T> * KDSpillTree<Label, T>::build_tree(size_t c, double a,
     size_t d_l = MIN(subdomain_l_lim - subdomain_l.size(), pivot_pool.size() + pivot_l_pool.size() + pivot_r_pool.size());
     size_t d_r = MIN(subdomain_r_lim - subdomain_r.size(), pivot_pool.size() + pivot_l_pool.size() + pivot_r_pool.size());
     size_t spill = d_l + d_r - (pivot_pool.size() + pivot_l_pool.size() + pivot_r_pool.size());
-    #ifdef DEBUG
-        cerr << "[DEBUG: dl - " << d_l << "]" << endl;
-        cerr << "[DEBUG: dr - " << d_r << "]" << endl;
-        cerr << "[DEBUG: spill - " << spill << "]" << endl;
-    #endif
+    LOG_FINE("dl = %ld, dr = %ld, spill = %ld\n", d_l, d_r, spill);
     for (size_t i = 0; i < d_l - spill; i++)
     {
         size_t curr;
@@ -155,10 +168,15 @@ KDTreeNode<Label, T> * KDSpillTree<Label, T>::build_tree(size_t c, double a,
     result->set_right(build_tree(c, a, st, subdomain_r));
     return result;
 }
+
+/* Private Functions */
+
 template<class Label, class T>
 KDSpillTree<Label, T>::KDSpillTree(DataSet<Label, T> & st) :
   KDTree<Label, T>(st)
 { }
+
+/* Public Functions */
 
 template<class Label, class T>
 KDSpillTree<Label, T>::KDSpillTree(size_t c, double a, DataSet<Label, T> & st) :

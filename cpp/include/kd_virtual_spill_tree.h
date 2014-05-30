@@ -1,3 +1,8 @@
+/* 
+ * File             : kd_spill_tree.h
+ * Date             : 2014-5-29
+ * Summary          : Infrastructure to hold a kd spill tree.
+ */
 #ifndef KD_VIRTUAL_SPILL_TREE_H_
 #define KD_VIRTUAL_SPILL_TREE_H_
 
@@ -8,24 +13,47 @@
 #include "kd_tree.h"
 using namespace std;
 
+/* Class Definitions */
+
+/* 
+ * Name             : KDVirtualSpillTree
+ * Description      : Encapsulates the KDTreeNodes into a virtual spill tree.
+ *                    Effectively acts as identically to KDTree with spillage
+ *                    in terms of its query method.
+ * Data Field(s)    : range_mp  - A map to match a node with its range
+ * Functions(s)     : KDVirtualSpillTree(size_t, double, DataSet<Label, T> &)
+ *                              - Creates a spill tree with given min leaf size
+ *                                and the spill factor
+ *                    KDVirtualSpillTree(ifStream & in, DataSet<Label, T> & st)
+ *                              - De-serializes a virtual spill tree
+ *                    void save(ofstream &) const 
+ *                              - Serializes a virtual spill tree with its range
+ *                                appended to the end
+ *                    vector<size_t> subdomain(vector<T> *, size_t)
+ *                              - Queries the node with the spillage
+ */
 template<class Label, class T>
 class KDVirtualSpillTree : public KDTree<Label, T>
 {
     typedef pair<T, T> range;
 protected:
     map<KDTreeNode<Label, T> *, range> range_mp_;
-public:
     KDVirtualSpillTree(DataSet<Label, T> & st);
+public:
     KDVirtualSpillTree(size_t c, double a, DataSet<Label, T> & st);
     KDVirtualSpillTree(ifstream & in, DataSet<Label, T> & st);
     virtual void save(ofstream & out) const;
     virtual vector<size_t> subdomain(vector<T> * query, size_t l_c = 0);
 };
 
+/* Private Functions */
+
 template<class Label, class T>
 KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(DataSet<Label, T> & st) :
   KDTree<Label, T>(st)
 { }
+
+/* Public Functions */
 
 template<class Label, class T>
 KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(size_t c, double a, 
@@ -102,7 +130,6 @@ void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
         }
     }
 }
-
 
 template<class Label, class T>
 vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t l_c)

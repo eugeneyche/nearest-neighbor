@@ -1,3 +1,8 @@
+/* 
+ * File             : nn.h
+ * Date             : 2014-5-29
+ * Summary          : Basic nearest neighbor algorithms.
+ */
 #ifndef NN_H_
 #define NN_H_
 
@@ -6,6 +11,14 @@
 #include "data_set.h"
 using namespace std;
 
+/*
+ * Name             : nearest_neighbor
+ * Prototype        : vector<T> * nearest_neighbor(const vector<T> *, const DataSet<Label, T> &)
+ * Description      : Gets the nearest neighbor to a query in a linear fashion.
+ * Parameter(s)     : query     - The vector to search the data set against
+ *                    st        - The set to search from
+ * Return Value     : Gets the nearest neighbor to the query in the data set
+ */
 template<class Label, class T>
 vector<T> * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> & st)
 {
@@ -24,6 +37,15 @@ vector<T> * nearest_neighbor(const vector<T> * query, const DataSet<Label, T> & 
     return mn_vtr;
 }
 
+/*
+ * Name             : k_nearest_neighbor
+ * Prototype        : DataSet<Label, T> k_nearest_neighbor(size_t, const vector<T> *, 
+ *                                                         const DataSet<Label, T> &)
+ * Description      : Gets the k nearest neighbors to a query in a linear fashion.
+ * Parameter(s)     : query     - The vector to search the data set against
+ *                    st        - The set to search from
+ * Return Value     : Gets a data set storing the k nearest neighbors to the query in the data set
+ */
 template<class Label, class T>
 DataSet<Label, T> k_nearest_neighbor(size_t k, vector<T> * query, DataSet<Label, T> & st)
 {
@@ -52,6 +74,16 @@ DataSet<Label, T> k_nearest_neighbor(size_t k, vector<T> * query, DataSet<Label,
     return st.subset(domain);
 }
 
+/*
+ * Name             : c_approx_nn
+ * Prototype        : c_approx(size_tconst vector<T> *, const DataSet<Label, T> &)
+ * Description      : Gets the c approxiate nearest neighbors to a query in a linear fashion.
+ * Parameter(s)     : c         - The c approximation
+ *                    query     - The vector to search the data set against
+ *                    st        - The set to search from
+ * Return Value     : Gets a data set storing the c approximate nearest neighbors to the query 
+ *                    in the data set
+ */
 template<class Label, class T>
 DataSet<Label, T> c_approx_nn(double c, vector<T> * query, DataSet<Label, T> & st, 
         vector<T> * nn)

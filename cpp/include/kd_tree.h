@@ -1,10 +1,18 @@
+/* 
+ * File             : kd_tree.h
+ * Date             : 2014-5-29
+ * Summary          : Infrastructure to hold a kd tree.
+ */
 #ifndef KD_TREE_H_
 #define KD_TREE_H_
 
 #include <queue>
 #include <map>
+#include "logging.h"
 #include "data_set.h"
 using namespace std;
+
+/* Class Prototypes */
 
 template<class Label, class T>
 class KDTreeNode;
@@ -12,6 +20,37 @@ class KDTreeNode;
 template<class Label, class T>
 class KDTree;
 
+/* Class Definitions */
+
+/* 
+ * Name             : KDTreeNode
+ * Description      : Data structure to hold a node of a KDTree
+ * Data Field(s)    : index_    - The max variance index
+ *                    pivot_    - The value to pivot on
+ *                    left_     - Pointer to left subtree node
+ *                    right_    - Pointer to right subtree node
+ *                    domain_   - vectors out of vector space in data set
+ * Functions(s)     : KDTreeNode(const vector<size_t>) 
+ *                              - Create a KDTreeNode of given domain (leaf)
+ *                    KDTreeNode(size_t, T, vector<size_t>)
+ *                              - Create a KDTreeNode of given domain (non-leaf)
+ *                    KDTreeNode(ifstream &)
+ *                              - Creates a KDTreeNode through de-serialization
+ *                    size_t get_index() const
+ *                              - Gets index of max variance
+ *                    KDTreeNode * get_left() const
+ *                              - Returns pointer to left subtree node
+ *                    KDTreeNode * get_right() const
+ *                              - Returns pointer to right subtree node
+ *                    vector<size_t> get_domain() const
+ *                              - Returns the domain the node stores
+ *                    void set_left(KDTreeNode *)
+ *                              - Sets the left subtree node
+ *                    void set_right(KDTreeNode *)
+ *                              - Sets the right subtree node
+ *                    void save(ofstream &)
+ *                              - Serializes node 
+ */
 template<class Label, class T>
 class KDTreeNode
 {
@@ -43,6 +82,29 @@ public:
     friend class KDTree<Label, T>;
 };
 
+/*
+ * Name             : KDTree
+ * Description      : Encapsulates the KDTreeNodes into tree.
+ * Data Field(s)    : root_ - Holds the root node of tree
+ *                    st_   - Holds the data set associated with tree
+ * Function(s)      : KDTree(DataSet<Label, T>)
+ *                          - Creates a tree of given data set
+ *                    KDTree(size_t, DataSet<Label, T>)
+ *                          - Creates a tree of given min leaf size and
+ *                            data set
+ *                    KDTree(ifstream &, DataSet<Label, T>)
+ *                          - De-serialization 
+ *                    ~KDTree()
+ *                          - Deconstructor
+ *                    KDTreeNode<Label, T> * get_root() const
+ *                          - Returns the root
+ *                    DataSet<Label, T> & get_st() const
+ *                          - Returns the set associated with the tree
+ *                    void save(ofstream &) const
+ *                          - Serializes the tree
+ *                    vector<size_t> subdomain(vector<T> *, size_t)
+ *                          - Queries the tree for a subdomain
+ */
 template<class Label, class T>
 class KDTree
 {
@@ -52,8 +114,8 @@ private:
 protected:
     KDTreeNode<Label, T> * root_;
     DataSet<Label, T> & st_;
-public:
     KDTree(DataSet<Label, T> & st);
+public:
     KDTree(size_t c, DataSet<Label, T> & st);
     KDTree(ifstream & in, DataSet<Label, T> & st);
     ~KDTree();
@@ -67,13 +129,13 @@ public:
     virtual vector<size_t> subdomain(vector<T> * query, size_t l_c = 0);
 };
 
+/* Private Functions */
+
 template<class Label, class T>
 KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
-    #ifdef DEBUG
-        cerr << "[DEBUG: Building tree of size " << domain.size() << "]" << endl;
-    #endif
+    LOG_FINE("Building KDTree of c = %ld and domain of size %ld\n", c, domain.size());
     if (domain.size() < c)
         return new KDTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
@@ -121,6 +183,8 @@ KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
     return result;
 }
 
+/* Public Functions */
+
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(const vector<size_t> domain) :
   index_ (0),
@@ -147,10 +211,6 @@ KDTreeNode<Label, T>::KDTreeNode(ifstream & in)
      in.read((char *)&pivot_, sizeof(T));
      size_t sz;
      in.read((char *)&sz, sizeof(size_t));
-     #ifdef DEBUG
-     cerr << "[DEBUG: Building node with index " << index_ <<
-            " and size " << sz << "]" << endl;
-     #endif
      while (sz--)
      {
          size_t v;
@@ -169,10 +229,7 @@ KDTreeNode<Label, T>::~KDTreeNode()
 template<class Label, class T>
 void KDTreeNode<Label, T>::save(ofstream & out) const
 {
-     #ifdef DEBUG
-     cerr << "[DEBUG: Saving node with index " << index_ <<
-            " and size " << domain_.size() << "]" << endl;
-     #endif
+    LOG_FINE("Saving KDTreeNode data with domain of size %ld\n", domain_.size());
     out.write((char *)&index_, sizeof(size_t)); 
     out.write((char *)&pivot_, sizeof(T)); 
     size_t sz = domain_.size();
@@ -197,6 +254,7 @@ template<class Label, class T>
 KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
   st_ (st)
 {
+    LOG_FINE("De-serializing KDTree\n");
     queue<KDTreeNode<Label, T> **> to_load;
     to_load.push(&root_);
     while (!to_load.empty())
@@ -219,6 +277,7 @@ KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
 template<class Label, class T>
 KDTree<Label, T>::~KDTree()
 {
+    LOG_FINE("Deconstructing KDTree\n");
     if (root_) delete root_;
 }
 
@@ -245,6 +304,7 @@ void KDTree<Label, T>::save(ofstream & out) const
 template<class Label, class T>
 vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
+    LOG_FINE("Querying KDTree down to min leaf of size %ld\n", l_c);
     queue<KDTreeNode<Label, T> *> expl;
     expl.push(root_);
     while (!expl.empty())
