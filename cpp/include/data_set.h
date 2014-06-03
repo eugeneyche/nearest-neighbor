@@ -95,14 +95,16 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 }
 
 /*
- * Name             : max_eigen_vector
- * Prototype        : vector<double> max_eigen_vector(DataSet<Label, T> &)
- * Description      : Gets the eigen vector of the data set.
+ * Name             : max_eigen_vector_oja
+ * Prototype        : vector<double> max_eigen_vector_oja(DataSet<Label, T> &)
+ * Description      : Gets the eigen vector of the data set using Oja's
+ *                    algorithm..
  * Parameter(s)     : subset - The data set to find the eigen vector of
  * Return Value     : The (max) eigen vector of the data set
+ * Notes            : Still needs quite a bit of work.
  */
 template<class Label, class T>
-vector<double> max_eigen_vector(DataSet<Label, T> & subset)
+vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
 {
     /* Calculate mean */
     vector<double> mean;
