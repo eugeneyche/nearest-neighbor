@@ -207,6 +207,7 @@ KDTreeNode<Label, T>::KDTreeNode(size_t index,
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(ifstream & in)
 {
+    LOG_FINE("De-serializing KDTreeNode\n");
      in.read((char *)&index_, sizeof(size_t));
      in.read((char *)&pivot_, sizeof(T));
      size_t sz;

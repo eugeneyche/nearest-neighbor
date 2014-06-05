@@ -9,7 +9,11 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <algorithm>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include "vector_math.h"
+#include "logging.h"
 using namespace std;
 
 /* 
@@ -95,6 +99,63 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 }
 
 /*
+ * Name             : max_variance_indices
+ * Prototype        : vector<size_t> k_max_variance_index(DataSet<Label, T> &)
+ * Description      : Gets the index that produces the greatest variance
+ *                    out of all the vectors
+ * Parameter(s)     : subset - The data set to find the max varianced
+ *                             index
+ * Return Value     : The index that produces the max variance
+ */
+template<class Label, class T>
+vector<size_t> k_max_variance_indices(size_t k, DataSet<Label, T> & subset)
+{
+    vector<double> var;
+    vector<T> vtr;
+    size_t dimension = subset[0]->size();
+    size_t subsize = subset.size();
+    for (size_t i = 0; i < dimension; i++)
+    {
+        vtr.clear();
+        for (size_t j = 0; j < subsize; j++)
+        {
+            vtr.push_back((*subset[j])[i]);
+        }
+        T median = selector(vtr, (size_t)(subset.size() * 0.5));
+        double variance = 0.0;
+        for (size_t j = 0; j < subsize; j++)
+        {
+            double dif = (double)(*subset[j])[i] - (double)median;
+            variance += dif * dif;
+        }
+        variance = variance / subsize;
+        var.push_back(variance);
+    }
+    size_t idx [dimension];
+    for (size_t i = 0; i < dimension; i++)
+    {
+        idx[i] = i;
+    }
+    /* Selection Sort for Parallel Arrays */
+    vector<size_t> result;
+    for (size_t i = 0; i < k; i++)
+    {
+        size_t maxIndex = i;
+        for (size_t j = i; j < dimension; j++)
+        {
+            if (var[j] > var[maxIndex])
+            {
+                maxIndex = j;
+            }
+        }
+        result.push_back(idx[maxIndex]);
+        swap(var[i], var[maxIndex]);
+        swap(idx[i], idx[maxIndex]);
+    }
+    return result;
+}
+
+/*
  * Name             : max_eigen_vector_oja
  * Prototype        : vector<double> max_eigen_vector_oja(DataSet<Label, T> &)
  * Description      : Gets the eigen vector of the data set using Oja's
@@ -171,6 +232,55 @@ vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
         }
     }
     return eigen;
+}
+
+/*
+ * Name             : max_eigen_vector
+ * Prototype        : vector<double> max_eigen_vector(DataSet<Label, T> &)
+ * Description      : Gets the eigen vector of the data set using Eigen's
+ *                    algorithm.
+ * Parameter(s)     : subset - The data set to find the eigen vector of
+ * Return Value     : The (max) eigen vector of the data set
+ */
+template<class Label, class T>
+vector<double> max_eigen_vector(DataSet<Label, T> & subset)
+{
+    LOG_INFO("Creating eigenvector of subset size %ld\n", subset.size());
+    /*
+    int rows = subset[0]->size();
+    int cols = subset.size();
+    */
+    int dim = (*subset[0]).size();  /* Dimension of each vector */
+    int num = subset.size();        /* Number of vectors */
+    Eigen::MatrixXd mtx = Eigen::MatrixXd::Zero(num, dim);
+    for (size_t i = 0; i < num; i++)
+    {
+        for (size_t j = 0; j < dim; j++)
+        {
+            mtx(i, j) = (double)(*subset[i])[j];
+        }
+    }
+    LOG_FINE("Subset of dimensions %d, %d copied over\n", num, dim);
+    Eigen::MatrixXd centered = mtx.rowwise() - mtx.colwise().mean();
+    LOG_FINE("Done centering...\n");
+    Eigen::MatrixXd covar    = (centered.adjoint() * centered) / (double)num;
+    LOG_FINE("Done covariance...\n");
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(covar);
+    Eigen::VectorXd eigVtr = eig.eigenvectors().rightCols(1);
+    LOG_FINE("Done eigenvectors...\n");
+    cout << eigVtr << endl;
+    vector<double> maxEigVtr;
+    double len;
+    for (size_t i = 0; i < dim; i++)
+    {
+        len += eigVtr(i) * eigVtr(i);
+    }
+    LOG_FINE("Eigen Vector length %lf\n", len);
+    for (size_t i = 0; i < dim; i++)
+    {
+        maxEigVtr.push_back(eigVtr(i) / len);
+    }
+    return maxEigVtr;
 }
 
 /* Private Functions */

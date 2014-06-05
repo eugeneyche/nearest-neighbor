@@ -137,7 +137,7 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     if (domain.size() < c)
         return new BSPTreeNode<Label, T>(domain);
     DataSet<Label, T> subst = st.subset(domain);
-    vector<double> mx_var_dir = max_eigen_vector_oja(subst);
+    vector<double> mx_var_dir = max_eigen_vector(subst);
     vector<double> values;
     for (size_t i = 0; i < subst.size(); i++)
         values.push_back(dot(*subst[i], mx_var_dir));
@@ -199,6 +199,7 @@ BSPTreeNode<Label, T>::BSPTreeNode(vector<double> dir,
 template<class Label, class T>
 BSPTreeNode<Label, T>::BSPTreeNode(ifstream & in)
 {
+    LOG_FINE("De-serializing BSPTreeNode\n", domain_.size());
      size_t dim;
      in.read((char *)&dim, sizeof(size_t));
      while (dim--)
@@ -256,7 +257,7 @@ template<class Label, class T>
 BSPTree<Label, T>::BSPTree(ifstream & in, DataSet<Label, T> & st) :
   st_ (st)
 {
-    LOG_FINE("De-serializing KDTree\n");
+    LOG_FINE("De-serializing BSPTree\n");
     queue<BSPTreeNode<Label, T> **> to_load;
     to_load.push(&root_);
     while (!to_load.empty())
