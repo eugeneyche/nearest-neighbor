@@ -268,7 +268,6 @@ vector<double> max_eigen_vector(DataSet<Label, T> & subset)
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(covar);
     Eigen::VectorXd eigVtr = eig.eigenvectors().rightCols(1);
     LOG_FINE("Done eigenvectors...\n");
-    cout << eigVtr << endl;
     vector<double> maxEigVtr;
     double len;
     for (size_t i = 0; i < dim; i++)

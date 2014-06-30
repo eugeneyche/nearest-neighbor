@@ -5,8 +5,8 @@ typedef unsigned char byte;
 const char BASE_PATH [] = "data/eharmony";
 const char SLC1_DATA_PATH [] = "/in/EH-slice1-data.csv";
 const char SLC1_MIX_PATH []  = "/in/EH-slice1-labels.csv";
-const char SLC2_DATA_PATH [] = "/in/EH-slice1-data.csv";
-const char SLC2_MIX_PATH []  = "/in/EH-slice1-labels.csv";
+const char SLC2_DATA_PATH [] = "/in/EH-slice2-data.csv";
+const char SLC2_MIX_PATH []  = "/in/EH-slice2-labels.csv";
 
 const char TRN_VTR_PATH [] = "/out/trn_vtr";
 const char TRN_LBL_PATH [] = "/out/trn_lbl";
@@ -18,9 +18,8 @@ const size_t MAX = 100000;
 float databuf [300000][100];
 unsigned int mixbuf [600000][3];
 char strbuf [BUFSIZ], * tok;
-size_t pw, vtrw;
+size_t pw, vtrw, mixh;
 int dataw, datah;
-int mixh;
 byte res;
 
 typedef unsigned char byte;
@@ -58,9 +57,14 @@ void eharmony_generate() {
     fprintf(stderr, "  > generating pairwise data with labels\n");
     mixh = 0;
     while (fscanf(fin, "%d,%d,%d\n", &mixbuf[mixh][0], &mixbuf[mixh][1], 
-            &mixbuf[mixh][2]) == EOF) mixh++;
+            &mixbuf[mixh][2]) != EOF) {
+        fprintf(stderr, "    > %ld:    %d,%d,%d\n", mixh, mixbuf[mixh][0],mixbuf[mixh][1], 
+                mixbuf[mixh][2]);
+        mixh++;
+    }
     pw = dataw - 1;
     vtrw = 2 * pw;
+    fprintf(stderr, "  > mix: %ld, %ld\n", vtrw, mixh);
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout1);
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout2);
     fwrite((const char *)&vtrw, sizeof(size_t), 1, fout1);
@@ -102,9 +106,14 @@ void eharmony_generate() {
     fprintf(stderr, "  > generating pairwise data with labels\n");
     mixh = 0;
     while (fscanf(fin, "%d,%d,%d\n", &mixbuf[mixh][0], &mixbuf[mixh][1], 
-            &mixbuf[mixh][2]) == EOF) mixh++;
+            &mixbuf[mixh][2]) != EOF) {
+        fprintf(stderr, "    > %ld:    %d,%d,%d\n", mixh, mixbuf[mixh][0],mixbuf[mixh][1], 
+                mixbuf[mixh][2]);
+        mixh++;
+    }
     pw = dataw - 1;
     vtrw = 2 * pw;
+    fprintf(stderr, "  > mix: %ld, %ld\n", vtrw, mixh);
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout1);
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout2);
     fwrite((const char *)&vtrw, sizeof(size_t), 1, fout1);

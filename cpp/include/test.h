@@ -79,7 +79,7 @@ public:
         thread t [a_len];
         for (size_t i = 0; i < a_len; i++)
         {
-            t[i] = thread(&Test<T, Label>::s_kd_spill_tree, this, min_leaf, a[i]);
+            t[i] = thread(&Test<Label, T>::s_kd_spill_tree, this, min_leaf, a[i]);
         }
         for (size_t i = 0; i < a_len; i++)
         {
@@ -103,7 +103,7 @@ public:
         thread t [a_len];
         for (size_t i = 0; i < a_len; i++)
         {
-            t[i] = thread(&Test<T, Label>::s_kd_v_spill_tree, this, min_leaf, a[i]);
+            t[i] = thread(&Test<Label, T>::s_kd_v_spill_tree, this, min_leaf, a[i]);
         }
         for (size_t i = 0; i < a_len; i++)
         {
@@ -143,7 +143,7 @@ public:
         thread t [a_len];
         for (size_t i = 0; i < a_len; i++)
         {
-            t[i] = thread(&Test<T, Label>::s_bsp_spill_tree, this, min_leaf, a[i]);
+            t[i] = thread(&Test<Label, T>::s_bsp_spill_tree, this, min_leaf, a[i]);
         }
         for (size_t i = 0; i < a_len; i++)
         {
@@ -163,7 +163,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -215,7 +215,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                  subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
@@ -250,7 +250,7 @@ public:
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(&Test<T, Label>::s_kd_spill_tree_data, this, l[i], a[j], &(r[i][j]));
+                t[i][j] = thread(&Test<Label, T>::s_kd_spill_tree_data, this, l[i], a[j], &(r[i][j]));
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -276,7 +276,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -310,7 +310,7 @@ public:
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(&Test<T, Label>::s_kd_v_spill_tree_data, this, l[i], a[j], &(r[i][j]));
+                t[i][j] = thread(&Test<Label, T>::s_kd_v_spill_tree_data, this, l[i], a[j], &(r[i][j]));
             }
         }
         for (size_t i = 0; i < l_len; i++)
@@ -336,7 +336,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
             if (nn_lbl != (*tst_st_).get_label(i))
@@ -388,7 +388,7 @@ public:
         unsigned long long subdomain_count = 0;
         for (size_t i = 0; i < (*tst_st_).size(); i++)
         {
-            DataSet<T, Label> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
+            DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i],
                                  subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
@@ -423,7 +423,7 @@ public:
         {
             for (size_t j = 0; j < a_len; j++)
             {
-                t[i][j] = thread(&Test<T, Label>::s_bsp_spill_tree_data, this, l[i], a[j], &(r[i][j]));
+                t[i][j] = thread(&Test<Label, T>::s_bsp_spill_tree_data, this, l[i], a[j], &(r[i][j]));
             }
         }
         for (size_t i = 0; i < l_len; i++)
