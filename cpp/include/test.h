@@ -443,15 +443,15 @@ Test<Label, T>::Test(string base_dir) :
   base_dir_ (base_dir)
 {
     LOG_INFO("Loading data sets\n");
-    ifstream trn_vtr_in (base_dir + "/trn_vtr");
-    ifstream tst_vtr_in (base_dir + "/tst_vtr");
+    ifstream trn_vtr_in (base_dir + "/trn_vtr", ios::binary);
+    ifstream tst_vtr_in (base_dir + "/tst_vtr", ios::binary);
     trn_st_ = new DataSet<Label, T>(trn_vtr_in);
     tst_st_ = new DataSet<Label, T>(tst_vtr_in);
     trn_vtr_in.close();
     tst_vtr_in.close();
     LOG_INFO("Labeling data sets\n");
-    ifstream trn_lbl_in (base_dir + "/trn_lbl");
-    ifstream tst_lbl_in (base_dir + "/tst_lbl");
+    ifstream trn_lbl_in (base_dir + "/trn_lbl", ios::binary);
+    ifstream tst_lbl_in (base_dir + "/tst_lbl", ios::binary);
     trn_st_->label(trn_lbl_in);
     tst_st_->label(tst_lbl_in);
     trn_lbl_in.close();
