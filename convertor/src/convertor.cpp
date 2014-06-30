@@ -6,6 +6,7 @@ using namespace std;
 
 #include "mnist.h"
 #include "mini_mnist.h"
+#include "eharmony.h"
 #include "cifar10.h"
 
 string usage =
@@ -24,6 +25,10 @@ int main(int argc, char ** argv)
     for (int i = 1; i < argc; i++)
     {
         string target (argv[i]);
+        if (target == "eharmony")
+        {
+           eharmony_generate();
+        }
         if (target == "mnist")
         {
            mnist_generate();

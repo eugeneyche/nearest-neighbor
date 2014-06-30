@@ -32,6 +32,10 @@ directories:
 	make -C data/mnist directories
 	make -C data/cifar10 directories
 
+eharmony: $(TARGET)
+	make -C data/eharmony
+	$(TARGET) eharmony
+
 mnist: $(TARGET)
 	make -C data/mnist
 	$(TARGET) mnist
@@ -43,7 +47,6 @@ mini_mnist: $(TARGET)
 cifar10: $(TARGET)
 	make -C data/cifar10
 	$(TARGET) cifar10
-	
 
 .PHONY: 
 	clean
