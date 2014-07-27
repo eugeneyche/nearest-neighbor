@@ -141,12 +141,10 @@ public:
     void generate_bsp_spill_trees()
     {
         thread t [a_len];
-        for (size_t i = 0; i < a_len; i++)
-        {
+        for (size_t i = 0; i < a_len; i++) {
             t[i] = thread(&Test<Label, T>::s_bsp_spill_tree, this, min_leaf, a[i]);
         }
-        for (size_t i = 0; i < a_len; i++)
-        {
+        for (size_t i = 0; i < a_len; i++) {
             t[i].join();
         }
     }
@@ -161,8 +159,7 @@ public:
         size_t error_count = 0;
         size_t true_nn_count = 0;
         unsigned long long subdomain_count = 0;
-        for (size_t i = 0; i < (*tst_st_).size(); i++)
-        {
+        for (size_t i = 0; i < (*tst_st_).size(); i++) {
             DataSet<Label, T> subSet = (*trn_st_).subset(tree.subdomain((*tst_st_)[i], (size_t)(ll * (*trn_st_).size())));
             vector<T> * nn_vtr = nearest_neighbor((*tst_st_)[i], subSet);
             Label nn_lbl = (*trn_st_).get_label(nn_vtr);
@@ -506,4 +503,4 @@ Test<Label, T>::~Test()
     delete tst_st_;
 }
 
-#endif
+#endif /* TEST_H_ */

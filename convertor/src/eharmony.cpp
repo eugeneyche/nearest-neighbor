@@ -13,7 +13,8 @@ const char TRN_LBL_PATH [] = "/out/trn_lbl";
 const char TST_VTR_PATH [] = "/out/tst_vtr";
 const char TST_LBL_PATH [] = "/out/tst_lbl";
 
-const size_t MAX = 100000;
+const size_t S1_MAX = 100000;
+const size_t S2_MAX = 10000;
 
 float databuf [300000][100];
 unsigned int mixbuf [600000][3];
@@ -62,6 +63,8 @@ void eharmony_generate() {
                 mixbuf[mixh][2]);
         mixh++;
     }
+    if (mixh > S1_MAX)
+        mixh = S1_MAX;
     pw = dataw - 1;
     vtrw = 2 * pw;
     fprintf(stderr, "  > mix: %ld, %ld\n", vtrw, mixh);
@@ -111,6 +114,8 @@ void eharmony_generate() {
                 mixbuf[mixh][2]);
         mixh++;
     }
+    if (mixh > S2_MAX)
+        mixh = S2_MAX;
     pw = dataw - 1;
     vtrw = 2 * pw;
     fprintf(stderr, "  > mix: %ld, %ld\n", vtrw, mixh);

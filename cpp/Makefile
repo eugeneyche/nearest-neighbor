@@ -32,3 +32,6 @@ directories:
 
 .PHONY: 
 	clean
+
+run-background:
+	screen -dmSL eharmony bin/main
