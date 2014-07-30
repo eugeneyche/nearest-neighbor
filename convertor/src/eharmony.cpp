@@ -35,6 +35,8 @@ void eharmony_generate() {
     fprintf(stderr, "  > populating data buffer for slice 1\n");
     strcpy(relpath, SLC1_DATA_PATH);
     fin = fopen(filepath, "rb");
+    
+    //height is the number of vectors
     datah = 0;
     while (fgets(strbuf, BUFSIZ, fin)) {
         tok = strtok(strbuf, ",");
@@ -68,14 +70,19 @@ void eharmony_generate() {
     pw = dataw - 1;
     vtrw = 2 * pw;
     fprintf(stderr, "  > mix: %ld, %ld\n", vtrw, mixh);
+    
+    //height and width at the beginning of the vector data
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout1);
-    fwrite((const char *)&mixh, sizeof(size_t), 1, fout2);
     fwrite((const char *)&vtrw, sizeof(size_t), 1, fout1);
-    for (int i = 0; i < vtrw; i++) {
+    
+    //only height at the begining of the label data
+    fwrite((const char *)&mixh, sizeof(size_t), 1, fout2);
+    
+    for (int i = 0; i < mixh; i++) {
         res = (byte)mixbuf[i][0];
-        fwrite((const char *)&res, sizeof(byte), 1, fout2);
-        fwrite((const char *)&databuf[mixbuf[i][1]], sizeof(float), pw, fout1);
-        fwrite((const char *)&databuf[mixbuf[i][2]], sizeof(float), pw, fout1);
+        fwrite((const char *)&res, sizeof(byte), 1, fout2); //write in label data
+        fwrite((const char *)&databuf[mixbuf[i][1]][1], sizeof(float), pw, fout1);
+        fwrite((const char *)&databuf[mixbuf[i][2]][1], sizeof(float), pw, fout1);
     }
     fclose(fin);
     fclose(fout1);
