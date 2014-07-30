@@ -7,33 +7,31 @@
 //
 
 #include "cifar.h"
-typedef unsigned char byte;
-
-
-const char BASE_PATH [] = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/cifar";
-const char TRAIN_VECTOR_PATH [] = "/train_vectors";
-const char TRAIN_LABEL_PATH []  = "/train_labels";
-const char TEST_VECTOR_PATH [] = "/test_vectors";
-const char TEST_LABEL_PATH []  = "/test_labels";
-
-const char TRN_VTR_PATH [] = "/trn_vtr";
-const char TRN_LBL_PATH [] = "/trn_lbl";
-const char TST_VTR_PATH [] = "/tst_vtr";
-const char TST_LBL_PATH [] = "/tst_lbl";
-
-const size_t TRAIN_MAX = 50000;
-const size_t TEST_MAX = 10000;
-const size_t WIDTH = 1000;
-
-float databuf [TRAIN_MAX][WIDTH];
-unsigned int labelbuf [TRAIN_MAX];
-
-char strbuf [TRAIN_MAX], * tok;
-byte res;
-int datah, dataw;
-size_t labelh;
 
 typedef unsigned char byte;
+
+static const char BASE_PATH [] = "/Users/janetzhai/Desktop/nn-xcode/nn-xcode/cifar";
+static const char TRAIN_VECTOR_PATH [] = "/train_vectors";
+static const char TRAIN_LABEL_PATH []  = "/train_labels";
+static const char TEST_VECTOR_PATH [] = "/test_vectors";
+static const char TEST_LABEL_PATH []  = "/test_labels";
+
+static const char TRN_VTR_PATH [] = "/trn_vtr";
+static const char TRN_LBL_PATH [] = "/trn_lbl";
+static const char TST_VTR_PATH [] = "/tst_vtr";
+static const char TST_LBL_PATH [] = "/tst_lbl";
+
+static const size_t TRAIN_MAX = 50000;
+static const size_t TEST_MAX = 10000;
+static const size_t WIDTH = 1000;
+
+static float databuf [TRAIN_MAX][WIDTH];
+static unsigned int labelbuf [TRAIN_MAX];
+
+static char strbuf [TRAIN_MAX], * tok;
+static byte res;
+static int datah, dataw;
+static size_t labelh;
 
 void cifar_generate() {
     /* WRITE TRAIN DATA AND LABEL*/

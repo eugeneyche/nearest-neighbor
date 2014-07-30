@@ -11,10 +11,10 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <cstring>
 #include <vector>
 using namespace std;
 
 void cifar_generate();
-
 
 #endif

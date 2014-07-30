@@ -7,7 +7,7 @@ using namespace std;
 #include "mnist.h"
 #include "mini_mnist.h"
 #include "eharmony.h"
-#include "cifar10.h"
+#include "cifar.h"
 
 string usage =
 "\nUsage:\n"
@@ -37,9 +37,9 @@ int main(int argc, char ** argv)
         {
             mini_mnist_generate();
         }
-        if (target == "cifar10")
+        if (target == "cifar")
         {
-            cifar10_generate();
+            cifar_generate();
         }
     }
 }

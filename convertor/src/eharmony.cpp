@@ -1,29 +1,27 @@
 #include "eharmony.h"
-typedef unsigned char byte;
-
-
-const char BASE_PATH [] = "data/eharmony";
-const char SLC1_DATA_PATH [] = "/in/EH-slice1-data.csv";
-const char SLC1_MIX_PATH []  = "/in/EH-slice1-labels.csv";
-const char SLC2_DATA_PATH [] = "/in/EH-slice2-data.csv";
-const char SLC2_MIX_PATH []  = "/in/EH-slice2-labels.csv";
-
-const char TRN_VTR_PATH [] = "/out/trn_vtr";
-const char TRN_LBL_PATH [] = "/out/trn_lbl";
-const char TST_VTR_PATH [] = "/out/tst_vtr";
-const char TST_LBL_PATH [] = "/out/tst_lbl";
-
-const size_t S1_MAX = 100000;
-const size_t S2_MAX = 10000;
-
-float databuf [300000][100];
-unsigned int mixbuf [600000][3];
-char strbuf [BUFSIZ], * tok;
-size_t pw, vtrw, mixh;
-int dataw, datah;
-byte res;
 
 typedef unsigned char byte;
+
+static const char BASE_PATH [] = "data/eharmony";
+static const char SLC1_DATA_PATH [] = "/in/EH-slice1-data.csv";
+static const char SLC1_MIX_PATH []  = "/in/EH-slice1-labels.csv";
+static const char SLC2_DATA_PATH [] = "/in/EH-slice2-data.csv";
+static const char SLC2_MIX_PATH []  = "/in/EH-slice2-labels.csv";
+
+static const char TRN_VTR_PATH [] = "/out/trn_vtr";
+static const char TRN_LBL_PATH [] = "/out/trn_lbl";
+static const char TST_VTR_PATH [] = "/out/tst_vtr";
+static const char TST_LBL_PATH [] = "/out/tst_lbl";
+
+static const size_t S1_MAX = 100000;
+static const size_t S2_MAX = 10000;
+
+static float databuf [300000][100];
+static unsigned int mixbuf [600000][3];
+static char strbuf [BUFSIZ], * tok;
+static size_t pw, vtrw, mixh;
+static int dataw, datah;
+static byte res;
 
 void eharmony_generate() {
     /* SLICE 1 */
@@ -129,11 +127,11 @@ void eharmony_generate() {
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout1);
     fwrite((const char *)&mixh, sizeof(size_t), 1, fout2);
     fwrite((const char *)&vtrw, sizeof(size_t), 1, fout1);
-    for (int i = 0; i < vtrw; i++) {
+    for (int i = 0; i < mixh; i++) {
         res = (byte)mixbuf[i][0];
         fwrite((const char *)&res, sizeof(byte), 1, fout2);
-        fwrite((const char *)&databuf[mixbuf[i][1]], sizeof(float), pw, fout1);
-        fwrite((const char *)&databuf[mixbuf[i][2]], sizeof(float), pw, fout1);
+        fwrite((const char *)&databuf[mixbuf[i][1]][1], sizeof(float), pw, fout1);
+        fwrite((const char *)&databuf[mixbuf[i][2]][1], sizeof(float), pw, fout1);
     }
     fclose(fin);
     fclose(fout1);

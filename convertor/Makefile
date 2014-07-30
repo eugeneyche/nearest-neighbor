@@ -44,9 +44,9 @@ mini_mnist: $(TARGET)
 	make -C data/mini_mnist
 	$(TARGET) mini_mnist
 
-cifar10: $(TARGET)
-	make -C data/cifar10
-	$(TARGET) cifar10
+cifar: $(TARGET)
+	make -C data/cifar
+	$(TARGET) cifar
 
 .PHONY: 
 	clean
