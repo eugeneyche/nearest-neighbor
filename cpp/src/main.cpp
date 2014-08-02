@@ -15,7 +15,7 @@ int main()
 {
     Test<byte, float> mTest ("data/eharmony");
     mTest.generate_kd_trees();
-    mTest.generate_kd_tree_data();
-    mTest.generate_kd_spill_tree_data();
-    mTest.generate_bsp_tree_data();
+    mTest.generate_kd_spill_trees();
+    mTest.generate_bsp_trees();
+    mTest.generate_bsp_spill_trees();
 }

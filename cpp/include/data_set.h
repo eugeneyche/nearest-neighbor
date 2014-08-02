@@ -66,21 +66,20 @@ public:
 template<class Label, class T>
 size_t max_variance_index(DataSet<Label, T> & subset)
 {
+    LOG_INFO("Enter max_variance_index\n");
+    LOG_FINE("with subset.size = %ld\n", subset.size());
     vector<double> var;
     vector<T> vtr;
     size_t dimension = subset[0]->size();
     size_t subsize = subset.size();
-    for (size_t i = 0; i < dimension; i++)
-    {
+    for (size_t i = 0; i < dimension; i++) {
         vtr.clear();
-        for (size_t j = 0; j < subsize; j++)
-        {
+        for (size_t j = 0; j < subsize; j++) {
             vtr.push_back((*subset[j])[i]);
         }
         T median = selector(vtr, (size_t)(subset.size() * 0.5));
         double variance = 0.0;
-        for (size_t j = 0; j < subsize; j++)
-        {
+        for (size_t j = 0; j < subsize; j++) {
             double dif = (double)(*subset[j])[i] - (double)median;
             variance += dif * dif;
         }
@@ -88,13 +87,13 @@ size_t max_variance_index(DataSet<Label, T> & subset)
         var.push_back(variance);
     }
     size_t maxIndex = 0;
-    for (size_t i = 1; i < dimension; i++)
-    {
-        if (var[i] > var[maxIndex])
-        {
+    for (size_t i = 1; i < dimension; i++) {
+        if (var[i] > var[maxIndex]) {
             maxIndex = i;
         }
     }
+    LOG_INFO("Exit max_variance_index\n");
+    LOG_FINE("with result = %ld \n ", maxIndex);
     return maxIndex;
 }
 
@@ -110,21 +109,20 @@ size_t max_variance_index(DataSet<Label, T> & subset)
 template<class Label, class T>
 vector<size_t> k_max_variance_indices(size_t k, DataSet<Label, T> & subset)
 {
+    LOG_INFO("Enter k_max_variance_index\n");
+    LOG_FINE("with k = %ld, subset.size = %ld\n", k, subset.size());
     vector<double> var;
     vector<T> vtr;
     size_t dimension = subset[0]->size();
     size_t subsize = subset.size();
-    for (size_t i = 0; i < dimension; i++)
-    {
+    for (size_t i = 0; i < dimension; i++) {
         vtr.clear();
-        for (size_t j = 0; j < subsize; j++)
-        {
+        for (size_t j = 0; j < subsize; j++) {
             vtr.push_back((*subset[j])[i]);
         }
         T median = selector(vtr, (size_t)(subset.size() * 0.5));
         double variance = 0.0;
-        for (size_t j = 0; j < subsize; j++)
-        {
+        for (size_t j = 0; j < subsize; j++) {
             double dif = (double)(*subset[j])[i] - (double)median;
             variance += dif * dif;
         }
@@ -132,19 +130,15 @@ vector<size_t> k_max_variance_indices(size_t k, DataSet<Label, T> & subset)
         var.push_back(variance);
     }
     size_t idx [dimension];
-    for (size_t i = 0; i < dimension; i++)
-    {
+    for (size_t i = 0; i < dimension; i++) {
         idx[i] = i;
     }
     /* Selection Sort for Parallel Arrays */
     vector<size_t> result;
-    for (size_t i = 0; i < k; i++)
-    {
+    for (size_t i = 0; i < k; i++) {
         size_t maxIndex = i;
-        for (size_t j = i; j < dimension; j++)
-        {
-            if (var[j] > var[maxIndex])
-            {
+        for (size_t j = i; j < dimension; j++) {
+            if (var[j] > var[maxIndex]) {
                 maxIndex = j;
             }
         }
@@ -152,6 +146,7 @@ vector<size_t> k_max_variance_indices(size_t k, DataSet<Label, T> & subset)
         swap(var[i], var[maxIndex]);
         swap(idx[i], idx[maxIndex]);
     }
+    LOG_INFO("Exit k_max_variance_index\n");
     return result;
 }
 
@@ -167,20 +162,19 @@ vector<size_t> k_max_variance_indices(size_t k, DataSet<Label, T> & subset)
 template<class Label, class T>
 vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
 {
+    LOG_INFO("Enter max_eigen_vector_oja\n");
+    LOG_FINE("with subset.size = %ld\n", subset.size());
     /* Calculate mean */
     vector<double> mean;
     vector<double> sum;
 
-    for (size_t i = 0; i < subset[0]->size(); i++)
-    {
+    for (size_t i = 0; i < subset[0]->size(); i++) {
         sum.push_back(0);
-        for (size_t j = 0; j < subset.size();j++)
-        {
+        for (size_t j = 0; j < subset.size();j++) {
             sum[i] += (*subset[j])[i];
         }
     }
-    for (size_t i = 0; i < subset.size(); i++)
-    {
+    for (size_t i = 0; i < subset.size(); i++) {
         mean.push_back(sum[i] / subset.size());
     }
     
@@ -190,8 +184,7 @@ vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
     srand((int)time(NULL));
 
     /* WARNING: Potentially dangerous if subset has size 0 */
-    for (size_t i = 0; i < (*subset[0]).size(); i++)
-    {
+    for (size_t i = 0; i < (*subset[0]).size(); i++) {
         double x = (double)((rand() % 201) - 100) / 100;
         eigen.push_back(x);
         eigen_size += x * x;
@@ -199,38 +192,34 @@ vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
     eigen_size = sqrt(eigen_size);
     
     /* normalize eigen here */
-    for (size_t i = 0; i < eigen.size(); i++)
-    {
+    for (size_t i = 0; i < eigen.size(); i++) {
         eigen[i] = eigen[i] / eigen_size;
     }
     
     /* calculate dominant eigenvector*/
-    for (size_t i = 0; i < subset.size(); i++)
-    {
+    for (size_t i = 0; i < subset.size(); i++) {
         double gamma = 1/(i + 1); // learning rate
 
         /* calculate X transpose dot V*/
         double X_transpo_dot_V = 0.0;
         vector<double> X;
-        for (size_t j = 0; j < X.size(); j++)
-        {
+        for (size_t j = 0; j < X.size(); j++) {
             X.push_back((double)(*subset[i])[j] - mean[j]); //centralize X
             X_transpo_dot_V += (X[j] * eigen[j]);
         }
 
         /* normalize eigenvector */
         double vector_size = 0.0;
-        for (size_t j = 0; j < X.size(); j++)
-        {
+        for (size_t j = 0; j < X.size(); j++) {
             eigen[j] += (gamma * X[j] * X_transpo_dot_V);
             vector_size += eigen[j] * eigen[j];
         }
         vector_size = sqrt(vector_size);
-        for (size_t j = 0; j < X.size(); j++)
-        {
+        for (size_t j = 0; j < X.size(); j++) {
             eigen[j] = eigen[j]/vector_size;
         }
     }
+    LOG_INFO("Exit max_eigen_vector_oja\n");
     return eigen;
 }
 
@@ -245,7 +234,8 @@ vector<double> max_eigen_vector_oja(DataSet<Label, T> & subset)
 template<class Label, class T>
 vector<double> max_eigen_vector(DataSet<Label, T> & subset)
 {
-    LOG_INFO("Creating eigenvector of subset size %ld\n", subset.size());
+    LOG_INFO("Enter max_eigen_vector\n");
+    LOG_FINE("with subset.size = %ld\n", subset.size());
     /*
     int rows = subset[0]->size();
     int cols = subset.size();
@@ -253,32 +243,29 @@ vector<double> max_eigen_vector(DataSet<Label, T> & subset)
     int dim = (*subset[0]).size();  /* Dimension of each vector */
     int num = subset.size();        /* Number of vectors */
     Eigen::MatrixXd mtx = Eigen::MatrixXd::Zero(num, dim);
-    for (size_t i = 0; i < num; i++)
-    {
-        for (size_t j = 0; j < dim; j++)
-        {
+    for (size_t i = 0; i < num; i++) {
+        for (size_t j = 0; j < dim; j++) {
             mtx(i, j) = (double)(*subset[i])[j];
         }
     }
-    LOG_FINE("Subset of dimensions %d, %d copied over\n", num, dim);
+    LOG_FINE("> Subset [%d, %d] copied over\n", num, dim);
     Eigen::MatrixXd centered = mtx.rowwise() - mtx.colwise().mean();
-    LOG_FINE("Done centering...\n");
+    LOG_FINE("> Done centering...\n");
     Eigen::MatrixXd covar    = (centered.adjoint() * centered) / (double)num;
-    LOG_FINE("Done covariance...\n");
+    LOG_FINE("> Done covariance...\n");
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(covar);
     Eigen::VectorXd eigVtr = eig.eigenvectors().rightCols(1);
-    LOG_FINE("Done eigenvectors...\n");
+    LOG_FINE("> Done eigenvectors...\n");
     vector<double> maxEigVtr;
     double len;
-    for (size_t i = 0; i < dim; i++)
-    {
+    for (size_t i = 0; i < dim; i++) {
         len += eigVtr(i) * eigVtr(i);
     }
-    LOG_FINE("Eigen Vector length %lf\n", len);
-    for (size_t i = 0; i < dim; i++)
-    {
+    LOG_FINE("> vtr.length = %lf\n", len);
+    for (size_t i = 0; i < dim; i++) {
         maxEigVtr.push_back(eigVtr(i) / len);
     }
+    LOG_INFO("Exit max_eigen_vector\n");
     return maxEigVtr;
 }
 
@@ -290,9 +277,10 @@ DataSet<Label, T>::DataSet(DataSet<Label, T> & parent, vector<size_t> domain) :
   labels_ (parent.labels_),
   vectors_ (parent.vectors_)
 {
+    LOG_INFO("DataSet Constructed\n"); 
+    LOG_FINE("with parent, domain.size = %ld\n", domain.size());
     vector<size_t>::iterator itr;
-    for (itr = domain.begin(); itr != domain.end(); itr++)
-    {
+    for (itr = domain.begin(); itr != domain.end(); itr++) {
         domain_.push_back(parent.domain_[*itr]);
     }
 }
@@ -303,9 +291,10 @@ DataSet<Label, T>::DataSet(vector_space vectors) :
   labels_ (new label_space),
   vectors_ (new vector_space)
 {
+    LOG_INFO("DataSet Constructed\n"); 
+    LOG_FINE("with vectors.size = %ld\n", vectors.size());
     typename vector_space::iterator itr;
-    for (itr = vectors.begin(); itr != vectors.end(); itr++)
-    {
+    for (itr = vectors.begin(); itr != vectors.end(); itr++) {
         domain_.push_back((size_t)domain_.size());
         vectors_->push_back(*itr);
     }
@@ -325,7 +314,10 @@ DataSet<Label, T>::DataSet() :
   parent_ (NULL),
   labels_ (new label_space),
   vectors_ (new vector_space)
-{ }
+{ 
+    LOG_INFO("DataSet Constructed\n"); 
+    LOG_FINE("with default constructor\n");
+}
 
 /*
  * Name             : DataSet
@@ -340,6 +332,8 @@ DataSet<Label, T>::DataSet(ifstream & in) :
   labels_ (new label_space),
   vectors_ (new vector_space)
 {
+    LOG_INFO("DataSet Constructed\n"); 
+    LOG_FINE("with input stream\n");
     size_t n, m;
     in.read((char *)&n, sizeof(size_t));
     in.read((char *)&m, sizeof(size_t));
@@ -374,6 +368,7 @@ DataSet<Label, T>::~DataSet()
         delete labels_;
         delete vectors_;
     }
+    LOG_INFO("DataSet Deconstructed\n"); 
 }
 
 /*
@@ -399,6 +394,7 @@ size_t DataSet<Label, T>::size() const
 template<class Label, class T>
 void DataSet<Label, T>::label(ifstream & in)
 {
+    LOG_INFO("Enter label\n");
     size_t n;
     in.read((char *)&n, sizeof(size_t));
     Label buffer [n];
@@ -407,6 +403,7 @@ void DataSet<Label, T>::label(ifstream & in)
     {
         (*labels_)[(*this)[i]] = buffer[i];
     }
+    LOG_INFO("Exit label\n");
 }
 
 /*

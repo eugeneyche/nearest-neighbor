@@ -135,43 +135,41 @@ template<class Label, class T>
 KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
-    LOG_FINE("Building KDTree of c = %ld and domain of size %ld\n", c, domain.size());
-    if (domain.size() < c)
+    LOG_INFO("Enter build_tree\n");
+    LOG_FINE("with c = %ld and domain.size = %ld\n", c, domain.size());
+    if (domain.size() < c) {
+        LOG_INFO("Exit build_tree");
+        LOG_FINE("by hitting base size");
         return new KDTreeNode<Label, T>(domain);
+    }
     DataSet<Label, T> subst = st.subset(domain);
     size_t mx_var_index = max_variance_index(subst);
     vector<T> values;
-    for (size_t i = 0; i < subst.size(); i++)
-    {
+    for (size_t i = 0; i < subst.size(); i++) {
         values.push_back((*subst[i])[mx_var_index]);
     }
     T pivot = selector(values, (size_t)(values.size() * 0.5));
     vector<size_t> subdomain_l;
     size_t subdomain_l_lim = (size_t)(values.size() * 0.5);
+    LOG_FINE("> l_lim = %ld\n", subdomain_l_lim);
     vector<size_t> subdomain_r;
     vector<size_t> pivot_pool;
-    for (size_t i = 0; i < domain.size(); i++)
-    {
-        if (pivot == values[i])
-        {
+    for (size_t i = 0; i < domain.size(); i++) {
+        if (pivot == values[i]) {
             pivot_pool.push_back(domain[i]);
-        }
-        else
-        {
+        } else {
             if (values[i] <= pivot)
                 subdomain_l.push_back(domain[i]);
             else
                 subdomain_r.push_back(domain[i]);
         }
     }
-    while (subdomain_l_lim > subdomain_l.size())
-    {
+    while (subdomain_l_lim > subdomain_l.size()) {
         size_t curr = pivot_pool.back();
         pivot_pool.pop_back();
         subdomain_l.push_back(curr);
     }
-    while (!pivot_pool.empty())
-    {
+    while (!pivot_pool.empty()) {
         size_t curr = pivot_pool.back();
         pivot_pool.pop_back();
         subdomain_r.push_back(curr);
@@ -180,6 +178,9 @@ KDTreeNode<Label, T> * KDTree<Label, T>::build_tree(size_t c,
             (mx_var_index, pivot, domain);
     result->left_ = build_tree(c, st, subdomain_l);
     result->right_ = build_tree(c, st, subdomain_r);
+    LOG_FINE("> sdl = %ld\n", subdomain_l.size());
+    LOG_FINE("> sdr = %ld\n", subdomain_r.size());
+    LOG_INFO("Exit build_tree\n");
     return result;
 }
 
@@ -192,7 +193,10 @@ KDTreeNode<Label, T>::KDTreeNode(const vector<size_t> domain) :
   left_ (NULL),
   right_ (NULL),
   domain_ (domain)
-{ }
+{ 
+    LOG_INFO("KDTreeNode Constructed\n"); 
+    LOG_FINE("with domain.size = %ld\n", domain.size());
+}
 
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(size_t index, 
@@ -202,35 +206,49 @@ KDTreeNode<Label, T>::KDTreeNode(size_t index,
   left_ (NULL), 
   right_ (NULL),
   domain_ (domain)
-{ }
+{ 
+    LOG_INFO("KDTreeNode Constructed\n"); 
+    LOG_FINE("with index = %ld, domain.size = %ld\n", index, 
+            domain.size());
+}
 
 template<class Label, class T>
 KDTreeNode<Label, T>::KDTreeNode(ifstream & in)
 {
-    LOG_FINE("De-serializing KDTreeNode\n");
-     in.read((char *)&index_, sizeof(size_t));
-     in.read((char *)&pivot_, sizeof(T));
-     size_t sz;
-     in.read((char *)&sz, sizeof(size_t));
-     while (sz--)
-     {
-         size_t v;
-         in.read((char *)&v, sizeof(size_t));
-         domain_.push_back(v);
-     }
+    LOG_INFO("KDTreeNode Constructed\n"); 
+    LOG_FINE("with input stream\n");
+    in.read((char *)&index_, sizeof(size_t));
+    in.read((char *)&pivot_, sizeof(T));
+    size_t sz;
+    LOG_FINE("> sz = %ld\n", sz);
+    in.read((char *)&sz, sizeof(size_t));
+    while (sz--)
+    {
+        size_t v;
+        in.read((char *)&v, sizeof(size_t));
+        domain_.push_back(v);
+    }
 }
 
 template<class Label, class T>
 KDTreeNode<Label, T>::~KDTreeNode()
 {
-    if (left_) delete left_;
-    if (right_) delete right_;
+    if (left_) {
+        LOG_FINE("Deleted left subtree\n");
+        delete left_;
+    }
+    if (right_) {
+        LOG_FINE("Deleted right subtree\n");
+        delete right_;
+    }
+    LOG_INFO("KDTreeNode Deconstructed\n"); 
 }
 
 template<class Label, class T>
 void KDTreeNode<Label, T>::save(ofstream & out) const
 {
-    LOG_FINE("Saving KDTreeNode data with domain of size %ld\n", domain_.size());
+    LOG_INFO("Saving KDTreeNode\n"); 
+    LOG_FINE("> domain.size = %ld\n", domain_.size());
     out.write((char *)&index_, sizeof(size_t)); 
     out.write((char *)&pivot_, sizeof(T)); 
     size_t sz = domain_.size();
@@ -243,19 +261,26 @@ template<class Label, class T>
 KDTree<Label, T>::KDTree(DataSet<Label, T> & st) :
   root_ (NULL),
   st_ (st)
-{ }
+{ 
+    LOG_INFO("KDTree Constructed\n"); 
+    LOG_FINE("with default constructor\n");
+}
 
 template<class Label, class T>
 KDTree<Label, T>::KDTree(size_t c, DataSet<Label, T> & st) :
   root_ (build_tree(c, st, st.get_domain())),
   st_ (st)
-{ }
+{ 
+    LOG_INFO("KDSpillTree Constructed\n"); 
+    LOG_FINE("with c = %ld", c);
+}
 
 template<class Label, class T>
 KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
   st_ (st)
 {
-    LOG_FINE("De-serializing KDTree\n");
+    LOG_INFO("BSPSpillTree Constructed\n"); 
+    LOG_FINE("with input stream\n");
     queue<KDTreeNode<Label, T> **> to_load;
     to_load.push(&root_);
     while (!to_load.empty())
@@ -264,8 +289,7 @@ KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
         to_load.pop();
         bool exist;
         in.read((char *)&exist, sizeof(bool));
-        if (!exist)
-        {
+        if (!exist) {
             *cur = NULL; 
             continue;
         }
@@ -278,23 +302,22 @@ KDTree<Label, T>::KDTree(ifstream & in, DataSet<Label, T> & st) :
 template<class Label, class T>
 KDTree<Label, T>::~KDTree()
 {
-    LOG_FINE("Deconstructing KDTree\n");
     if (root_) delete root_;
+    LOG_INFO("KDTree Deconstructed\n"); 
 }
 
 template<class Label, class T>
 void KDTree<Label, T>::save(ofstream & out) const
 {
+    LOG_INFO("Saving KDTreeNode\n"); 
     queue<KDTreeNode<Label, T> *> to_save;
     to_save.push(root_);
-    while (!to_save.empty())
-    {
+    while (!to_save.empty()) {
         KDTreeNode<Label, T> * cur = to_save.front();
         to_save.pop();
         bool exists = cur != NULL;
         out.write((char *)&exists, sizeof(bool)); 
-        if (exists)
-        {
+        if (exists) {
             cur->save(out);
             to_save.push(cur->left_);
             to_save.push(cur->right_);
@@ -305,7 +328,8 @@ void KDTree<Label, T>::save(ofstream & out) const
 template<class Label, class T>
 vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
-    LOG_FINE("Querying KDTree down to min leaf of size %ld\n", l_c);
+    LOG_INFO("Enter subdomain\n");
+    LOG_FINE("with lc = %ld\n", l_c);
     queue<KDTreeNode<Label, T> *> expl;
     expl.push(root_);
     while (!expl.empty())
@@ -313,8 +337,7 @@ vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
         KDTreeNode<Label, T> * cur = expl.front();
         expl.pop();
         if (cur->left_ && cur->right_ &&
-            cur->domain_.size() >= l_c)
-        {
+            cur->domain_.size() >= l_c) {
             if ((*query)[cur->index_] <= cur->pivot_)
                 expl.push(cur->left_);
             else
@@ -323,6 +346,7 @@ vector<size_t> KDTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
         else
             return cur->domain_;
     }
+    LOG_INFO("Exit subdomain\n");
     return vector<size_t>();
 }
 

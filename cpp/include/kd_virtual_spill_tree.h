@@ -51,7 +51,10 @@ public:
 template<class Label, class T>
 KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(DataSet<Label, T> & st) :
   KDTree<Label, T>(st)
-{ }
+{ 
+    LOG_INFO("KDVirtualSpillTree Constructed\n"); 
+    LOG_FINE("with default constructor\n");
+}
 
 /* Public Functions */
 
@@ -60,6 +63,8 @@ KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(size_t c, double a,
         DataSet<Label, T> & st) :
   KDTree<Label, T>(c, st)
 {
+    LOG_INFO("KDVirtualSpillTree Constructed\n"); 
+    LOG_FINE("with c = %ld, a = %lf\n", c, a);
     queue<KDTreeNode<Label, T> *> to_update;
     to_update.push((this->get_root()));
     while (!to_update.empty())
@@ -90,6 +95,8 @@ KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(ifstream & in,
         DataSet<Label, T> & st) :
   KDTree<Label, T>(in, st)
 {
+    LOG_INFO("BSPSpillTree Constructed\n"); 
+    LOG_FINE("with input stream\n");
     queue<KDTreeNode<Label, T> *> to_update;
     to_update.push((this->get_root()));
     while (!to_update.empty())
@@ -112,6 +119,7 @@ KDVirtualSpillTree<Label, T>::KDVirtualSpillTree(ifstream & in,
 template<class Label, class T>
 void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 {
+    LOG_INFO("Saving KDTreeNode\n"); 
     this->KDTree<Label, T>::save(out);
     queue<KDTreeNode<Label, T> *> to_save;
     to_save.push((this->get_root()));
@@ -134,6 +142,8 @@ void KDVirtualSpillTree<Label, T>::save(ofstream & out) const
 template<class Label, class T>
 vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
+    LOG_INFO("Enter subdomain\n");
+    LOG_FINE("with lc = %ld\n", l_c);
     queue<KDTreeNode<Label, T> *> to_explore;
     set<size_t> domain_st;
     to_explore.push(this->get_root());
@@ -175,6 +185,7 @@ vector<size_t> KDVirtualSpillTree<Label, T>::subdomain(vector<T> * query, size_t
     {
         domain.push_back(*st_i);
     }
+    LOG_INFO("Exit subdomain\n");
     return domain;
 }
 

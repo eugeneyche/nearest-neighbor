@@ -133,9 +133,13 @@ template<class Label, class T>
 BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
         DataSet<Label, T> & st, vector<size_t> domain)
 {
-    LOG_FINE("Building BSPTree of c = %ld and domain of size %ld\n", c, domain.size());
-    if (domain.size() < c)
+    LOG_INFO("Enter build_tree\n");
+    LOG_FINE("with c = %ld and domain.size = %ld\n", c, domain.size());
+    if (domain.size() < c) {
+        LOG_INFO("Exit build_tree");
+        LOG_FINE("by hitting base size");
         return new BSPTreeNode<Label, T>(domain);
+    }
     DataSet<Label, T> subst = st.subset(domain);
     vector<double> mx_var_dir = max_eigen_vector(subst);
     vector<double> values;
@@ -144,36 +148,36 @@ BSPTreeNode<Label, T> * BSPTree<Label, T>::build_tree(size_t c,
     double pivot = selector(values, (size_t)(values.size() * 0.5));
     vector<size_t> subdomain_l;
     size_t subdomain_l_lim = (size_t)(values.size() * 0.5);
+    LOG_FINE("> l_lim = %ld\n", subdomain_l_lim);
     vector<size_t> subdomain_r;
     vector<size_t> pivot_pool;
-    for (size_t i = 0; i < domain.size(); i++)
-    {
+    for (size_t i = 0; i < domain.size(); i++) {
         if (pivot == values[i])
             pivot_pool.push_back(domain[i]);
-        else
-        {
+        else {
             if (values[i] <= pivot)
                 subdomain_l.push_back(domain[i]);
             else
                 subdomain_r.push_back(domain[i]);
         }
     }
-    while (subdomain_l_lim > subdomain_l.size())
-    {
+    while (subdomain_l_lim > subdomain_l.size()) {
         size_t curr = pivot_pool.back();
         pivot_pool.pop_back();
         subdomain_l.push_back(curr);
     }
-    while (!pivot_pool.empty())
-    {
+    while (!pivot_pool.empty()) {
         size_t curr = pivot_pool.back();
         pivot_pool.pop_back();
         subdomain_r.push_back(curr);
     }
-    BSPTreeNode<Label, T> * result = new BSPTreeNode<Label, T>
-            (mx_var_dir, pivot, domain);
+    BSPTreeNode<Label, T> * result = new BSPTreeNode<Label, T>(mx_var_dir, 
+            pivot, domain);
     result->left_ = build_tree(c, st, subdomain_l);
     result->right_ = build_tree(c, st, subdomain_r);
+    LOG_FINE("> sdl = %ld\n", subdomain_l.size());
+    LOG_FINE("> sdr = %ld\n", subdomain_r.size());
+    LOG_INFO("Exit build_tree\n");
     return result;
 }
 
@@ -184,7 +188,10 @@ BSPTreeNode<Label, T>::BSPTreeNode(const vector<size_t> domain) :
   left_ (NULL),
   right_ (NULL),
   domain_ (domain)
-{ }
+{ 
+    LOG_INFO("BSPTreeNode Constructed\n"); 
+    LOG_FINE("with domain.size = %ld\n", domain.size());
+}
 
 template<class Label, class T>
 BSPTreeNode<Label, T>::BSPTreeNode(vector<double> dir, 
@@ -194,42 +201,52 @@ BSPTreeNode<Label, T>::BSPTreeNode(vector<double> dir,
   left_ (NULL), 
   right_ (NULL),
   domain_ (domain)
-{ }
+{ 
+    LOG_INFO("BSPTreeNode Constructed\n"); 
+    LOG_FINE("with domain.size = %ld\n", domain.size());
+}
 
 template<class Label, class T>
 BSPTreeNode<Label, T>::BSPTreeNode(ifstream & in)
 {
-    LOG_FINE("De-serializing BSPTreeNode\n", domain_.size());
-     size_t dim;
-     in.read((char *)&dim, sizeof(size_t));
-     while (dim--)
-     {
-         double v;
-         in.read((char *)&v, sizeof(double));
-         dir_.push_back(v);
-     }
-     in.read((char *)&pivot_, sizeof(double));
-     size_t sz;
-     in.read((char *)&sz, sizeof(size_t));
-     while (sz--)
-     {
-         size_t v;
-         in.read((char *)&v, sizeof(size_t));
-         domain_.push_back(v);
-     }
+    LOG_INFO("KDTreeNode Constructed\n"); 
+    LOG_FINE("with input stream\n");
+    size_t dim;
+    in.read((char *)&dim, sizeof(size_t));
+    while (dim--) {
+        double v;
+        in.read((char *)&v, sizeof(double));
+        dir_.push_back(v);
+    }
+    in.read((char *)&pivot_, sizeof(double));
+    size_t sz;
+    in.read((char *)&sz, sizeof(size_t));
+    while (sz--) {
+        size_t v;
+        in.read((char *)&v, sizeof(size_t));
+        domain_.push_back(v);
+    }
 }
 
 template<class Label, class T>
 BSPTreeNode<Label, T>::~BSPTreeNode()
 {
-    if (left_) delete left_;
-    if (right_) delete right_;
+    if (left_) {
+        LOG_FINE("Deleted left subtree\n");
+        delete left_;
+    }
+    if (right_) {
+        LOG_FINE("Deleted right subtree\n");
+        delete right_;
+    }
+    LOG_INFO("BSPTreeNode Deconstructed\n"); 
 }
 
 template<class Label, class T>
 void BSPTreeNode<Label, T>::save(ofstream & out) const
 {
-    LOG_FINE("Saving BSPTreeNode data with domain of size %ld\n", domain_.size());
+    LOG_INFO("Saving BSPTreeNode\n"); 
+    LOG_FINE("> domain.size = %ld\n", domain_.size());
     size_t dim = dir_.size();
     out.write((char *)&dim, sizeof(size_t)); 
     out.write((char *)&dir_[0], 
@@ -245,29 +262,34 @@ template<class Label, class T>
 BSPTree<Label, T>::BSPTree(DataSet<Label, T> & st) :
   root_ (NULL),
   st_ (st)
-{ }
+{ 
+    LOG_INFO("KDTree Constructed\n"); 
+    LOG_FINE("with default constructor\n");
+}
 
 template<class Label, class T>
 BSPTree<Label, T>::BSPTree(size_t c, DataSet<Label, T> & st) :
   root_ (build_tree(c, st, st.get_domain())),
   st_ (st)
-{ }
+{ 
+    LOG_INFO("KDSpillTree Constructed\n"); 
+    LOG_FINE("with c = %ld", c);
+}
 
 template<class Label, class T>
 BSPTree<Label, T>::BSPTree(ifstream & in, DataSet<Label, T> & st) :
   st_ (st)
 {
-    LOG_FINE("De-serializing BSPTree\n");
+    LOG_INFO("BSPSpillTree Constructed\n"); 
+    LOG_FINE("with input stream\n");
     queue<BSPTreeNode<Label, T> **> to_load;
     to_load.push(&root_);
-    while (!to_load.empty())
-    {
+    while (!to_load.empty()) {
         BSPTreeNode<Label, T> ** cur = to_load.front();
         to_load.pop();
         bool exist;
         in.read((char *)&exist, sizeof(bool));
-        if (!exist)
-        {
+        if (!exist) {
             *cur = NULL; 
             continue;
         }
@@ -280,23 +302,22 @@ BSPTree<Label, T>::BSPTree(ifstream & in, DataSet<Label, T> & st) :
 template<class Label, class T>
 BSPTree<Label, T>::~BSPTree()
 {
-    LOG_FINE("Deconstructing BSPTree\n");
     if (root_) delete root_;
+    LOG_INFO("BSPTree Deconstructed\n"); 
 }
 
 template<class Label, class T>
 void BSPTree<Label, T>::save(ofstream & out) const
 {
+    LOG_INFO("Saving BSPTreeNode\n"); 
     queue<BSPTreeNode<Label, T> *> to_save;
     to_save.push(root_);
-    while (!to_save.empty())
-    {
+    while (!to_save.empty()) {
         BSPTreeNode<Label, T> * cur = to_save.front();
         to_save.pop();
         bool exists = cur != NULL;
         out.write((char *)&exists, sizeof(bool)); 
-        if (exists)
-        {
+        if (exists) {
             cur->save(out);
             to_save.push(cur->left_);
             to_save.push(cur->right_);
@@ -307,16 +328,15 @@ void BSPTree<Label, T>::save(ofstream & out) const
 template<class Label, class T>
 vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
 {
-    LOG_FINE("Querying BSPTree down to min leaf of size %ld\n", l_c);
+    LOG_INFO("Enter subdomain\n");
+    LOG_FINE("with lc = %ld\n", l_c);
     queue<BSPTreeNode<Label, T> *> expl;
     expl.push(root_);
-    while (!expl.empty())
-    {
+    while (!expl.empty()) {
         BSPTreeNode<Label, T> * cur = expl.front();
         expl.pop();
         if (cur->left_ && cur->right_ &&
-            cur->domain_.size() >= l_c)
-        {
+            cur->domain_.size() >= l_c) {
             if (dot(*query, cur->dir_) <= cur->pivot_)
                 expl.push(cur->left_);
             else
@@ -325,6 +345,7 @@ vector<size_t> BSPTree<Label, T>::subdomain(vector<T> * query, size_t l_c)
         else
             return cur->domain_;
     }
+    LOG_INFO("Exit subdomain\n");
     return vector<size_t>();
 }
 #endif
