@@ -30,8 +30,8 @@ using namespace std;
 #endif
 
 static double min_leaf  = 0.005;
-static double l []      = {0.025, 0.05, 0.075, 0.1};
-const size_t l_len      = 4;
+static double l []      = {0.015, 0.03, 0.045, 0.06, 0.075, 0.09, 0.105, 0.12, 0.135, 0.15};
+const size_t l_len      = 10;
 static double a []      = {0.05, 0.1};
 const size_t a_len      = 2;
 
