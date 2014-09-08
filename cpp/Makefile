@@ -13,6 +13,12 @@ INC := -I include
 ifdef DEBUG
 CFLAGS += -g -DDEBUG=$(DEBUG)
 endif
+ifdef LABEL_T
+CFLAGS += -DLABEL_T=$(LABEL_T)
+endif
+ifdef DATA_T
+CFLAGS += -DDATA_T=$(DATA_T)
+endif
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $(TARGET) $(LIB)
