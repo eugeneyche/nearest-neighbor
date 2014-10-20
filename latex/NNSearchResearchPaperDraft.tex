@@ -1,0 +1,90 @@
+
+%-----------------------------
+%	PACKAGES
+%-----------------------------
+
+\documentclass[paper=letter, fontsize=12pt]{article} % Letter paper and 11pt font size
+
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{setspace}
+\usepackage{sectsty} % Allows customizing section commands
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{0pt} % Customize the height of the header
+
+%margin
+\addtolength{\textwidth}{1.5in}
+\addtolength{\textheight}{1.00in}
+\addtolength{\evensidemargin}{-0.75in}
+\addtolength{\oddsidemargin}{-0.75in}
+\addtolength{\topmargin}{-1.0in}
+
+
+%-----------------------------
+%	TITLE SECTION
+%-----------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{
+\normalfont \normalsize 
+\horrule{2pt} \\
+\LARGE Nearest Neighbor Search Data Structure \\ [-10 pt] %title
+\horrule{1pt} \\
+}
+
+\author{
+	\small
+	\begin{tabular}{*{3}{c}}
+		\textbf{Sanjoy Dasgupta} & \textbf{Zhen Zhai} & \textbf{Eugene Che} \\
+		Department of Computer Science & Department of Computer Science & Department of Computer Science  \\
+		University of California, San Diego & University of California, San Diego & University of California, San Diego \\
+		dasgupta@cs.ucsd.edu & zzhai@ucsd.edu & eche@ucsd.edu \\
+	\end{tabular}
+}
+ 
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Nearest-neighbor(NN) search is boardly used within all different fields of study to gain information on new data from training data set. For NN search, the more complex the training data set is the more accurate the result will be. However, doing NN search on complex and large training data sets is time consuming. Therefore, improving the speed and acuracy of nearest-neighbor search becomes essential. We look at different data structures for NN search and compare the results on varied data sets. We focus on data structures including kd tree, kd spill tree, kd virtual spill tree, bsp tree, and bsp spill tree. We conclude that spilling often improve the performance of the data structures.
+\end{abstract}
+
+\section{Introduction}
+A lot of machine learning algorithms spend a big amount of time searching for information of an input query from the training set, which could very well be represented by high dimentional vectors. This approach is referred as nearest neighbor search. We are given a data set that contains a set of points {
+
+\section{Data structures}
+We propose two main data structures, KD-trees and BSP-trees. We also look at KD spill tree, BSP spill tree, and KD virtual spill tree, which are the revised versions. We show that spilling improve the accuracy of NN search and virtual spill improve the performance even more.
+
+\subsection{KD-trees}
+\subsection{BSP-trees}
+\subsection{Spill trees and virtual spill trees}
+
+\section{Experimental results}
+\subsection{Mnist}
+\subsection{CIFAR}
+\subsection{eHarmony}
+
+\section{Conclusion}
+
+\section{References}
+
+
+
+
+
+
+
+\end{document}
