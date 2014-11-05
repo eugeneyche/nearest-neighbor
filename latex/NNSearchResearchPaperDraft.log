@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 OCT 2014 15:24
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  5 NOV 2014 00:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -453,40 +453,56 @@ Underfull \hbox (badness 10000) in paragraph at lines 65--74
 
 {/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `T1/futs/bx/n' in size <12> not available
-(Font)              Font shape `T1/futs/b/n' tried instead on input line 78.
+(Font)              Font shape `T1/futs/b/n' tried instead on input line 84.
 
-Underfull \hbox (badness 10000) in paragraph at lines 79--82
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 84--87
+Underfull \hbox (badness 10000) in paragraph at lines 85--112
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--92
+Underfull \hbox (badness 10000) in paragraph at lines 85--112
 
  []
 
-[2] (./NNSearchResearchPaperDraft.aux) ) 
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--112
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--142
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--142
+
+ []
+
+[2]
+Underfull \hbox (badness 10000) in paragraph at lines 145--148
+
+ []
+
+[3] (./NNSearchResearchPaperDraft.aux) ) 
 Here is how much of TeX's memory you used:
  2598 strings out of 493315
  32681 string characters out of 6137904
- 86902 words of memory out of 5000000
+ 88902 words of memory out of 5000000
  6008 multiletter control sequences out of 15000+600000
  88873 words of font info for 95 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  28i,12n,43p,826b,353s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fon
-ts/enc/dvips/base/8r.enc}</usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/
-utopia/putb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/utopia/
-putr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/utopia/putri8a
-.pfb>
-Output written on NNSearchResearchPaperDraft.pdf (2 pages, 49480 bytes).
+ts/enc/dvips/base/8r.enc}</usr/local/texlive/2013/texmf-dist/fonts/type1/public
+/fourier/fourier-ms.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/u
+topia/putb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/utopia/p
+utr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/adobe/utopia/putri8a.
+pfb>
+Output written on NNSearchResearchPaperDraft.pdf (3 pages, 60247 bytes).
 PDF statistics:
- 24 PDF objects out of 1000 (max. 8388607)
- 16 compressed objects within 1 object stream
+ 31 PDF objects out of 1000 (max. 8388607)
+ 21 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
