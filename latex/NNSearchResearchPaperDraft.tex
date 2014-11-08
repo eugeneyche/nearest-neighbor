@@ -62,100 +62,95 @@ Nearest-neighbor(NN) search is boardly used within all different fields of study
 \end{abstract}
 
 \section{Introduction}
-Gaining information of an input query by looking for the most similar match from the training set is referred as nearest neighbor(NN) search. We are given a data set $\mathbf S$ that contains a set of points $\{ s_1, s_2, s_3, ... , s_n\}$ and an input query $q$, and we are looking for the nearest neighbor $s_i$ of $q$ in $\mathbf S$ such that $s_i$ can provide valuable information about input query $q$.
-\\~\\
-A lot of machine learning algorithms spend a big amount of time on nearest neighbor search. The reason that NN search is time consuming is that the training set could very well be represented by high dimentional vectors. In fact, the accuracy of the NN search result is proportional with the complexity of the training set. Therefore, speeding up NN search can lead to tremoudous improvment to many applications of not only machine learning but also data analysis, bio-informatics, signal processing, etc.
-\\~\\
-There has been a large number of research devoting to speed up the performance of NN search. In this paper, we evaluate two most promising data structures, KD tree and PCA tree. (TALK ABOUT THESE TWO DATA STRUCTURE)
-\\~\\
-We also experiment the technique of spilling and virtual spilling by looking at KD spill tree, KD virtual spill tree, and PCA spill tree. (TALK ABOUT THESE TWO TECHNIQUE)
-\\~\\
-We apply these data structures on five different data sets from different area of study including computer vision, human relationship... We focus on the accuracy of NN search using these data structures and conclude the following: PCA tree has a better performance comparing to KD tree, spilling improve the performance, and virtual spilling improve the accuracy slightly more than spilling.
+Gaining information of an input query by looking for the most similar match from the training set is referred as nearest neighbor(NN) search. We are given a data set $\mathbf S$ that contains a set of points $\{ s_1, s_2, s_3, ... , s_n\}$ and an input query $q$, and we are looking for the nearest neighbor $s_i$ of $q$ in $\mathbf S$ such that $s_i$ can provide valuable information about input query $q$.\\
+\hspace*{2em} A lot of machine learning algorithms spend a big amount of time on nearest neighbor search. The reason that NN search is time consuming is that the training set could very well be represented by high dimentional vectors. In fact, the accuracy of the NN search result is proportional with the complexity of the training set. Therefore, speeding up NN search can lead to tremoudous improvment to many applications of not only machine learning but also data analysis, bio-informatics, signal processing, etc.\\
+\hspace*{2em} There has been a large number of research devoting to speed up the performance of NN search. In this paper, we evaluate two most promising data structures, KD tree and PCA tree. We conclude that PCA tree has better performance than KD tree.\\
+\hspace*{2em} We also experiment the technique of spilling by looking at KD spill tree vs. KD tree and PCA spill tree vs. PCA tree. We observe that spilling gives a better result.\\
+\hspace*{2em} We finally experiment the technique of virtual spilling by looking at KD virtual spill tree. We compare it with KD spill tree and conclude that virtual spilling improve the performance of spilling.\\
+\hspace*{2em} We apply these data structures on five different data sets from different area of study including computer vision, human relationship... We focus on the accuracy of NN search using these data structures and make sure it generally apply to all different kinds of data sets. In conclusion, we observe the following: PCA tree has a better performance comparing to KD tree, spilling improve the performance, and virtual spilling improve the accuracy slightly more than spilling.
 
 
 
-
-
-\section{Data structures}
-We focus our study on binary space partitioning(BSP) trees, one of the most promising data structure for NN search. We first look at k-dimentional(KD) trees. Then we study principle component analysis(PCA) tree, in which we preprocess the data using PCA(Pearson, 1901) before partitioning the space. Finally, we look at spill trees and virtual spill trees, which are the revised data structures of BSP trees. Experiment supports that spilling improve the accuracy of NN search and virtual spilling improve the performance even more.
-
+\section{KD tree vs. PCA tree}
+We focus our study on binary space partitioning(BSP) trees, one of the most promising data structure for NN search. We first look at k-dimentional(KD) trees. Then we study principle component analysis(PCA) tree, in which we preprocess the data using PCA(Pearson, 1901) before partitioning the space.
+%Finally, we look at spill trees and virtual spill trees, which are the revised data structures of BSP trees. Experiment supports that spilling improve the accuracy of NN search and virtual spilling improve the performance even more.
 
 
 \subsection{KD trees}
-KD tree is a BSP tree that partition data points into a k dimentional binary tree(Bentley, 1975). Starting from the root of the tree, a cooridnate with biggest variance is chosen. The data points $\mathbf S$ from root are split at the median of the coordinate into two children of the root. Recursively apply the process on the children until the leaf of the tree contain at most $\mathbf n$ data points.
-\\~\\
-Given KD tree $T$ and query $q$, simply trace $q$ down the tree and find the leaf $l$ it falls in. Return all the possible nearest neighbors within leaf $l$. Then do distance calculation for each of the data point in leaf and return the point that lies closest to query $q$.
+KD tree is a BSP tree that partition data points into a k dimentional binary tree(Bentley, 1975). Starting from the root of the tree, a cooridnate with biggest variance is chosen. The data points $\mathbf S$ from root are split at the median of the coordinate into two children of the root. Recursively apply the process on the children until the leaf of the tree contain at most $\mathbf n$ data points.\\
+\hspace*{2em} Given KD tree $T$ and query $q$, simply trace $q$ down the tree and find the leaf $l$ it falls in. Return all the possible nearest neighbors within leaf $l$. Then do distance calculation for each of the data point in leaf and return the point that lies closest to query $q$.
 \\~\\
 Pseudocode:\\
 \hspace*{1em} \textbf{function BuildTree(S, n)}\\
-\hspace*{2em} For every coordinate in data, pick the coordinate  $c$ with biggest variance\\
-\hspace*{2em} Calculate the median $m$ of $c$\\
-\hspace*{2em} For every data point $p$ in $S$:\\
-\hspace*{3em} If $p[c] > m$, add to left child $L$\\
-\hspace*{3em} If $p[c] <= m$, add to right child $R$\\
-\hspace*{2em} End For\\
-\hspace*{2em} Record coordinate $c$ and mean $m$ of root for searching purpose\\
-\hspace*{2em} If $sizeOf(L)<=n$ and $sizeOf(R) <=n$\\
-\hspace*{3em} return root\\
-\hspace*{2em} $BuildTree(L, n)$\\
-\hspace*{2em} $BuildTree(R, n)$\\
+\hspace*{2em} If $|S| < n$\\
+\hspace*{3em} return S as leaf\\
+\hspace*{2em} Choose the coordinate $c$ with biggest variance\\
+\hspace*{2em} Split $S$ into $L$ and $R$ at the median $m$ of $c$\\
+\hspace*{2em} Record coordinate $c$ and mean $m$\\
+\hspace*{2em} $LeftTree = BuildTree(L, n)$\\
+\hspace*{2em} $RightTree = BuildTree(R, n)$\\
 \hspace*{1em} \textbf{function SearchTree(T, q)}\\
 \hspace*{2em} If $T$ is leaf\\
 \hspace*{3em} return $T$\\
-\hspace*{2em} Retrieve $c$ and $m$ from root\\
+\hspace*{2em} Retrieve $c$ and $m$ from $T$\\
 \hspace*{2em} If $q[c] < m$\\
 \hspace*{3em} $SearchTree(L, q)$\\
 \hspace*{2em} Else\\
 \hspace*{3em} $SearchTree(R, q)$
 \\~\\
-The problem with KD tree is that the true nearest neighbor $n$ of query $q$ could be in a leaf that is different from the leaf $q$ falls in. This could happen easily when $q$ and $n$ are both located close to the boundary of the tree (Figure 1). Therefore, the error rate could be very high.
+\hspace*{2em} The problem with KD tree is that the true nearest neighbor $n$ of query $q$ could be in a leaf that is different from the leaf $q$ falls in. This could happen easily when $q$ and $n$ are both located close to the boundary of the tree (Figure 1). Therefore, the error rate could be very high.
 
 
 \subsection{PCA tree}
-PCA tree is also a BSP tree which partition data after a process of PCA on the data points. From the root of the tree, we do a PCA and find the first principle component $v$. We then reduce the dimension of the data by mapping all the data points onto $v$ which gives us a one dimensional data set $s$. The original data points from root are partition using the corresponding data in $s$ and split at the median of $s$.
-\\~\\
+PCA tree is also a BSP tree which partition data after a process of PCA on the data points. From the root of the tree, we do a PCA and find the first principle component $v$. We then reduce the dimension of the data by mapping all the data points onto $v$ which gives us a one dimensional data set $s$. The original data points from root are partition using the corresponding data in $s$ and split at the median of $s$.\\
 Similar to KD tree, searching NN of a query $q$ can be done by tracing $q$ down the tree.
 \\~\\
 Pseudocode:\\
 \hspace*{1em} \textbf{function BuildTree(S, n)}\\
+\hspace*{2em} If $|S| < n$\\
+\hspace*{3em} return S as leaf\\
 \hspace*{2em} Run PCA and find the first principle component $c$\\
-\hspace*{2em} Map $S$ on to $c$ and get $S_c$\\
-\hspace*{2em} Calculate the median $m$ of $S_c$\\
-\hspace*{2em} For every data point $p$ in $S_c$:\\
-\hspace*{3em} If $p > m$, add corresponding vector $v$ of $S$ to left child $L$\\
-\hspace*{3em} If $p <= m$, add corresponding vector $v$ of $S$ to right child $R$\\
-\hspace*{2em} End For\\
-\hspace*{2em} Record principle component $c$ and mean $m$ of root for searching purpose\\
-\hspace*{2em} If $sizeOf(L)<=n$ and $sizeOf(R) <=n$\\
-\hspace*{3em} return root\\
+\hspace*{2em} Map $S$ onto $c$ to get $S_c$\\
+\hspace*{2em} Split $p$ at the median $m$ of $S_c$\\
+\hspace*{2em} Split $S$ according to $p$ into $L$ and $R$\\
+\hspace*{2em} Record principle component $c$ and mean $m$\\
 \hspace*{2em} $BuildTree(L, n)$\\
 \hspace*{2em} $BuildTree(R, n)$\\
 \hspace*{1em} \textbf{function SearchTree(T, q)}\\
 \hspace*{2em} If $T$ is leaf\\
 \hspace*{3em} return $T$\\
-\hspace*{2em} Retrieve $c$ and $m$ from root\\
-\hspace*{2em} Map $q$ onto $c$ and get $q_c$\\
+\hspace*{2em} Retrieve $c$ and $m$ from $T$\\
+\hspace*{2em} Map $q$ onto $c$ to get $q_c$\\
 \hspace*{2em} If $q_c < m$\\
 \hspace*{3em} $SearchTree(L, q)$\\
 \hspace*{2em} Else\\
 \hspace*{3em} $SearchTree(R, q)$
 
 
-\subsection{Spill trees and virtual spill trees}
+\subsection{Experimental results}
+
+
+
+\section{Spilling or not}
+We explore the technique of spilling on both KD tree and PCA tree.
+
+\subsection{Spill tree}
 Spill tree is ...
-\\~\\
+
+\subsection{Experimental results}
+
+
+
+\section{Virtual spill tree vs. spill tree}
+
+\subsection{Virtual spill tree}
 Virtual spill tree is ...
 
-\section{Experimental results}
-\subsection{Mnist}
-\subsection{CIFAR}
-\subsection{eHarmony}
-\subsection{data4}
-\subsection{data5}
+\subsection{Experimental results}
+
 
 \section{Conclusion}
 
-\section{References}
 
 
 
