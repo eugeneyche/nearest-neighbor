@@ -1,11 +1,6 @@
-#ifndef _MNIST_H
-#define _MNIST_H
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <vector>
-using namespace std;
+#ifndef MNIST_H
+#define MNIST_H
 
 void mnist_generate();
 
-#endif
+#endif /* MNIST_H */

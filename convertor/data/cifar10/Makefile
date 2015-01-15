@@ -1,17 +1,15 @@
-default: directories in/cifar-10-batches-bin/data
+BASE_URL := "http://www.cs.toronto.edu/~kriz"
+PARTS := cifar-10-binary
+TARGET := cifar-10-batches-bin
 
-directories:
-	if [ ! -d in ]; then mkdir in; fi
-	if [ ! -d out ]; then mkdir out; fi
+default:
+	@for p in $(PARTS); do 		   \
+		wget $(BASE_URL)/$$p.tar.gz && \
+			 tar -xvf $$p.tar.gz  && \
+			 rm -f $$p.tar.gz;     \
+	done
 
 clean:
-	rm -f -r in/*
-	rm -f out/*
+	rm -f $(TARGET)
 
 new: clean default
-
-in/cifar-10-binary.tar.gz:
-	cd in; wget http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz
-in/cifar-10-batches-bin/data: in/cifar-10-binary.tar.gz
-	cd in; tar -xvf cifar-10-binary.tar.gz
-	touch in/cifar-10-batches-bin/data

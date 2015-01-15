@@ -9,9 +9,3 @@ Converts data sets from different sources into a more universal form to use with
 Usage
 -----
 
-```
-make directories
-make new
-make mnist
-make cifar
-```

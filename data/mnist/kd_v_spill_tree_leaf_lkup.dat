@@ -1,8 +1,0 @@
-#   KDVirtualSpillTree
-#   leaf        alpha       avg leaf lookups
-    0.02		0		    1
-    0.02		0.05		14.2991
-    0.02		0.1		    17.4117
-    0.05		0		    1
-    0.05		0.05		9.0553
-    0.05		0.1		    10.6482
