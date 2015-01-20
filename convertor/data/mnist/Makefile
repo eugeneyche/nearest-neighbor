@@ -8,7 +8,7 @@ default:
 	@for p in $(PARTS); do 		   \
 		wget $(BASE_URL)/$$p.gz && \
 			 gunzip $$p.gz  && \
-			 rm -f $$p.gz;     \
+			 $(RM) $$p.gz;     \
 	done
 
 clean:

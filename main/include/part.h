@@ -10,27 +10,27 @@ template <class Label, class T>
 class Part
 {
 public:
-    virtual pair<DataSet<Label, T> *, DataSet<Label, T> *> 
-            operator() (const DataSet<Label, T> *) = 0;
+    virtual pair<DataSet<Label, T>, DataSet<Label, T>> 
+            operator() (const DataSet<Label, T> &) = 0;
 };
 
 template<class Label, class T>
 size_t 
-max_variance_index(DataSet<Label, T> * data)
+max_variance_index(const DataSet<Label, T> & data)
 {
     vector<double> var;
     vector<T> vtr;
-    size_t dimension = (*data)[0]->size();
-    size_t subsize = (*data).size();
+    size_t dimension = data[0].size();
+    size_t subsize = data.size();
     for (size_t i = 0; i < dimension; i++) {
         vtr.clear();
         for (size_t j = 0; j < subsize; j++) {
-            vtr.push_back((*(*data)[j])[i]);
+            vtr.push_back(data[j][i]);
         }
-        T median = selector(vtr, (size_t)((*data).size() * 0.5));
+        T median = selector(vtr, (size_t)(data.size() * 0.5));
         double variance = 0.0;
         for (size_t j = 0; j < subsize; j++) {
-            double dif = (double)(*(*data)[j])[i] - (double)median;
+            double dif = (double)(data[j][i] - (double)median;
             variance += dif * dif;
         }
         variance = variance / subsize;
@@ -47,21 +47,21 @@ max_variance_index(DataSet<Label, T> * data)
 
 template<class Label, class T>
 vector<size_t> 
-k_max_variance_indices(size_t k, DataSet<Label, T> * data)
+k_max_variance_indices(const DataSet<Label, T> & data, size_t k)
 {
     vector<double> var;
     vector<T> vtr;
-    size_t dimension = (*data)[0]->size();
-    size_t subsize = (*data).size();
+    size_t dimension = data[0]->size();
+    size_t subsize = data.size();
     for (size_t i = 0; i < dimension; i++) {
         vtr.clear();
         for (size_t j = 0; j < subsize; j++) {
-            vtr.push_back((*(*data)[j])[i]);
+            vtr.push_back(data[j][i]);
         }
         T median = selector(vtr, (size_t)((*data).size() * 0.5));
         double variance = 0.0;
         for (size_t j = 0; j < subsize; j++) {
-            double dif = (double)(*(*data)[j])[i] - (double)median;
+            double dif = (double)(data[j][i] - (double)median;
             variance += dif * dif;
         }
         variance = variance / subsize;
@@ -89,7 +89,7 @@ k_max_variance_indices(size_t k, DataSet<Label, T> * data)
 
 template<class Label, class T>
 vector<double> 
-max_eigen_vector_oja(DataSet<Label, T> * data)
+max_eigen_vector_oja(const DataSet<Label, T> & data)
 {
     /* Calculate mean */
     vector<double> mean;
@@ -97,7 +97,7 @@ max_eigen_vector_oja(DataSet<Label, T> * data)
 
     for (size_t i = 0; i < (*data)[0]->size(); i++) {
         sum.push_back(0);
-        for (size_t j = 0; j < (*data).size();j++) {
+        for (size_t j = 0; j < data.size();j++) {
             sum[i] += (*(*data)[j])[i];
         }
     }
@@ -152,16 +152,16 @@ max_eigen_vector_oja(DataSet<Label, T> * data)
 
 template<class Label, class T>
 vector<double> 
-max_eigen_vector(DataSet<Label, T> * data)
+max_eigen_vector(const DataSet<Label, T> & data)
 {
-    if (!data->size())
-        return vector<double>;
+    if (data->size() == 0)
+        return vector<double>();
     int dim = (*data)[0]->size();
     int num = data->size();
     Eigen::MatrixXd mtx = Eigen::MatrixXd::Zero(num, dim);
     for (size_t i = 0; i < num; i++) {
         for (size_t j = 0; j < dim; j++) {
-            mtx(i, j) = (double)(*(*subset)[i])[j];
+            mtx(i, j) = (double)data[i][j];
         }
     }
     Eigen::MatrixXd centered = mtx.rowwise() - mtx.colwise().mean();
@@ -184,18 +184,18 @@ template <class Label, class T>
 class KDPart : public Part<Label, T>
 {
 public:
-    pair<DataSet<Label, T> *, DataSet<Label, T> *> 
-            operator() (const DataSet<Label, T> * data)
+    pair<DataSet<Label, T>, DataSet<Label, T>> 
+            operator() (const DataSet<Label, T> data)
     {
         size_t pivot_idx =  max_variance_index(data);
         vector<T> pivot_data;
         for (size_t it = 0; it < data.size(); it++) {
-            data.push_back((*(*data)[it])[pivot_idx]);
+            data.push_back(data[it][pivot_idx]);
         }
         T pivot = selector(pivot_data, pivot_data.size() / 2);
-        DataSet<Label, T>::DomainSpace left_d;
-        DataSet<Label, T>::DomainSpace right_d;
-        DataSet<Label, T>::DomainSpace fence_d;
+        typename DataSet<Label, T>::DomainSpace left_d;
+        typename DataSet<Label, T>::DomainSpace right_d;
+        typename DataSet<Label, T>::DomainSpace fence_d;
         for (size_t it = 0; it < data.size(); it++) {
             if ((*(*data)[it])[pivot_idx] < pivot) {
                 left_d.push_back(it);
@@ -207,54 +207,14 @@ public:
                 fence_d.push_back(it);
             }
         }
-        for (size_t it = 0; it < fence.size(); it++) {
+        for (size_t it = 0; it < fence_d.size(); it++) {
             if (left_d.size() < pivot_data.size() / 2) {
                 left_d.push_back(fence_d[it]);
             } else {
                 right_d.push_back(fence_d[it]);
             }
         }
-        return make_pair(data->subset(left_domain), data->subset(right_domain));
-    }
-};
-
-template <class Label, class T>
-class KDSpillPart : public Part<Label, T>
-{
-private:
-    double alpha;
-public:
-    pair<DataSet<Label, T> *, DataSet<Label, T> *> 
-            operator() (const DataSet<Label, T> * data)
-    {
-        size_t pivot_idx =  max_variance_index(data);
-        vector<T> pivot_data;
-        for (size_t it = 0; it < data.size(); it++) {
-            data.push_back((*(*data)[it])[pivot_idx]);
-        }
-        T pivot = selector(pivot_data, pivot_data.size() / 2);
-        DataSet<Label, T>::DomainSpace left_d;
-        DataSet<Label, T>::DomainSpace right_d;
-        DataSet<Label, T>::DomainSpace fence_d;
-        for (size_t it = 0; it < data.size(); it++) {
-            if ((*(*data)[it])[pivot_idx] < pivot) {
-                left_d.push_back(it);
-            }
-            if ((*(*data)[it])[pivot_idx] > pivot) {
-                right_d.push_back(it);
-            }
-            if ((*(*data)[it])[pivot_idx] == pivot) {
-                fence_d.push_back(it);
-            }
-        }
-        for (size_t it = 0; it < fence.size(); it++) {
-            if (left_d.size() < pivot_data.size() / 2) {
-                left_d.push_back(fence_d[it]);
-            } else {
-                right_d.push_back(fence_d[it]);
-            }
-        }
-        return make_pair(data->subset(left_domain), data->subset(right_domain));
+        return make_pair(data.subset(left_d), data.subset(right_d));
     }
 };
 

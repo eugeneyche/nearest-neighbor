@@ -10,6 +10,6 @@ default:
 	done
 
 clean:
-	rm -f $(TARGET)
+	$(RM) $(TARGET)
 
 new: clean default
