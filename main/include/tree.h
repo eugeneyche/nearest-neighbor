@@ -12,163 +12,182 @@
 #include <stack>
 #include <queue>
 #include <map>
+#include <set>
 #include <utility>
+using namespace std;
 
 #include "logging.h"
 #include "dataset.h"
 #include "part.h"
 
-template <class Label, class T, class P>
+template <class T, class P>
 class Tree
 {
 protected:
     struct TreeNode {
-        DataSet<Label, T> data;
-        TreeNode * left, * right;
+        DataSet<T> data;
+        TreeNode  *left, *right;
+        P          part;
 
-        TreeNode(const DataSet<Label, T> &);
-        ~TreeNode(void);
+        TreeNode(const DataSet<T> &);
+        TreeNode(const DataSet<T> &, FILE *in);
+        virtual ~TreeNode(void);
+
+        void save(FILE *);
     };
 
-    TreeNode          * root;
-    Part              * part;
-    DataSet<Label, T>   data;
-
-    void buildTree(void);
-    void loadTree(FILE *);
+    DataSet<T> data;
+    TreeNode  *root;
 
 public:
-    Tree(const DataSet<Label, T> &);
-    Tree(const DataSet<Label, T> &, FILE *);
-    ~Tree(void);
+    Tree(const DataSet<T> &);
+    Tree(const DataSet<T> &, FILE *in);
+    virtual ~Tree(void);
 
-    void saveTree(FILE *);
-    VSpill generateVSpill(double alpha);
-    DataSet<Label, T> range(const typename DataSet<Label, T>::Vector, 
-            int min = 0);
+    void save(FILE *);
+    DataSet<T> find(const typename DataSet<T>::Vector &, 
+            size_t min_leaf = 0);
+
+    void show(void); /* tentative for debugging */
 };
 
-template <class Label, class T>
-Tree<Label, T>::TreeNode::TreeNode(const DataSet<Label, T> & data) 
-    : data  (data) 
-    , left  (NULL) 
-    , right (NULL)
+template <class T, class P>
+Tree<T, P>::TreeNode::TreeNode(const DataSet<T> & data) 
+    : data  (data)
+    , left  (nullptr)
+    , right (nullptr)
+    , part  (data)
+{
+    DataSet<T> ldata = data.subset(part.get_left());
+    DataSet<T> rdata = data.subset(part.get_right());
+    if (ldata.size())
+        left = new TreeNode(ldata);
+    if (rdata.size())
+        right = new TreeNode(rdata);
+}
+
+template <class T, class P>
+Tree<T, P>::TreeNode::TreeNode(const DataSet<T> & data, FILE *in) 
+    : data  (data)
+    , left  (nullptr)
+    , right (nullptr)
+    , part  (data, in)
+{
+    DataSet<T> ldata = data.subset(part.get_left());
+    DataSet<T> rdata = data.subset(part.get_right());
+    if (ldata.size())
+        left = new TreeNode(ldata, in);
+    if (rdata.size())
+        right = new TreeNode(rdata, in);
+}
+
+template <class T, class P>
+Tree<T, P>::TreeNode::~TreeNode(void)
+{ 
+    if (left) delete left;
+    if (right) delete right;
+}
+
+template <class T, class P>
+void
+Tree<T, P>::TreeNode::save(FILE * out)
+{ 
+    part.save(out);
+    if (left) left->save(out);
+    if (right) right->save(out);
+}
+
+template <class T, class P>
+Tree<T, P>::Tree(const DataSet<T> & data) 
+    : data (data)
+    , root (new TreeNode(data))
 { }
 
-template <class Label, class T>
-Tree<Label, T>::TreeNode::~TreeNode(void)
-{ 
-    delete data;
-    if (left)
-        delete left;
-    if (right)
-        delete right;
-}
+template <class T, class P>
+Tree<T, P>::Tree(const DataSet<T> & data, FILE* in) 
+    : data (data)
+    , root (new TreeNode(data, in))
+{ }
 
-
-template <class Label, class T>
-void
-Tree<Label, T>::buildTree(Part<Label, T> & part)
-{ 
-    stack<pair<TreeNode **, DataSet<Label, T>>> toBuild;
-    toBuild.push(make_pair(&root, data));
-
-    while (!toBuild.empty()) {
-        TreeNode ** tnodep = toBuild.top().first;
-        const DataSet<Label, T> & tdata = toBuild.top().second;
-        toBuild.pop();
-        if (!tnodep || tdata.size() == 0) {
-            *tnodep = NULL;
-            continue;
-        }
-        *tnodep = new TreeNode(tdata);
-        pair<DataSet<Label, T>, DataSet<Label, T>> partition = part(tdata);
-        toBuild.push(make_pair(&(*tnodep)->left, partition.first));
-        toBuild.push(make_pair(&(*tnodep)->right, partition.second));
-    }
-} 
-
-template <class Label, class T>
-void
-Tree<Label, T>::loadTree(FILE* in)
-{ 
-    size_t size;
-    stack<pair<TreeNode **, DataSet<Label, T>>> to_load;
-    to_load.push(make_pair(&root, data)); 
-    while (!to_load.empty()) {
-        TreeNode ** tnodep = to_load.top()->first;
-        const DataSet<Label, T> & tdata = to_load.top()->first;
-        if (!tnodep || tdata.size() == 0) {
-            *tnodep = NULL;
-            continue;
-        }
-        fread(&size, sizeof(size_t), 1, in);
-        if (!size) {
-            *tnodep = NULL;
-            continue;
-        }
-        size_t buffer [size];
-        fread(buffer, sizeof(size_t), size, in);
-        typename DataSet<Label, T>::DomainSpace ds;
-        ds.assign(buffer, buffer + size);
-        *tnodep = new TreeNode(tdata.subset(ds));
-        to_load.push(make_pair(&(*tnodep)->left, (*tnodep)->data));
-        to_load.push(make_pair(&(*tnodep)->right, (*tnodep)->data));
-    }
-}
-
-template <class Label, class T>
-Tree<Label, T>::Tree(const DataSet<Label, T> & data, Part<Label, T> & part) :
-        root (NULL),
-        data (data)
-{ 
-    buildTree(part);
-}
-
-template <class Label, class T>
-Tree<Label, T>::Tree(const DataSet<Label, T> & data, FILE* in) 
-    : root (NULL)
-    , data (data)
-{ 
-    loadTree(in);
-}
-
-template <class Label, class T>
-Tree<Label, T>::~Tree(void)
+template <class T, class P>
+Tree<T, P>::~Tree(void)
 {
-    if (root)
-        delete root;
+    if (root) delete root;
 }
 
-template <class Label, class T>
+template <class T, class P>
 void
-Tree<Label, T>::saveTree(FILE * out)
+Tree<T, P>::save(FILE * out)
 { 
-    stack<TreeNode *> to_save;
-    to_save.push(root);
-    while (!to_save.empty()) {
-        TreeNode* tnode = to_save.top();
-        size_t size = 0;
-        if (!tnode) {
-            fwrite(&size, sizeof(size_t), 1, out);
-            continue;
-        }
-        to_save.pop();
-        typename DataSet<Label, T>::DomainSpace & ds = tnode->data.getDomain();
-        size = ds.size();
-        fwrite(&size, sizeof(size_t), 1, out);
-        fwrite(&ds[0], sizeof(size_t), ds.size(), out);
-        to_save.push(tnode->right);
-        to_save.push(tnode->left);
-    }
+    if (root) root->save(out);
 }
 
 
-template <class Label, class T>
-DataSet<Label, T>
-Tree<Label, T>::range(const typename DataSet<Label, T>::Vector, int min)
+template <class T, class P>
+DataSet<T>
+Tree<T, P>::find(const typename DataSet<T>::Vector & vtr, size_t min_leaf)
 {
-    return DataSet<Label, T>();
+    stack<TreeNode *> explore;
+    set<size_t> uniq;
+
+    explore.push(root);
+
+    while (!explore.empty()) {
+        TreeNode * current = explore.top();
+        explore.pop();
+
+        if (current->data.size() <= min_leaf) {
+            uniq.insert(current->data.get_domain().begin(), 
+                    current->data.get_domain().end());
+            continue;
+        } 
+
+        Action action = current->part.query(vtr);
+
+        switch(action) {
+        case LEFT:
+            if (current->left)
+                explore.push(current->left);
+            break;
+        case RIGHT:
+            if (current->right)
+                explore.push(current->right);
+            break;
+        case SPILL:
+            if (current->left)
+                explore.push(current->left);
+            if (current->right)
+                explore.push(current->right);
+            break;
+        }
+    }
+    return root->data.subset(typename DataSet<T>::DomainSpace(uniq.begin(), uniq.end()));
+}
+
+template <class T, class P>
+void 
+Tree<T, P>::show(void)
+{
+    stack<pair<TreeNode *, size_t>> explore;
+    explore.push(make_pair(root, 0));
+    while (!explore.empty()) {
+        pair<TreeNode *, size_t> current = explore.top();
+        explore.pop();
+        /* visit */
+        for (size_t it = 0; it < current.second; it++) {
+            printf("\t");
+        }
+        for (auto it = current.first->data.begin(); it != current.first->data.end(); it++) {
+           printf("%lu ", it.get_index());
+        }
+        printf("\n");
+        if (current.first->left) {
+            explore.push(make_pair(current.first->left, current.second + 1));
+        }
+        if (current.first->right) {
+            explore.push(make_pair(current.first->right, current.second + 1));
+        }
+    }
 }
 
 #endif /* TREE_H_ */

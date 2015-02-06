@@ -17,94 +17,142 @@ using namespace std;
 #include "vmath.h"
 #include "logging.h"
 
-template<class Label, class T>
+template<class T>
 class DataSet
 {
 public:
     typedef vector<T> Vector;
-    typedef typename Vector::const_iterator iterator;
-    typedef map<Vector *, Label> LabelSpace;
     typedef vector<Vector> VectorSpace;
     typedef vector<size_t> DomainSpace;
 
 private:
-    DataSet<Label, T> * parent;
-    LabelSpace        * labels;
-    VectorSpace       * vectors;
-    DomainSpace         domain;
+    const DataSet<T>  *parent;
+    const VectorSpace *vectors;
+    const DomainSpace *domain;
 
-    DataSet(const DataSet<Label, T> *, DomainSpace);
+    DataSet(const DataSet<T> *, const DomainSpace &, bool);
 
     void loadVectors(FILE *);
-    void loadLabels(FILE *);
 
 public:
+
+    class iterator 
+    {
+        friend class DataSet<T>;
+    private: 
+        typename DataSet<T>::DomainSpace::const_iterator index;
+        const VectorSpace *vectors;
+
+        iterator(typename DataSet<T>::DomainSpace::const_iterator index,
+                const typename DataSet<T>::VectorSpace *vectors)
+            : index   (index)
+            , vectors (vectors)
+        { }
+
+    public:
+        iterator(const iterator &copy)
+            : index   (copy.index)
+            , vectors (copy.vectors)
+        { }
+
+        const typename DataSet<T>::Vector & 
+        operator*(void) 
+        {
+            return vectors->at(*index);
+        }
+
+        const typename DataSet<T>::Vector * 
+        operator->(void) 
+        {
+            return &(operator*()); 
+        }
+        
+        iterator & 
+        operator++(void) 
+        {
+            ++index;
+            return *this;
+        }
+
+        iterator
+        operator++(int) 
+        {
+            return iterator(index++, vectors);
+        }
+
+        bool 
+        operator!=(const iterator &other) 
+        {
+            return vectors != other.vectors || index != other.index;
+        }
+
+        bool 
+        operator==(const iterator & other) 
+        {
+            return !operator!=(other);
+        }
+        
+        size_t 
+        get_index(void)
+        {
+            return *index;
+        }
+    };
+
     DataSet(void);
-    DataSet(const DataSet<Label, T> &);
+    DataSet(const DataSet<T> &);
     DataSet(FILE *);
-    DataSet(FILE *, FILE *);
     ~DataSet(void);
-    const size_t        size(void)               const;
-    const Label         getLabel(const size_t)   const;
-    const Label         getLabel(const Vector &) const;
-    const DomainSpace   getDomain(void)          const;
-    iterator            begin(void)              const;
-    iterator            end(void)                const;
-    const Vector &      operator[](const size_t) const;
-    DataSet<Label, T> subset(const DomainSpace);
+    const size_t       size(void)                  const;
+    const VectorSpace &get_vectors(void)           const;
+    const DomainSpace &get_domain(void)            const;
+    iterator           begin(void)                 const;
+    iterator           end(void)                   const;
+    const Vector &     operator[](const size_t)    const;
+    DataSet<T>         subset(const DomainSpace &) const;
+    DataSet<T>         merge(const DataSet<T> &)   const;
 };
 
-template<class Label, class T>
-DataSet<Label, T>::DataSet(const DataSet<Label, T> * parent, DomainSpace domain) 
+template<class T>
+DataSet<T>::DataSet(
+        const DataSet<T> *parent, 
+        const DomainSpace &domain, 
+        bool relative)
     : parent  (parent)
-    , labels  (parent->labels)
     , vectors (parent->vectors)
 {
-    DomainSpace::iterator itr;
-    for (itr = domain.begin(); itr != domain.end(); itr++) {
-        domain.push_back(parent->domain[*itr]);
+    DomainSpace *build_domain = new DomainSpace;
+    if (relative) {
+        for (auto it = domain.begin(); it != domain.end(); it++) {
+            build_domain->push_back(parent->domain->at(*it));
+        }
+    } else {
+        build_domain->insert(build_domain->begin(), domain.begin(), domain.end());
     }
+    this->domain = build_domain;
 }
 
-template<class Label, class T>
-DataSet<Label, T>::DataSet(void) 
-    : parent  (NULL)
-    , labels  (NULL)
-    , vectors (NULL)
+template<class T>
+DataSet<T>::DataSet(void) 
+    : parent  (nullptr)
+    , vectors (nullptr)
+    , domain  (nullptr)
 { }
 
-template<class Label, class T>
-DataSet<Label, T>::DataSet(const DataSet<Label, T> & copy)
+template<class T>
+DataSet<T>::DataSet(const DataSet<T> &copy)
     : parent  (copy.parent)
-    , labels  (copy.labels)
     , vectors (copy.vectors)
-    , domain  (copy.domain)
+    , domain  (new DomainSpace(*copy.domain))
 { }
 
-template<class Label, class T>
-DataSet<Label, T>::DataSet(FILE* vectorIn) 
-    : parent (NULL)
-    , labels  (NULL)
+template<class T>
+DataSet<T>::DataSet(FILE *in) 
+    : parent (nullptr)
 {
-    loadVectors(vectorIn);
-}
-
-template<class Label, class T>
-DataSet<Label, T>::DataSet(FILE* vectorIn, FILE* labelIn) 
-    : parent (NULL)
-{
-    loadVectors(vectorIn);
-    loadLabels(labelIn);
-}
-
-
-template <class Label, class T>
-void 
-DataSet<Label, T>::loadVectors(FILE* in)
-{
-    parent = NULL;
-    labels = NULL;
-    vectors = new VectorSpace;
+    parent = nullptr;
+    VectorSpace *build_vectors = new VectorSpace;
+    DomainSpace *build_domain = new DomainSpace;
     size_t n, m;
     fread(&n, sizeof(size_t), 1, in);
     fread(&m, sizeof(size_t), 1, in);
@@ -113,90 +161,103 @@ DataSet<Label, T>::loadVectors(FILE* in)
         T buffer [m];
         fread(buffer, sizeof(T), m, in);
         vtr.assign(buffer, buffer + m);
-        domain.push_back(domain.size());
-        vectors->push_back(vtr);
+        build_domain->push_back(build_domain->size());
+        build_vectors->push_back(vtr);
     }
+    vectors = build_vectors;
+    domain = build_domain;
 }
 
-template <class Label, class T>
-void 
-DataSet<Label, T>::loadLabels(FILE * in)
+template <class T>
+DataSet<T>::~DataSet(void)
 {
-    if (!vectors)
-        return;
-    labels = new LabelSpace;
-    size_t n;
-    fread(&n, sizeof(size_t), 1, in);
-    Label buffer [n];
-    fread(buffer, sizeof(Label), n, in);
-    for (size_t i = 0; i < n; i++) {
-        (*labels)[&(*this)[i]] = buffer[i];
+    if (!parent && vectors) {
+        delete vectors;
     }
+    if (domain) delete domain;
 }
 
-template <class Label, class T>
-DataSet<Label, T>::~DataSet(void)
-{
-    if (!parent) {
-        if (labels) delete labels;
-        if (vectors) delete vectors;
-    }
-}
-
-template <class Label, class T>
+template <class T>
 const size_t 
-DataSet<Label, T>::size(void) const
+DataSet<T>::size(void) const
 {
-    return domain.size();
+    return domain->size();
 }
 
-template <class Label, class T>
-const Label 
-DataSet<Label, T>::getLabel(const size_t index) const
+template <class T>
+const typename DataSet<T>::VectorSpace &
+DataSet<T>::get_vectors(void) const
 {
-    return getLabel(&(*this)[index]);
+    return *vectors;
 }
 
-template <class Label, class T>
-const Label 
-DataSet<Label, T>::getLabel(const Vector & vtr) const
+template <class T>
+const typename DataSet<T>::DomainSpace &
+DataSet<T>::get_domain(void) const
 {
-    return (*labels)[&vtr];
+    return *domain;
 }
 
-template <class Label, class T>
-const typename DataSet<Label,T>::DomainSpace 
-DataSet<Label, T>::getDomain(void) const
+template <class T>
+typename DataSet<T>::iterator
+DataSet<T>::begin(void) const
 {
-    return domain;
+    return DataSet<T>::iterator(domain->begin(), vectors);
 }
 
-template <class Label, class T>
-typename DataSet<Label, T>::iterator
-DataSet<Label, T>::begin(void) const
+template <class T>
+typename DataSet<T>::iterator
+DataSet<T>::end(void) const
 {
-    return vectors->cbegin();
+    return DataSet<T>::iterator(domain->end(), vectors);
 }
 
-template <class Label, class T>
-typename DataSet<Label, T>::iterator
-DataSet<Label, T>::end(void) const
+template <class T>
+const typename DataSet<T>::Vector &
+DataSet<T>::operator[](const size_t index) const
 {
-    return vectors->cend();
+    return (*vectors)[domain->at(index)];
 }
 
-template <class Label, class T>
-const typename DataSet<Label, T>::Vector &
-DataSet<Label, T>::operator[](const size_t index) const
+template <class T>
+DataSet<T>
+DataSet<T>::subset(const DomainSpace &domain) const
 {
-    return (*vectors)[domain[index]];
+    return DataSet<T>(this, domain, true);
 }
 
-template <class Label, class T>
-DataSet<Label, T>
-DataSet<Label, T>::subset(const DomainSpace domain)
+
+template <class T>
+DataSet<T>
+DataSet<T>::merge(const DataSet<T> &other) const
 {
-    return DataSet<Label, T>(this, domain);
+    DomainSpace merged_domain;
+    size_t it_this, it_other;
+    it_this = it_other = 0;
+    while (it_this < size() && it_other < other.size()) {
+        if ((*this)[it_this] < other[it_other]) {
+            merged_domain.push_back((*this)[it_this]);
+            it_this++;
+        }
+        if ((*this)[it_this] == other[it_other]) {
+            merged_domain.push_back((*this)[it_this]);
+            it_this++;
+            it_other++;
+        }
+        if ((*this)[it_this] > other[it_other]) {
+            merged_domain.push_back(other[it_this]);
+            it_other++;
+        }
+    }
+    while (it_this < size()) {
+        merged_domain.push_back((*this)[it_this]);
+        it_this++;
+    }
+    while (it_other < other.size()) {
+        merged_domain.push_back(other[it_other]);
+        it_other++;
+    }
+    return DataSet<T>(this, merged_domain, false);
 }
 
 #endif /* DATASET_H */

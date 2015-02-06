@@ -11,7 +11,7 @@
 using namespace std;
 
 template<class T>
-double distance_to(const vector<T> & v1, const vector<T> & v2)
+double distance_to(const vector<T> &v1, const vector<T> &v2)
 {
     if (v1.size() != v2.size())
         return -1;
@@ -25,7 +25,7 @@ double distance_to(const vector<T> & v1, const vector<T> & v2)
 }
 
 template<class A, class B>
-double dot(const vector<A> & v, const vector<B> & vd)
+double dot(const vector<A> &v, const vector<B> &vd)
 {
     long double factor = 0;;
     for (int i = 0; i < v.size() && i < vd.size(); i++)
@@ -34,11 +34,11 @@ double dot(const vector<A> & v, const vector<B> & vd)
 }
 
 template<class T>
-T selector(const vector<T> & v, size_t k)
+T selector(const vector<T> &v, size_t k)
 {
 	srand((int)time(NULL));
 	size_t sz = v.size();
-	double rand_idx= rand() % sz;
+	double rand_idx = rand() % sz;
     
 	vector<T> left;
 	vector<T> right;
@@ -53,13 +53,13 @@ T selector(const vector<T> & v, size_t k)
 			right.push_back(*it);
 	}
     
-	if (left.size() >= k)
+	if (left.size() > k) {
 		return selector(left, k);
-	else if (left.size() + fence.size() >= k)
+    } else if (left.size() + fence.size() >= k) {
 		return v[rand_idx];
-	else
-		return selector(right, k - left.size() - v.size());
+    } else {
+		return selector(right, k - left.size() - fence.size());
+    }
 }
-
 
 #endif /* VMATH_H */

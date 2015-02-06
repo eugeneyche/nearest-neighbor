@@ -1,3 +1,9 @@
+/* 
+ * File     : part.h
+ * Date     : 20-1-2015
+ * Summary  : Contains the data structure definition
+ *            of a tree structure
+ */
 #ifndef PART_H
 #define PART_H
 
@@ -6,17 +12,13 @@ using namespace std;
 
 #include "math.h"
 
-template <class Label, class T>
-class Part
-{
-public:
-    virtual pair<DataSet<Label, T>, DataSet<Label, T>> 
-            operator() (const DataSet<Label, T> &) = 0;
-};
+#define MIN_SIZE (5)
 
-template<class Label, class T>
+enum Action {LEFT, RIGHT, SPILL};
+
+template<class T>
 size_t 
-max_variance_index(const DataSet<Label, T> & data)
+max_variance_index(const DataSet<T> &data)
 {
     vector<double> var;
     vector<T> vtr;
@@ -30,8 +32,8 @@ max_variance_index(const DataSet<Label, T> & data)
         T median = selector(vtr, (size_t)(data.size() * 0.5));
         double variance = 0.0;
         for (size_t j = 0; j < subsize; j++) {
-            double dif = (double)(data[j][i] - (double)median;
-            variance += dif * dif;
+            double diff = (double)data[j][i] - median;
+            variance += diff * diff;
         }
         variance = variance / subsize;
         var.push_back(variance);
@@ -45,9 +47,9 @@ max_variance_index(const DataSet<Label, T> & data)
     return maxIndex;
 }
 
-template<class Label, class T>
+template<class T>
 vector<size_t> 
-k_max_variance_indices(const DataSet<Label, T> & data, size_t k)
+k_max_variance_indices(const DataSet<T> &data, size_t k)
 {
     vector<double> var;
     vector<T> vtr;
@@ -61,8 +63,8 @@ k_max_variance_indices(const DataSet<Label, T> & data, size_t k)
         T median = selector(vtr, (size_t)((*data).size() * 0.5));
         double variance = 0.0;
         for (size_t j = 0; j < subsize; j++) {
-            double dif = (double)(data[j][i] - (double)median;
-            variance += dif * dif;
+            double diff = (double)data[j][i] - (double)median;
+            variance += diff * diff;
         }
         variance = variance / subsize;
         var.push_back(variance);
@@ -71,7 +73,7 @@ k_max_variance_indices(const DataSet<Label, T> & data, size_t k)
     for (size_t i = 0; i < dimension; i++) {
         idx[i] = i;
     }
-    /* Selection Sort for Parallel Arrays */
+
     vector<size_t> result;
     for (size_t i = 0; i < k; i++) {
         size_t maxIndex = i;
@@ -87,22 +89,22 @@ k_max_variance_indices(const DataSet<Label, T> & data, size_t k)
     return result;
 }
 
-template<class Label, class T>
+template<class T>
 vector<double> 
-max_eigen_vector_oja(const DataSet<Label, T> & data)
+max_eigen_vector_oja(const DataSet<T> &data)
 {
     /* Calculate mean */
     vector<double> mean;
     vector<double> sum;
 
-    for (size_t i = 0; i < (*data)[0]->size(); i++) {
+    for (size_t i = 0; i < data[0]->size(); i++) {
         sum.push_back(0);
         for (size_t j = 0; j < data.size();j++) {
-            sum[i] += (*(*data)[j])[i];
+            sum[i] += data[j][i];
         }
     }
-    for (size_t i = 0; i < (*data).size(); i++) {
-        mean.push_back(sum[i] / (*data).size());
+    for (size_t i = 0; i < data.size(); i++) {
+        mean.push_back(sum[i] / data.size());
     }
     
     /* initialize eigen here */
@@ -111,7 +113,7 @@ max_eigen_vector_oja(const DataSet<Label, T> & data)
     srand((int)time(NULL));
 
     /* WARNING: Potentially dangerous if subset has size 0 */
-    for (size_t i = 0; i < (*(*data)[0]).size(); i++) {
+    for (size_t i = 0; i < data[0].size(); i++) {
         double x = (double)((rand() % 201) - 100) / 100;
         eigen.push_back(x);
         eigen_size += x * x;
@@ -131,7 +133,7 @@ max_eigen_vector_oja(const DataSet<Label, T> & data)
         double X_transpo_dot_V = 0.0;
         vector<double> X;
         for (size_t j = 0; j < X.size(); j++) {
-            X.push_back((double)(*(*data)[i])[j] - mean[j]); //centralize X
+            X.push_back((double)data[i][j] - mean[j]);
             X_transpo_dot_V += (X[j] * eigen[j]);
         }
 
@@ -146,13 +148,12 @@ max_eigen_vector_oja(const DataSet<Label, T> & data)
             eigen[j] = eigen[j]/vector_size;
         }
     }
-    LOG_INFO("Exit max_eigen_vector_oja\n");
     return eigen;
 }
 
-template<class Label, class T>
+template<class T>
 vector<double> 
-max_eigen_vector(const DataSet<Label, T> & data)
+max_eigen_vector(const DataSet<T> &data)
 {
     if (data->size() == 0)
         return vector<double>();
@@ -179,42 +180,330 @@ max_eigen_vector(const DataSet<Label, T> & data)
     return maxEigVtr;
 }
 
-
-template <class Label, class T>
-class KDPart : public Part<Label, T>
+template<class T>
+class KD
 {
+protected:
+    typename DataSet<T>::DomainSpace 
+            left, right;
+    T pivot;
+    size_t pivot_index;
+
 public:
-    pair<DataSet<Label, T>, DataSet<Label, T>> 
-            operator() (const DataSet<Label, T> data)
+    KD(const DataSet<T> &data)
     {
-        size_t pivot_idx =  max_variance_index(data);
-        vector<T> pivot_data;
+        if (data.size() < MIN_SIZE)
+            return;
+        pivot_index = max_variance_index(data);
+        vector<T> pivots;
         for (size_t it = 0; it < data.size(); it++) {
-            data.push_back(data[it][pivot_idx]);
+            pivots.push_back(data[it][pivot_index]);
         }
-        T pivot = selector(pivot_data, pivot_data.size() / 2);
-        typename DataSet<Label, T>::DomainSpace left_d;
-        typename DataSet<Label, T>::DomainSpace right_d;
-        typename DataSet<Label, T>::DomainSpace fence_d;
+        size_t half = size_t(pivots.size() * 0.5);
+        pivot = selector(pivots, half);
+        typename DataSet<T>::DomainSpace middle;
         for (size_t it = 0; it < data.size(); it++) {
-            if ((*(*data)[it])[pivot_idx] < pivot) {
-                left_d.push_back(it);
-            }
-            if ((*(*data)[it])[pivot_idx] > pivot) {
-                right_d.push_back(it);
-            }
-            if ((*(*data)[it])[pivot_idx] == pivot) {
-                fence_d.push_back(it);
-            }
+            if (data[it][pivot_index] < pivot)
+                left.push_back(it);
+            else if (data[it][pivot_index] > pivot)
+                right.push_back(it);
+            else if (data[it][pivot_index] == pivot)
+                middle.push_back(it);
         }
-        for (size_t it = 0; it < fence_d.size(); it++) {
-            if (left_d.size() < pivot_data.size() / 2) {
-                left_d.push_back(fence_d[it]);
+        for (size_t it = 0; it < middle.size(); it++) {
+            if (left.size() < half) {
+                left.push_back(middle[it]);
             } else {
-                right_d.push_back(fence_d[it]);
+                right.push_back(middle[it]);
             }
         }
-        return make_pair(data.subset(left_d), data.subset(right_d));
+    }
+
+    KD(const DataSet<T> &data, FILE *in)
+    {
+        size_t l_size, r_size, buffer_size;
+        fread(&l_size, sizeof(size_t), 1, in);
+        fread(&r_size, sizeof(size_t), 1, in);
+
+        buffer_size = l_size > r_size ? l_size : r_size;
+        size_t buffer [buffer_size];
+
+        fread(buffer, sizeof(size_t), l_size, in);
+        left.assign(buffer, buffer + l_size);
+
+        fread(buffer, sizeof(size_t), r_size, in);
+        right.assign(buffer, buffer + r_size);
+
+        fread(&pivot, sizeof(T), 1, in);
+        fread(&pivot_index, sizeof(size_t), 1, in);
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_left(void)
+    {
+        return left;
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_right(void)
+    {
+        return right;
+    }
+
+    virtual Action 
+    query(const typename DataSet<T>::Vector & vtr)
+    {
+        return (vtr[pivot_index] < pivot)
+            ? LEFT
+            : RIGHT;
+    }
+
+    virtual 
+    void save(FILE *out)
+    {
+        size_t l_size, r_size;
+        l_size = left.size();
+        r_size = right.size();
+
+        fwrite(&l_size, sizeof(size_t), 1, out);
+        fwrite(&r_size, sizeof(size_t), 1, out);
+
+        fwrite(&left[0], sizeof(size_t), l_size, out);
+        fwrite(&right[0], sizeof(size_t), r_size, out);
+
+        fwrite(&pivot, sizeof(T), 1, out);
+        fwrite(&pivot_index, sizeof(size_t), 1, out);
+    }
+};
+
+double default_spill = 0;
+
+template<class T, const double & spill = default_spill>
+class Spill
+{
+protected:
+    typename DataSet<T>::DomainSpace 
+            left, right;
+    T pivot;
+    size_t pivot_index, pivot_l, pivot_r;
+
+public:
+    Spill(const DataSet<T> &data)
+    { 
+        if (data.size() < MIN_SIZE)
+            return;
+        pivot_index = max_variance_index(data);
+        vector<T> pivots;
+        for (size_t it = 0; it < data.size(); it++) {
+            pivots.push_back(data[it][pivot_index]);
+        }
+        size_t half = size_t(pivots.size() * 0.5);
+        size_t spill_l = size_t(pivots.size() * (0.5 - spill));
+        size_t spill_r = size_t(pivots.size() * (0.5 + spill));
+        pivot = selector(pivots, half);
+        pivot_l = selector(pivots, spill_l);
+        pivot_r = selector(pivots, spill_r);
+        typename DataSet<T>::DomainSpace fence;
+        typename DataSet<T>::DomainSpace fence_l;
+        typename DataSet<T>::DomainSpace fence_r;
+        for (size_t it = 0; it < data.size(); it++) {
+            if (data[it][pivot_index] < pivot_l)
+                left.push_back(it);
+            else if (data[it][pivot_index] > pivot_r)
+                right.push_back(it);
+            else if (data[it][pivot_index] == pivot_l)
+                fence_l.push_back(it);
+            else if (data[it][pivot_index] == pivot_r)
+                fence_r.push_back(it);
+            else if (data[it][pivot_index] > pivot_l &&
+                    data[it][pivot_index] < pivot_r) {
+                fence.push_back(it);
+            }
+        }
+        for (size_t it = 0; it < fence_l.size(); it++) {
+            if (left.size() < spill_l) {
+                left.push_back(fence_l[it]);
+            } else {
+                fence.push_back(fence_l[it]);
+            }
+        }
+        for (size_t it = 0; it < fence_r.size(); it++) {
+            if (right.size() < spill_r) {
+                right.push_back(fence_r[it]);
+            } else {
+                fence.push_back(fence_r[it]);
+            }
+        }
+        for (size_t it = 0; it < fence.size(); it++) {
+            left.push_back(fence[it]);
+            right.push_back(fence[it]);
+        }
+    }
+
+    Spill(const DataSet<T> &data, FILE *in)
+    { 
+        size_t l_size, r_size, buffer_size;
+        fread(&l_size, sizeof(size_t), 1, in);
+        fread(&r_size, sizeof(size_t), 1, in);
+
+        buffer_size = l_size > r_size ? l_size : r_size;
+        size_t buffer [buffer_size];
+
+        fread(buffer, sizeof(size_t), l_size, in);
+        left.assign(buffer, buffer + l_size);
+
+        fread(buffer, sizeof(size_t), r_size, in);
+        right.assign(buffer, buffer + r_size);
+
+        fread(&pivot, sizeof(T), 1, in);
+        fread(&pivot_index, sizeof(size_t), 1, in);
+        fread(&pivot_l, sizeof(size_t), 1, in);                       
+        fread(&pivot_r, sizeof(size_t), 1, in);                       
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_left(void)
+    {
+        return left;
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_right(void)
+    {
+        return right;
+    }
+
+    virtual Action 
+    query(const typename DataSet<T>::Vector & vtr)
+    {
+        return (vtr[pivot_index] < pivot)
+            ? LEFT
+            : RIGHT;
+    }
+
+    virtual 
+    void save(FILE *out)
+    {
+        size_t l_size, r_size;
+        l_size = left.size();
+        r_size = right.size();
+
+        fwrite(&l_size, sizeof(size_t), 1, out);
+        fwrite(&r_size, sizeof(size_t), 1, out);
+
+        fwrite(&left[0], sizeof(size_t), l_size, out);
+        fwrite(&right[0], sizeof(size_t), r_size, out);
+
+        fwrite(&pivot, sizeof(T), 1, out);
+        fwrite(&pivot_index, sizeof(size_t), 1, out);
+        fwrite(&pivot_l, sizeof(size_t), 1, out);
+        fwrite(&pivot_r, sizeof(size_t), 1, out);
+    }
+};
+
+template<class T, const double & spill = default_spill>
+class VSpill : public KD<T>
+{
+protected:
+    typename DataSet<T>::DomainSpace 
+            left, right;
+    T pivot;
+    size_t pivot_index, pivot_l, pivot_r;
+
+public:
+    VSpill(const DataSet<T> &data)
+    { 
+        if (data.size() < MIN_SIZE)
+            return;
+        pivot_index = max_variance_index(data);
+        vector<T> pivots;
+        for (size_t it = 0; it < data.size(); it++) {
+            pivots.push_back(data[it][pivot_index]);
+        }
+        size_t half = size_t(pivots.size() * 0.5);
+        size_t spill_l = size_t(pivots.size() * (0.5 - spill));
+        size_t spill_r = size_t(pivots.size() * (0.5 + spill));
+        pivot = selector(pivots, half);
+        pivot_l = selector(pivots, spill_l);
+        pivot_r = selector(pivots, spill_r);
+        typename DataSet<T>::DomainSpace middle;
+        for (size_t it = 0; it < data.size(); it++) {
+            if (data[it][pivot_index] < pivot)
+                left.push_back(it);
+            else if (data[it][pivot_index] > pivot)
+                right.push_back(it);
+            else if (data[it][pivot_index] == pivot)
+                middle.push_back(it);
+        }
+        for (size_t it = 0; it < middle.size(); it++) {
+            if (left.size() < half) {
+                left.push_back(middle[it]);
+            } else {
+                right.push_back(middle[it]);
+            }
+        }
+    }
+
+    VSpill(const DataSet<T> &data, FILE *in)
+    { 
+        size_t l_size, r_size, buffer_size;
+        fread(&l_size, sizeof(size_t), 1, in);
+        fread(&r_size, sizeof(size_t), 1, in);
+
+        buffer_size = l_size > r_size ? l_size : r_size;
+        size_t buffer [buffer_size];
+
+        fread(buffer, sizeof(size_t), l_size, in);
+        left.assign(buffer, buffer + l_size);
+
+        fread(buffer, sizeof(size_t), r_size, in);
+        right.assign(buffer, buffer + r_size);
+
+        fread(&pivot, sizeof(T), 1, in);
+        fread(&pivot_index, sizeof(size_t), 1, in);
+        fread(&pivot_l, sizeof(size_t), 1, in);                       
+        fread(&pivot_r, sizeof(size_t), 1, in);                       
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_left(void)
+    {
+        return left;
+    }
+
+    virtual const 
+    typename DataSet<T>::DomainSpace get_right(void)
+    {
+        return right;
+    }
+
+    virtual Action 
+    query(const typename DataSet<T>::Vector & vtr)
+    {
+        if (vtr[pivot_index] < pivot_l)
+            return LEFT;
+        if (vtr[pivot_index] > pivot_r)
+            return RIGHT;
+        return SPILL;
+    }
+
+    virtual 
+    void save(FILE *out)
+    {
+        size_t l_size, r_size;
+        l_size = left.size();
+        r_size = right.size();
+
+        fwrite(&l_size, sizeof(size_t), 1, out);
+        fwrite(&r_size, sizeof(size_t), 1, out);
+
+        fwrite(&left[0], sizeof(size_t), l_size, out);
+        fwrite(&right[0], sizeof(size_t), r_size, out);
+
+        fwrite(&pivot, sizeof(T), 1, out);
+        fwrite(&pivot_index, sizeof(size_t), 1, out);
+        fwrite(&pivot_l, sizeof(size_t), 1, out);
+        fwrite(&pivot_r, sizeof(size_t), 1, out);
     }
 };
 
