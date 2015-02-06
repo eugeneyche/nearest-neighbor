@@ -4,4 +4,4 @@ bin/*
 build/*
 data/*
 output/*
-
+tmp/*
