@@ -1,64 +1,32 @@
-#include "data_set.h"
-#include "nn.h"
 #include <iostream>
-#include <fstream>
-#include <algorithm>
+#include <cstdio>
+#include "vector_math.h"
+#include "nn.h"
+#include "kd_tree.h"
+#include "kd_spill_tree.h"
+#include "kd_virtual_spill_tree.h"
+#include "data_set.h"
+#include "test.h"
+#include "cifar.h"
 using namespace std;
 
-data_set train;
-data_set test;
+typedef unsigned char byte;
 
-int main()
+int main() 
 {
-    ifstream train_vtrs_in ("data/mnist/train_vectors");
-    ifstream train_labels_in ("data/mnist/train_labels");
-    ifstream test_vtrs_in ("data/mnist/test_vectors");
-    ifstream test_labels_in ("data/mnist/test_labels");
-    cout << "Loading train set...";
-    cout.flush();
-    load(train, train_vtrs_in);
-    label(train, train_labels_in);
-    cout << "Done." << endl;
-    cout << "Loading test set...";
-    cout.flush();
-    load(test, test_vtrs_in);
-    label(test, test_labels_in);
-    cout << "Done." << endl;
-
-    /* basic nn search */
-    for (int i = 0; i < test.size(); i++)
-    {
-        cout << test.get_label(test[i]) << " -> ";
-        cout.flush();
-        euclid_vector * l_mn = nn(test[i], train);
-        cout << train.get_label(l_mn);
-        if (test.get_label(test[i]) != train.get_label(l_mn))
-            cout << " X" << endl;
-        else
-            cout << endl;
-        
-    }
-    train_vtrs_in.close();
-    train_labels_in.close();
-    test_vtrs_in.close();
-    test_labels_in.close();
-    
-    /* kd_tree nn search
-    for (int i = 0; i < test.size(); i++)
-    {
-        cout << test.get_label(test[i]) << " -> ";
-        cout.flush();
-        euclid_vector * l_mn = kd_tree_nn(test[i], train);
-        cout << train.get_label(l_mn);
-        if (test.get_label(test[i]) != train.get_label(l_mn))
-            cout << " X" << endl;
-        else
-            cout << endl;
-        
-    }
-    train_vtrs_in.close();
-    train_labels_in.close();
-    test_vtrs_in.close();
-    test_labels_in.close();*/
-
+    //cifar_generate();
+    //Test<byte,float> mTest();
+    Test<byte, byte> mTest ("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/mnist");//"/Users/zhen/Desktop/nn-code/mnist");
+    //mTest.generate_kd_trees();
+    //mTest.generate_kd_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/mnist");//"/Users/zhen/Desktop/nn-code/mnist");
+    //mTest.generate_multi_kd_trees();
+    //mTest.generate_multi_kd_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/cifar");
+    //mTest.generate_kd_spill_trees();
+    //mTest.generate_kd_spill_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/mnist");//"/Users/zhen/Desktop/nn-code/mnist");
+    //mTest.generate_bsp_trees();
+    //mTest.generate_bsp_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/cifar");
+    mTest.generate_bsp_spill_trees();
+    mTest.generate_bsp_spill_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/mnist");
+    //mTest.generate_kd_v_spill_trees();
+    //mTest.generate_kd_v_spill_tree_data("/Users/janetzhai/Desktop/nn-xcode/nn-xcode/mnist");//"/Users/zhen/Desktop/nn-code/mnist");
 }
